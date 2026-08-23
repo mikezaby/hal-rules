@@ -45,8 +45,31 @@ into `~/.claude/`) was the wrong problem.
 }
 ```
 
+Plus the bootstrap keys:
+
+```json
+{
+  "marketplaces": { "my-team": { "source": { "source": "github", "repo": "org/plugins" } } },
+  "plugins": { "figma@claude-plugins-official": "on" },
+  "mcp": { "internal-api": { "command": "./bin/mcp-server" } },
+  "settings": { "permissions": { "allow": ["Bash(pnpm test:*)"] } }
+}
+```
+
 `npx ai-rules` (or `pnpm dlx ai-rules`) writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
 the config is the artifact under review, not the output.
+
+`.claude/settings.json` and `.mcp.json` are **bootstrapped, not owned**: written when
+absent, and on every later run left untouched with a report of what they lack.
+Claude Code never writes `settings.json` itself, but people and `/plugin install`
+do, and overwriting that to assert a source of truth costs more than it buys.
+Merging is still an open decision.
+
+`plugins` maps `"name@marketplace"` to on/off and lands as
+`enabledPlugins`, an **object of booleans** — `"off"` writes `false`, which
+actively disables, rather than being omitted. `settings` is spliced in verbatim,
+so no Claude Code setting needs modelling here. All four keys compose through
+`extends` exactly as `rules` do.
 
 Resolution:
 
@@ -99,8 +122,11 @@ single-source, which is worth remembering before treating the pack as settled.
 
 ## Status
 
-Rules generator works, `node --test` covers resolution. No rule pack written yet.
-`settings.json` and `.mcp.json` bootstrapping is designed, not built.
+Rules generator and the `settings.json` / `.mcp.json` bootstrap both work;
+10 tests cover resolution, composition and drift reporting.
+
+Not built: `ai-rules init`, `--check` for CI, drift *resolution* (only reporting),
+`.claude/agents/*.md` emit, README. Not published to npm.
 
 Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
 

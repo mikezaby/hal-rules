@@ -1,5 +1,11 @@
 #!/usr/bin/env node
-import { DEFAULT_CONFIG, DEFAULT_OUT, build } from "./index.ts";
+import {
+  DEFAULT_CONFIG,
+  DEFAULT_OUT,
+  bootstrap,
+  build,
+  loadConfig,
+} from "./index.ts";
 
 const args = process.argv.slice(2);
 const outFlag = args.indexOf("--out");
@@ -11,6 +17,17 @@ const config =
 try {
   const written = build(config, out);
   console.log(`${written.length} rules -> ${out}`);
+
+  for (const result of bootstrap(loadConfig(config))) {
+    if (result.status === "empty") continue;
+    if (result.status === "created") {
+      console.log(`created ${result.path}`);
+      continue;
+    }
+    console.log(`${result.path} exists — left alone`);
+    for (const entry of result.missing)
+      console.log(`  ! declared but absent: ${entry}`);
+  }
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exit(1);

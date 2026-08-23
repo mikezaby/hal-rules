@@ -107,13 +107,14 @@ command lists, file inventories. That stays in each project's own file.
 
 ## Open — deliberately not answered yet
 
-1. **Drift.** Once `settings.json` and `.mcp.json` are bootstrapped, how does a
-   later change to the base reach an existing project? Report only, prompt,
-   three-way merge? Undecided.
+1. **Drift resolution.** Bootstrap now *reports* what an existing file lacks
+   (`! declared but absent: enabledPlugins.figma@claude-plugins-official`).
+   How a change actually reaches that file — prompt, patch, three-way merge —
+   is still undecided.
 2. **Conflict management** when a bootstrapped file has been hand-edited and the
    pack also moved. Undecided.
-3. Whether `plugins` and `mcp` compose through `extends` like `rules` do, or stay
-   bootstrap-only.
+3. ~~Whether `plugins` and `mcp` compose through `extends`.~~ **Decided: they do.**
+   Same merge, later wins, one code path for all declaration kinds.
 4. Whether the tool ever shells out to `claude plugin install`, or only prints
    the commands a fresh clone still needs.
 5. Per-rule `paths:` override from config. Today shadowing is whole-file only.
