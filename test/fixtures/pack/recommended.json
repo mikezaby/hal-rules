@@ -1,0 +1,8 @@
+{
+  "rulesDir": ["rules"],
+  "rules": {
+    "code-style/naming": "on",
+    "code-style/no-magic": "on",
+    "testing/framework": ["on", { "framework": "jest" }]
+  }
+}

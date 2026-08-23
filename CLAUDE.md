@@ -29,9 +29,41 @@ it has no `extends` and no disable, which is the half that matters here.
 `.claude/rules/` mechanism stands; its conclusion (personal ruleset symlinked
 into `~/.claude/`) was the wrong problem.
 
+## How it works
+
+`ai-rules.json` per project, eslint-shaped:
+
+```json
+{
+  "extends": ["node_modules/@you/ai-rules/recommended.json"],
+  "rulesDir": ["rules"],
+  "rules": {
+    "code-style/no-hardcoded-values": "off",
+    "testing/never-weaken-tests": ["on", { "framework": "vitest" }],
+    "ours/deploy-checklist": "on"
+  }
+}
+```
+
+`npx ai-rules` writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
+the config is the artifact under review, not the output.
+
+Resolution:
+
+- `extends` is a **path**, resolved relative to the config file. `node_modules/...`,
+  a submodule dir, `./base.json` all work; no fetch or registry layer exists.
+- Configs merge in order, later wins — extends first, own `rules` last.
+- Rule *files* resolve last-`rulesDir`-first, so a project shadows a pack rule by
+  dropping its own `<slug>.md` in place. Shadowing replaces the whole file, `paths:`
+  frontmatter included.
+- `"off"` drops an inherited rule. The out dir is wiped each build, so a rule turned
+  off stops instructing Claude instead of lingering as a stale file.
+- `{{var}}` in a rule body is substituted from the config. An unset one is a build
+  error, never passed through to Claude.
+
 ## Status
 
-Design. Nothing implemented.
+Generator works, `node --test` covers resolution. No rule pack written yet.
 
 ## Mechanism facts (verified 2026-08-23, code.claude.com/docs)
 

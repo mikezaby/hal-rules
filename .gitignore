@@ -1,0 +1,3 @@
+node_modules/
+.claude/rules/generated/
+test/fixtures/.out/

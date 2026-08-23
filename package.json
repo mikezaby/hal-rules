@@ -1,0 +1,8 @@
+{
+  "name": "modular-skills",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": { "ai-rules": "./index.js" },
+  "files": ["index.js", "rules"],
+  "scripts": { "test": "node --test" }
+}
