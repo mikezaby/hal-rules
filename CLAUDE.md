@@ -1,5 +1,10 @@
 # modular-skills
 
+**Status: work in progress, pre-1.0.** The config format is not frozen — a minor
+bump may break it. Rules are still being added and removed as they prove
+themselves. Published to npm as `hal-rules`; this repo directory is still named
+`modular-skills`.
+
 A rule registry and generator for AI-agent config, checked into the _project_
 it configures. One team, one committed source of truth: run the generator, get
 `CLAUDE.md` / `.claude/` files every developer on the repo shares.
