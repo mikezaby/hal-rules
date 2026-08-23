@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { after, test } from "node:test";
 import { init } from "./index.ts";
 
-const root = mkdtempSync(join(tmpdir(), "ai-rules-init-"));
+const root = mkdtempSync(join(tmpdir(), "hal-init-"));
 after(() => {
   rmSync(root, { recursive: true, force: true });
 });
@@ -32,11 +32,10 @@ test("scaffolds a config that extends the installed pack", () => {
   assert.equal(config?.status, "created");
   assert.equal(gitignore?.status, "created");
 
-  const written = JSON.parse(read(dir, "ai-rules.json")) as Record<
-    string,
-    unknown
-  >;
-  assert.deepEqual(written.extends, ["node_modules/ai-rules/recommended.json"]);
+  const written = JSON.parse(read(dir, "hal.json")) as Record<string, unknown>;
+  assert.deepEqual(written.extends, [
+    "node_modules/hal-rules/recommended.json",
+  ]);
   assert.deepEqual(written.rulesDir, ["rules"]);
   assert.deepEqual(written.rules, {});
   assert.equal(read(dir, ".gitignore"), ".claude/rules/generated/\n");
@@ -44,12 +43,12 @@ test("scaffolds a config that extends the installed pack", () => {
 
 test("never overwrites an existing config", () => {
   const dir = project("existing");
-  writeFileSync(join(dir, "ai-rules.json"), '{"rules":{"ours/keep-me":"on"}}');
+  writeFileSync(join(dir, "hal.json"), '{"rules":{"ours/keep-me":"on"}}');
 
   const [config] = init(dir);
   assert.equal(config?.status, "exists");
   assert.match(
-    read(dir, "ai-rules.json"),
+    read(dir, "hal.json"),
     /keep-me/,
     "the team's config must survive re-init",
   );

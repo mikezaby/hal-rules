@@ -46,7 +46,7 @@ const CONFIG_KEYS = new Set([
   "settings",
 ]);
 
-export const DEFAULT_CONFIG = "ai-rules.json";
+export const DEFAULT_CONFIG = "hal.json";
 export const DEFAULT_OUT = ".claude/rules/generated";
 
 /** Later configs win, exactly like eslint: extends first, own `rules` last. */
@@ -146,8 +146,8 @@ function withHeader(body: string, slug: string, source: string): string {
   // the project (a pack in node_modules or elsewhere) is noise: drop it.
   const from = relative(process.cwd(), source);
   const note = from.startsWith("..")
-    ? `<!-- generated from ${slug} — edit it in the pack, then rerun ai-rules -->`
-    : `<!-- generated from ${slug} (${from}) — edit the source, then rerun ai-rules -->`;
+    ? `<!-- generated from ${slug} — edit it in the pack, then rerun hal -->`
+    : `<!-- generated from ${slug} (${from}) — edit the source, then rerun hal -->`;
   const frontmatter = /^---\n[\s\S]*?\n---\n/.exec(body);
   if (!frontmatter) return `${note}\n${body}`;
   return `${frontmatter[0]}${note}\n${body.slice(frontmatter[0].length)}`;
@@ -340,7 +340,7 @@ export interface InitResult {
 }
 
 const STARTER_CONFIG = {
-  extends: ["node_modules/ai-rules/recommended.json"],
+  extends: ["node_modules/hal-rules/recommended.json"],
   rulesDir: ["rules"],
   rules: {},
 };

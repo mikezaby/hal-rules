@@ -1,12 +1,12 @@
 {
-  "name": "ai-rules",
+  "name": "hal-rules",
   "version": "0.1.0",
-  "description": "Compose Claude Code rules from shareable packs, eslint-style",
+  "description": "I'm sorry Dave, I'm afraid I can't do that \u2014 composable, committed rules for Claude Code",
   "author": "Michalis Zabaras",
   "license": "ISC",
   "type": "module",
   "bin": {
-    "ai-rules": "./dist/cli.mjs"
+    "hal": "./dist/cli.mjs"
   },
   "exports": {
     ".": {

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { applyVars, build } from "./index.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const config = join(here, "fixtures/project/ai-rules.json");
+const config = join(here, "fixtures/project/hal.json");
 const pack = join(here, "fixtures/pack/recommended.json");
 const out = join(here, "fixtures/.out");
 const read = (slug: string) => readFileSync(join(out, `${slug}.md`), "utf8");
@@ -72,7 +72,7 @@ test("the header drops a source path that climbs out of the project", () => {
   rmSync(out, { recursive: true, force: true });
 
   const cwd = process.cwd();
-  const elsewhere = mkdtempSync(join(tmpdir(), "ai-rules-"));
+  const elsewhere = mkdtempSync(join(tmpdir(), "hal-"));
   try {
     process.chdir(elsewhere); // now the pack lives outside the project, as node_modules would
     build(pack, out);

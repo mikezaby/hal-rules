@@ -12,7 +12,7 @@ import { dirname, join } from "node:path";
 import { after, test } from "node:test";
 import { bootstrap, loadConfig } from "./index.ts";
 
-const root = mkdtempSync(join(tmpdir(), "ai-rules-bootstrap-"));
+const root = mkdtempSync(join(tmpdir(), "hal-bootstrap-"));
 after(() => {
   rmSync(root, { recursive: true, force: true });
 });
@@ -25,7 +25,7 @@ function project(
 ) {
   const dir = join(root, name);
   mkdirSync(dir, { recursive: true });
-  const path = join(dir, "ai-rules.json");
+  const path = join(dir, "hal.json");
   writeFileSync(path, JSON.stringify(config));
   for (const [rel, body] of Object.entries(files)) {
     const target = join(dir, rel);

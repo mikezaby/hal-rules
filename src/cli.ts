@@ -32,7 +32,7 @@ if (args[0] === "init") {
       status === "exists" ? `${path} exists — left alone` : `${status} ${path}`,
     );
   }
-  console.log("\nnext:\n  pnpm add -D ai-rules\n  pnpm ai-rules");
+  console.log("\nnext:\n  pnpm add -D hal-rules\n  pnpm hal");
   process.exit(0);
 }
 

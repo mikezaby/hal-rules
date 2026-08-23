@@ -12,7 +12,7 @@ import { dirname, join } from "node:path";
 import { after, test } from "node:test";
 import { build, validate } from "./index.ts";
 
-const root = mkdtempSync(join(tmpdir(), "ai-rules-validate-"));
+const root = mkdtempSync(join(tmpdir(), "hal-validate-"));
 after(() => {
   rmSync(root, { recursive: true, force: true });
 });
@@ -22,7 +22,7 @@ function project(name: string, config: unknown) {
   const dir = join(root, name);
   mkdirSync(join(dir, "rules/ours"), { recursive: true });
   writeFileSync(join(dir, "rules/ours/real.md"), "# Real\n- a real rule\n");
-  const path = join(dir, "ai-rules.json");
+  const path = join(dir, "hal.json");
   writeFileSync(path, JSON.stringify(config));
   return { dir, path, out: join(dir, "out") };
 }
@@ -126,9 +126,7 @@ test("an unknown key in an extended pack names that pack, not the project", () =
     () => validate(child.path),
     (error: Error) => {
       assert.ok(error.message.includes(base.path));
-      assert.ok(
-        !error.message.includes(dirname(child.path) + "/ai-rules.json"),
-      );
+      assert.ok(!error.message.includes(dirname(child.path) + "/hal.json"));
       return true;
     },
   );

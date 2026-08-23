@@ -31,11 +31,11 @@ into `~/.claude/`) was the wrong problem.
 
 ## How it works
 
-`ai-rules.json` per project, eslint-shaped:
+`hal.json` per project, eslint-shaped:
 
 ```json
 {
-  "extends": ["node_modules/@you/ai-rules/recommended.json"],
+  "extends": ["node_modules/@you/hal-rules/recommended.json"],
   "rulesDir": ["rules"],
   "rules": {
     "code-style/no-hardcoded-values": "off",
@@ -58,7 +58,7 @@ Plus the bootstrap keys:
 }
 ```
 
-`npx ai-rules` (or `pnpm dlx ai-rules`) writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
+`npx hal-rules` (or `pnpm dlx hal-rules`) writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
 the config is the artifact under review, not the output.
 
 `.claude/settings.json` and `.mcp.json` are **bootstrapped, not owned**: written when
@@ -92,7 +92,7 @@ TypeScript in `src/`, ESM, built with tsdown. Config extracted from blibliki:
 eslint flat config (`strictTypeChecked` + `stylisticTypeChecked`, `projectService`),
 prettier with the trivago import sorter, strict tsconfig with `noUncheckedIndexedAccess`.
 
-`ai-rules validate` reports every config problem at once and exits non-zero.
+`hal validate` reports every config problem at once and exits non-zero.
 `build` runs the same checks and writes nothing if any fail, so a bad config
 cannot leave the previous output half-wiped.
 
@@ -104,10 +104,16 @@ pnpm lint    eslint src
 pnpm format  prettier . --write
 ```
 
-Published flat as `ai-rules`, not scoped: a personal scope reads as a side project
-for something teams are asked to commit as shared infrastructure. There is no
-`pnpm create ai-rules` — `create-ai-rules` is taken — but `ai-rules init` covers
-that path, so nothing is lost.
+Published flat as `hal-rules`, not scoped: a personal scope reads as a side
+project for something teams are asked to commit as shared infrastructure. The bin
+is `hal`, the config is `hal.json`. `create-hal-rules` is free, so `pnpm create
+hal-rules` stays open — unlike `create-ai-rules`, which is taken and closed that
+path under the old name.
+
+Taglines: **"I'm sorry Dave, I'm afraid I can't do that."** and **"Don't let the
+agent decide what your team's standards are."** HAL fits because it failed on
+_contradictory instructions it could not reconcile_ — the exact hazard Claude
+Code's own docs warn about when rules conflict.
 
 ## The pack
 
@@ -136,7 +142,7 @@ Rules generator and the `settings.json` / `.mcp.json` bootstrap both work;
 README covers usage, the config reference, rule authoring and the pack; its example
 config is verified by running it.
 
-`ai-rules init` scaffolds a config and gitignores the output; it never overwrites
+`hal init` scaffolds a config and gitignores the output; it never overwrites
 an existing config.
 
 **The full remaining-work list — eight items, three of them decisions — lives in

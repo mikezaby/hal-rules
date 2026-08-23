@@ -52,11 +52,11 @@ modeling, and modeling them is how a config tool becomes a strictly-worse
 
 ## Config
 
-`ai-rules.json`, resolved by `npx ai-rules`:
+`hal.json`, resolved by `npx hal-rules`:
 
 ```json
 {
-  "extends": ["node_modules/@you/ai-rules/recommended.json"],
+  "extends": ["node_modules/@you/hal-rules/recommended.json"],
   "rulesDir": ["rules"],
   "rules": {
     "code-style/no-hardcoded-values": "off",
@@ -127,7 +127,7 @@ buildable now.
 ### Buildable
 
 4. **`--check` for CI.** Fail the build on stale or drifted _output_. Distinct
-   from `ai-rules validate`, which is built and checks the _config_: every
+   from `hal validate`, which is built and checks the _config_: every
    problem at once, non-zero exit, and `build` refuses to write when any fail.
 5. **Per-rule `paths:` override from config.** Shadowing replaces the whole file
    today, frontmatter included, so a rule's globs cannot be retargeted without
@@ -135,7 +135,7 @@ buildable now.
 6. **`.claude/agents/*.md` emit.** The second target the subagent finding turned
    up: per-agent behaviour cannot be expressed as a rule.
 7. **Publish to npm.** Nothing works via `npx` for anyone until this happens.
-8. **Prove it on a real repo.** Point blibliki's `ai-rules.json` at the pack and
+8. **Prove it on a real repo.** Point blibliki's `hal.json` at the pack and
    diff the generated rules against what its CLAUDE.md says today.
 
 ### Suggested order
@@ -150,7 +150,7 @@ disagrees with the config.
 
 - `plugins` and `mcp` compose through `extends` like `rules`. Same merge, later
   wins, one code path for every declaration kind.
-- Published flat as `ai-rules`, not user-scoped. A personal scope reads as a side
+- Published flat as `hal`, not user-scoped. A personal scope reads as a side
   project for something teams are asked to commit as shared infrastructure, and
   `init` covers the `pnpm create` path that scoping would have preserved.
 
