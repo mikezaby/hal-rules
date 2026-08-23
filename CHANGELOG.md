@@ -8,7 +8,7 @@ Rule wording changes are listed as carefully as code changes: a reworded rule
 changes what your agent does. After updating, `npx hal-rules --diff` shows
 exactly which instructions moved.
 
-## Unreleased
+## 0.6.0 (2026-08-24)
 
 ### Rules
 
@@ -24,6 +24,34 @@ exactly which instructions moved.
 - Docs and command hints say `npx hal-rules@latest`. npx caches a bare name as
   `^<version you first ran>`, so a newer `0.x` satisfies the range and the old
   copy keeps running.
+- **Added** registries in `extends`. An entry can be
+  `{ "registry": ..., "preset": ..., "ref": ... }`, naming a directory that holds
+  `<preset>.json` beside a `rules/` folder. `rules/` is convention, so extending
+  a registry needs no `rulesDir` at all. `registry` takes a path, a package name,
+  or `github:owner/repo[/dir]`; `preset` defaults to `recommended`. A registry
+  with no `rules/`, a preset that is not there, or a `ref` on a path registry are
+  each an error naming the path it looked for.
+- **Added** `github:` sources. A pack can be a repo rather than a published
+  package, so rules reach a project without waiting for a release. The checkout
+  lands in `.hal/packs/`, pinned by commit in `hal-rules.lock.json`. Commit that
+  directory: a pinned pack already on disk is never refetched, so builds and
+  `check` stay offline and an upstream push cannot change what instructs Claude
+  until someone runs `--update`.
+- **Added** `--update`, which moves a pinned `github:` registry to its ref.
+- **Changed** `init` scaffolds `{ "registry": "hal-rules" }` and no `rulesDir`.
+  Existing configs are unaffected; every string form still resolves exactly as
+  before, `github:owner/repo/config.json#ref` included.
+- **Changed** `rulesDir` no longer defaults to a directory that is not there.
+  The implicit `rules` counts only when it exists, so a chain of configs stops
+  contributing phantom search paths. A `rulesDir` you declared is still searched
+  either way, so a typo surfaces in the not-found error instead of resolving to
+  nothing.
+- **Fixed** `check --out <dir>` compared against the default directory. Every
+  subcommand read its first argument as the config path, so the flag itself
+  became a filename and the command failed on `ENOENT`.
+- The rule pack moved to `registry/` inside the package. No config changes:
+  `hal-rules/recommended.json` still resolves, through the published `exports`
+  map for an install and through the bundled fallback without one.
 
 ## 0.5.0 — 2026-08-23
 
