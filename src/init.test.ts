@@ -38,8 +38,12 @@ test("scaffolds a config that extends the installed pack", () => {
     string,
     unknown
   >;
-  assert.deepEqual(written.extends, ["hal-rules/recommended.json"]);
-  assert.deepEqual(written.rulesDir, ["rules"]);
+  assert.deepEqual(written.extends, [{ registry: "hal-rules" }]);
+  assert.equal(
+    written.rulesDir,
+    undefined,
+    "a registry supplies its own rules/, so a fresh project declares none",
+  );
   assert.deepEqual(
     (written.rules as Record<string, unknown>)["workflow/before-finish"],
     ["off", { checks: ["pnpm tsc", "pnpm lint", "pnpm test"] }],
@@ -93,7 +97,7 @@ test("--expand falls back to the bundled pack when there is no node_modules", ()
     unknown
   >;
 
-  assert.deepEqual(written.extends, ["hal-rules/recommended.json"]);
+  assert.deepEqual(written.extends, [{ registry: "hal-rules" }]);
   const rules = written.rules as Record<string, unknown>;
   assert.ok(
     Object.keys(rules).length > 0,
@@ -148,6 +152,7 @@ test("every rule that needs a variable is scaffolded", () => {
   const packRules = join(
     dirname(fileURLToPath(import.meta.url)),
     "..",
+    "registry",
     "rules",
   );
   const needsVars = readdirSync(packRules, {

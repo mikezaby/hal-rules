@@ -7,10 +7,10 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
+import { dirname, join, relative, resolve, sep } from "node:path";
+import type { ExtendsEntry } from "./packs.ts";
+import { PACK_DIR, collectPacks, resolveExtends } from "./packs.ts";
 import type { LockEntry } from "./skills.ts";
 
 /** A variable value: a string, or a list rendered as markdown bullets. */
@@ -26,7 +26,7 @@ export type RuleState = "on" | "off" | ["on" | "off", RuleVars];
 export type PluginState = "on" | "off";
 
 export interface AiRulesConfig {
-  extends?: string[];
+  extends?: ExtendsEntry[];
   rulesDir?: string[];
   rules?: Record<string, RuleState>;
   /** Marketplace name -> `{ source: { ... } }`, verbatim into settings.json. */
@@ -62,27 +62,6 @@ const CONFIG_KEYS = new Set([
   "skills",
 ]);
 
-/** This package's own root, so the bundled pack is reachable with no install. */
-const PACKAGE_ROOT = fileURLToPath(new URL("..", import.meta.url));
-
-/**
- * A path (`./base.json`, `/abs/base.json`) resolves against the config file.
- *
- * Anything else is a bare specifier: an installed package if there is one, and
- * otherwise the pack shipped inside this package. That fallback is what lets
- * `npx hal-rules` work in a repo with no node_modules. A Rails or Python
- * project has nowhere to install a pack.
- */
-function resolveExtends(spec: string, base: string): string {
-  if (spec.startsWith(".") || isAbsolute(spec)) return resolve(base, spec);
-  try {
-    return createRequire(join(base, "_.js")).resolve(spec);
-  } catch {
-    const [, ...rest] = spec.split("/");
-    return resolve(PACKAGE_ROOT, ...rest);
-  }
-}
-
 export const DEFAULT_CONFIG = "hal-rules.json";
 export const DEFAULT_OUT = ".claude/rules/generated";
 
@@ -90,6 +69,7 @@ export const DEFAULT_OUT = ".claude/rules/generated";
 export function loadConfig(
   file: string,
   loaded = new Set<string>(),
+  projectDir = dirname(resolve(file)),
 ): ResolvedConfig {
   const path = resolve(file);
   const out: ResolvedConfig = {
@@ -123,12 +103,20 @@ export function loadConfig(
   }
   const base = dirname(path);
   for (const from of config.extends ?? []) {
-    const inherited = loadConfig(resolveExtends(from, base), loaded);
+    const inherited = loadConfig(
+      resolveExtends(from, base, projectDir),
+      loaded,
+      projectDir,
+    );
     out.rulesDirs.push(...inherited.rulesDirs);
     merge(out, inherited);
   }
+  // A declared rulesDir that is missing stays an error worth seeing; the
+  // implicit default is a guess, so it only counts when it is really there.
+  const declared = config.rulesDir;
+  const dirs = (declared ?? ["rules"]).map((dir) => resolve(base, dir));
   out.rulesDirs.push(
-    ...(config.rulesDir ?? ["rules"]).map((dir) => resolve(base, dir)),
+    ...(declared ? dirs : dirs.filter((dir) => existsSync(dir))),
   );
   merge(out, config);
   return out;
@@ -454,8 +442,9 @@ export interface InitResult {
 }
 
 const STARTER_CONFIG = {
-  extends: ["hal-rules/recommended.json"],
-  rulesDir: ["rules"],
+  // A registry, so the rules/ convention supplies the bodies and a project
+  // needs no rulesDir until it writes rules of its own.
+  extends: [{ registry: "hal-rules" }],
 };
 
 /**
@@ -511,18 +500,27 @@ export function init(projectDir = ".", { expand = false } = {}): InitResult[] {
     results.push({ path: config, status: "exists" });
   } else {
     const starter: {
-      extends: string[];
-      rulesDir: string[];
+      extends: ExtendsEntry[];
       rules: Record<string, RuleState>;
     } = {
       ...STARTER_CONFIG,
       rules: { ...STARTER_RULES },
     };
     if (expand) {
-      const base = resolveExtends(starter.extends[0] ?? "", projectDir);
-      // Nothing to expand before the pack is installed; a bare config still works.
-      if (existsSync(base))
-        Object.assign(starter.rules, loadConfig(base).rules);
+      // Nothing to expand before the pack is there; a bare config still works.
+      // A bundled or installed pack resolves to a path that may not exist; an
+      // unfetched `github:` one throws, and means the same thing here.
+      try {
+        const first = starter.extends[0];
+        const base =
+          first === undefined
+            ? ""
+            : resolveExtends(first, projectDir, projectDir);
+        if (existsSync(base))
+          Object.assign(starter.rules, loadConfig(base).rules);
+      } catch {
+        // Left to the first build, which fetches the pack and reports properly.
+      }
     }
     writeFileSync(config, `${JSON.stringify(starter, null, 2)}\n`);
     results.push({ path: config, status: "created" });
@@ -536,22 +534,32 @@ export const LOCK_FILE = "hal-rules.lock.json";
 
 interface Lock {
   skills: Record<string, LockEntry>;
+  packs: Record<string, LockEntry>;
 }
 
 export function readLock(projectDir = "."): Lock {
   const path = join(projectDir, LOCK_FILE);
-  if (!existsSync(path)) return { skills: {} };
-  return JSON.parse(readFileSync(path, "utf8")) as Lock;
+  if (!existsSync(path)) return { skills: {}, packs: {} };
+  const lock = JSON.parse(readFileSync(path, "utf8")) as Partial<Lock>;
+  // A lock written before packs existed has no such key.
+  return { skills: lock.skills ?? {}, packs: lock.packs ?? {} };
 }
 
-export function writeLock(lock: Lock, projectDir = "."): void {
+export function writeLock(lock: Partial<Lock>, projectDir = "."): void {
   const path = join(projectDir, LOCK_FILE);
+  const skills = lock.skills ?? {};
+  const packs = lock.packs ?? {};
   // Nothing tracked and nothing to track: don't leave an empty file behind.
-  if (Object.keys(lock.skills).length === 0) {
+  if (Object.keys(skills).length === 0 && Object.keys(packs).length === 0) {
     rmSync(path, { force: true });
     return;
   }
-  writeFileSync(path, `${JSON.stringify(lock, null, 2)}\n`);
+  // An empty section is noise in a file people read during review.
+  const written = {
+    ...(Object.keys(packs).length > 0 ? { packs } : {}),
+    ...(Object.keys(skills).length > 0 ? { skills } : {}),
+  };
+  writeFileSync(path, `${JSON.stringify(written, null, 2)}\n`);
 }
 
 export interface CheckProblem {
@@ -569,6 +577,23 @@ export function check(
   outDir = DEFAULT_OUT,
 ): CheckProblem[] {
   const problems: CheckProblem[] = [];
+
+  // Packs first: an unfetched one makes every rule below it look like drift.
+  const lockedPacks = readLock(projectDir).packs;
+  for (const pack of collectPacks(configPath, projectDir)) {
+    if (!existsSync(pack.dir)) {
+      problems.push({
+        what: `pack ${pack.spec} is not fetched (no ${PACK_DIR}/${pack.source.owner}-${pack.source.repo})`,
+        fix: "run: npx hal-rules@latest",
+      });
+    } else if (!lockedPacks[pack.spec]) {
+      problems.push({
+        what: `pack ${pack.spec} is on disk but absent from ${LOCK_FILE}`,
+        fix: "run: npx hal-rules@latest",
+      });
+    }
+  }
+  if (problems.length > 0) return problems;
 
   const invalid = validate(configPath);
   if (invalid.length > 0) {

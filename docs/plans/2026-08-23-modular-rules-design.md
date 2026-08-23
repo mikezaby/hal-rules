@@ -85,7 +85,7 @@ resolution order, shadowing, `off`, stale-file removal and the unset-var guard.
 
 ## Pack
 
-17 rules in `rules/`, carved from real CLAUDE.md files in use, blibliki
+17 rules in `registry/rules/`, carved from real CLAUDE.md files in use, blibliki
 among them. Folders: `workflow`, `git`, `documentation`,
 `testing`, `code-style`, `architecture`, `safety`.
 
@@ -107,7 +107,7 @@ command lists, file inventories. That stays in each project's own file.
 
 ## Remaining work
 
-Eight items. Three are decisions with no code until they are made; five are
+Nine items. Three are decisions with no code until they are made; six are
 buildable now.
 
 ### Blocked on a decision
@@ -140,6 +140,23 @@ buildable now.
 7. **Publish to npm.** Nothing works via `npx` for anyone until this happens.
 8. **Prove it on a real repo.** Point blibliki's `hal-rules.json` at the pack and
    diff the generated rules against what its CLAUDE.md says today.
+9. **Split the pack into `hal-rules-registry`.** Deferred, not rejected. A
+   `github:` extends already takes any repo, so the move is a config string for
+   users and no code here. The one coupling to remember: the bundled fallback
+   (`PACKAGE_ROOT` in `src/packs.ts`) ships `registry/` _inside_ the npm package,
+   which is what makes `hal-rules/recommended.json` work with no network and no
+   `node_modules`. Split the repos and that copy has to be vendored at publish
+   time or the fallback rots. Do it when an outside consumer wants the pack
+   without the generator — the ai-rulez interop case is the trigger.
+
+   **It is also a prerequisite for pointing `init`'s default at `github:`.** A
+   `github:` source fetches the whole repo, so today that would have every user
+   commit `src/`, `docs/`, `scripts/` and `pnpm-lock.yaml` into their project
+   (352K measured) to get `registry/`. Pruning the tarball
+   instead means parsing the fetched config to learn which `rulesDir`s to keep —
+   real logic, and a new failure mode the split deletes for free. Until then the
+   starter config stays on the bundled pack, which needs no network and no
+   checkout.
 
 ### Suggested order
 

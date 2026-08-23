@@ -86,14 +86,26 @@ so no Claude Code setting needs modelling here. All four keys compose through
 
 Resolution:
 
-- `extends` is a **path**, resolved relative to the config file. `node_modules/...`,
-  a submodule dir, `./base.json` all work; no fetch or registry layer exists.
+- `extends` entries are either `{ registry, preset?, ref? }` — a directory holding
+  `<preset>.json` beside a `rules/`, by convention, so no `rulesDir` is needed;
+  `registry` takes a path, a package name (what `init` scaffolds) or
+  `github:owner/repo[/dir]` —
+  or a config file directly: a **path** relative to the config file
+  (`node_modules/...`, a submodule dir, `./base.json`), a bare specifier falling
+  back to the bundled pack, or `github:owner/repo[/config.json][#ref]`. A
+  registry with no `rules/` is an error, not an empty search. A GitHub source is fetched
+  into `.hal/packs/` (committed, like skills) and pinned by SHA in the lock file;
+  a pinned pack already on disk is never refetched, so builds and `check` stay
+  offline until `--update`.
 - Configs merge in order, later wins — extends first, own `rules` last.
 - Rule _files_ resolve last-`rulesDir`-first, so a project shadows a pack rule by
   dropping its own `<slug>.md` in place. Shadowing replaces the whole file, `paths:`
   frontmatter included.
 - `"off"` drops an inherited rule. The out dir is wiped each build, so a rule turned
   off stops instructing Claude instead of lingering as a stale file.
+- `rulesDir` is for a project's **own** rule files. An unset default that is not
+  on disk is not searched; a declared one that is missing still is, so a typo
+  surfaces instead of resolving to nothing.
 - `{{var}}` in a rule body is substituted from the config. An unset one is a build
   error, never passed through to Claude.
 
@@ -133,14 +145,15 @@ Code's own docs warn about when rules conflict.
 
 ## The pack
 
-`rules/` holds the registry, one file per rule, foldered by topic:
+`registry/` holds the pack, kept apart from the generator's code in `src/`.
+`registry/rules/` is one file per rule, foldered by topic:
 `workflow` · `git` · `documentation` · `testing` · `code-style` · `architecture` · `safety`
 
 Every rule was carved from a CLAUDE.md that was actually in use, blibliki among
 them. No rule exists here without a source line in one of them — the pack is
 evidence, not invention.
 
-`recommended.json` enables thirteen of them; the rest need a project-specific value
+`registry/recommended.json` enables thirteen of them; the rest need a project-specific value
 (`checks`, `findingsFile`, `adrDir`) or are a team preference. Left opt-in because
 they need a project-specific value or only fit some stacks:
 `workflow/before-finish` (`checks`), `workflow/out-of-scope-findings` (`findingsFile`),
@@ -162,9 +175,14 @@ config is verified by running it.
 existing config. `--expand` spells out the inherited rules so they can be toggled,
 at the cost of pinning today's set instead of inheriting later additions.
 
-**The full remaining-work list — eight items, three of them decisions — lives in
+**The full remaining-work list — nine items, three of them decisions — lives in
 `docs/plans/2026-08-23-modular-rules-design.md` under "Remaining work".** Keep it
-there rather than in chat.
+there rather than in chat. This is the deliberate exception to
+`documentation/no-scratch-files`, which is on here and otherwise forbids a plan
+file: the design doc is a real doc in its proper place, not a scratch pad, and it
+outlives the conversation that produced it. The usual fix — shadow the rule from
+your own `rulesDir` — is unavailable to the one repo whose `rulesDir` _is_ the
+pack, so the carve-out is stated here.
 
 Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
 

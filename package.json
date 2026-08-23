@@ -34,16 +34,16 @@
       "import": "./dist/index.mjs"
     },
     "./package.json": "./package.json",
-    "./recommended.json": "./recommended.json",
-    "./rules/*": "./rules/*"
+    "./recommended.json": "./registry/recommended.json",
+    "./rules/*": "./registry/rules/*",
+    "./registry/*": "./registry/*"
   },
   "files": [
     "CHANGELOG.md",
     "LICENSE",
     "README.md",
     "dist",
-    "recommended.json",
-    "rules"
+    "registry"
   ],
   "engines": {
     "node": ">=18"

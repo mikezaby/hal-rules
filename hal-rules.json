@@ -1,0 +1,35 @@
+{
+  "extends": [
+    {
+      "registry": "./registry"
+    }
+  ],
+  "rules": {
+    "workflow/before-finish": [
+      "on",
+      {
+        "checks": [
+          "pnpm build",
+          "pnpm tsc",
+          "pnpm lint",
+          "pnpm format:check",
+          "pnpm test",
+          "./scripts/verify-loading.sh",
+          "./scripts/verify-subagent.sh"
+        ]
+      }
+    ],
+    "workflow/out-of-scope-findings": [
+      "on",
+      {
+        "findingsFile": "docs/findings.md"
+      }
+    ],
+    "documentation/architecture-decisions": [
+      "on",
+      {
+        "adrDir": "docs/adr/"
+      }
+    ]
+  }
+}

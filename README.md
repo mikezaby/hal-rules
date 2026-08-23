@@ -108,8 +108,8 @@ artifact under review, not what it compiles to.
 
 | Key            | Effect                                                      |
 | -------------- | ----------------------------------------------------------- |
-| `extends`      | Paths to other configs. Merged in order, later wins.        |
-| `rulesDir`     | Where to find rule files by slug. Defaults to `rules`.      |
+| `extends`      | Registries or config files. Merged in order, later wins.    |
+| `rulesDir`     | Where **your own** rule files live. Defaults to `rules`.    |
 | `rules`        | `"on"`, `"off"`, or `["on", { var: value }]` per rule slug. |
 | `marketplaces` | Verbatim into `extraKnownMarketplaces`.                     |
 | `plugins`      | `"name@marketplace"` → on/off, into `enabledPlugins`.       |
@@ -165,14 +165,85 @@ Two sources providing the same skill name is an error, not a silent overwrite.
 
 ### How `extends` resolves
 
+An entry is either a **registry** you name a preset out of, or a **config file**
+directly.
+
+#### A registry
+
+A registry is a directory holding presets beside the rules they turn on:
+
+```
+your-pack/
+  recommended.json     the default preset
+  strict.json          another one
+  rules/
+    code-style/comments.md
+```
+
+`rules/` is convention, not configuration. Nothing declares it and nothing can
+move it, which is why extending a registry needs no `rulesDir` — that key is
+only for rule files of your own, and an unset one that is not on disk is not
+searched:
+
+```json
+{
+  "extends": [
+    { "registry": "hal-rules" },
+    { "registry": "./vendor/your-pack" },
+    { "registry": "github:acme/rules", "preset": "strict", "ref": "main" }
+  ]
+}
+```
+
+A bare name is a package: an installed one, and otherwise the registry bundled
+inside `hal-rules`. That is what `hal init` scaffolds, and what makes
+`npx hal-rules` work in a repo with no `node_modules`.
+
+| Field      | Meaning                                                       |
+| ---------- | ------------------------------------------------------------- |
+| `registry` | A directory: a path, a package, or `github:owner/repo[/dir]`. |
+| `preset`   | Which `<preset>.json` in it. Defaults to `recommended`.       |
+| `ref`      | Branch, tag or commit. `github:` registries only.             |
+
+A registry missing its `rules/`, or a preset that is not there, is an error
+naming the path it looked for. A registry that resolves to nothing would
+otherwise fail once per rule.
+
+#### A config file
+
 A **path** (`./base.json`, `/abs/base.json`) resolves against the config file.
 A git submodule or a vendored pack works this way.
 
+A **`github:` source** is fetched and pinned exactly as a `github:` registry is:
+
+```json
+{
+  "extends": ["github:you/your-pack/recommended.json#main"]
+}
+```
+
+The form is `github:owner/repo[/path/to/config.json][#ref]` — path first so it
+can nest, ref last. It defaults to `recommended.json` at the repo root.
+
+Either way a `github:` source lands in `.hal/packs/`, pinned by commit in
+`hal-rules.lock.json`, one checkout per repo however many presets you take
+out of it.
+
+**Commit `.hal/packs/`.** A pack is not reproducible from anything local, the
+same reason skills are committed. It also means a build never needs the network
+twice: a pinned pack already on disk is not refetched, so `hal check` stays
+offline in CI and a push upstream cannot change what instructs Claude until
+someone asks:
+
+```
+$ npx hal-rules@latest --update
+  pack github:you/your-pack  @ main (a1b2c3d4)
+```
+
 Anything else is a **bare specifier**: an installed package if there is one, and
 otherwise the pack bundled inside `hal-rules`. That fallback is what makes
-`hal-rules/recommended.json` work in a repo with no `node_modules`.
-
-Either way there is no registry lookup, no fetch step, and no cache to go stale.
+`hal-rules/recommended.json` work in a repo with no `node_modules`, and it needs
+no network at all.
 
 ### Adopting rules a pack added later
 

@@ -45,7 +45,7 @@ export function parseSource(spec: string): Source {
 }
 
 /** Pin whatever was asked for to a commit, so the lock records something stable. */
-async function resolveSha(
+export async function resolveSha(
   source: Source,
 ): Promise<{ ref: string; sha: string }> {
   const ref = source.ref ?? "HEAD";
@@ -62,7 +62,7 @@ async function resolveSha(
   return { ref, sha: (await response.text()).trim() };
 }
 
-async function download(source: Source, sha: string): Promise<string> {
+export async function download(source: Source, sha: string): Promise<string> {
   const dir = mkdtempSync(join(tmpdir(), "hal-skills-"));
   const url = `https://codeload.github.com/${source.owner}/${source.repo}/tar.gz/${sha}`;
   const response = await fetch(url);
