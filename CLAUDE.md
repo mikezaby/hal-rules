@@ -1,6 +1,6 @@
 # modular-skills
 
-A rule registry and generator for AI-agent config, checked into the *project*
+A rule registry and generator for AI-agent config, checked into the _project_
 it configures. One team, one committed source of truth: run the generator, get
 `CLAUDE.md` / `.claude/` files every developer on the repo shares.
 
@@ -45,7 +45,7 @@ into `~/.claude/`) was the wrong problem.
 }
 ```
 
-`npx ai-rules` writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
+`npx ai-rules` (or `pnpm dlx ai-rules`) writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
 the config is the artifact under review, not the output.
 
 Resolution:
@@ -53,13 +53,30 @@ Resolution:
 - `extends` is a **path**, resolved relative to the config file. `node_modules/...`,
   a submodule dir, `./base.json` all work; no fetch or registry layer exists.
 - Configs merge in order, later wins — extends first, own `rules` last.
-- Rule *files* resolve last-`rulesDir`-first, so a project shadows a pack rule by
+- Rule _files_ resolve last-`rulesDir`-first, so a project shadows a pack rule by
   dropping its own `<slug>.md` in place. Shadowing replaces the whole file, `paths:`
   frontmatter included.
 - `"off"` drops an inherited rule. The out dir is wiped each build, so a rule turned
   off stops instructing Claude instead of lingering as a stale file.
 - `{{var}}` in a rule body is substituted from the config. An unset one is a build
   error, never passed through to Claude.
+
+## Toolchain
+
+TypeScript in `src/`, ESM, built with tsdown. Config extracted from blibliki:
+eslint flat config (`strictTypeChecked` + `stylisticTypeChecked`, `projectService`),
+prettier with the trivago import sorter, strict tsconfig with `noUncheckedIndexedAccess`.
+
+```
+pnpm build   tsdown -> dist/*.mjs + .d.mts
+pnpm test    node --test on src/*.test.ts (Node strips types natively, no test dep)
+pnpm tsc     typecheck
+pnpm lint    eslint src
+pnpm format  prettier . --write
+```
+
+`pnpm create ai-rules` is **not** available — `create-ai-rules` is taken on npm by an
+unrelated package. Use `pnpm dlx ai-rules` or `npx ai-rules`.
 
 ## Status
 

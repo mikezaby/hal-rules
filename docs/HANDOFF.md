@@ -1,5 +1,5 @@
-> **Superseded on premise (2026-08-23).** This documents a *personal* ruleset
-> symlinked into `~/.claude/`. The project is a *project-scoped* generator instead —
+> **Superseded on premise (2026-08-23).** This documents a _personal_ ruleset
+> symlinked into `~/.claude/`. The project is a _project-scoped_ generator instead —
 > see `../CLAUDE.md`. The mechanism research below is still accurate.
 
 # Modular Claude rules — handoff
@@ -26,21 +26,21 @@ Mostly yes, and it's native to Claude Code. No dependency required.
 `.claude/rules/` is a directory of one-topic-per-file markdown, auto-loaded,
 with YAML frontmatter for glob scoping. It maps onto eslint's model:
 
-| ESLint | Claude Code equivalent |
-|---|---|
-| one rule = one module | one rule = one `.md` in `.claude/rules/` |
-| `extends` shareable config | symlink a shared dir into `.claude/rules/` |
-| user → project cascade | `~/.claude/rules/` loads first, project rules take priority |
-| `overrides[].files` glob | `paths:` frontmatter on the rule file |
-| turn a rule off | `claudeMdExcludes` glob in settings (per layer, arrays merge) |
-| `severity` | **no analogue** |
-| rule `options` | **no analogue** |
+| ESLint                     | Claude Code equivalent                                        |
+| -------------------------- | ------------------------------------------------------------- |
+| one rule = one module      | one rule = one `.md` in `.claude/rules/`                      |
+| `extends` shareable config | symlink a shared dir into `.claude/rules/`                    |
+| user → project cascade     | `~/.claude/rules/` loads first, project rules take priority   |
+| `overrides[].files` glob   | `paths:` frontmatter on the rule file                         |
+| turn a rule off            | `claudeMdExcludes` glob in settings (per layer, arrays merge) |
+| `severity`                 | **no analogue**                                               |
+| rule `options`             | **no analogue**                                               |
 
 ### Why the two gaps don't matter
 
 - **severity** — eslint's `error`/`warn` means fail-the-build or don't. There is
   no build. The real binary is mechanism: CLAUDE.md/rules are always advisory,
-  a hook is always blocking. Choosing where a rule lives *is* the severity.
+  a hook is always blocking. Choosing where a rule lives _is_ the severity.
 - **options/vars** — templating matters when shipping rules to strangers. For a
   personal ruleset, write the value into the file.
 
@@ -53,6 +53,7 @@ never needed to care about.
 ## Options evaluated and rejected
 
 ### mattpocock/skills
+
 Skill bundle (`tdd`, `diagnosing-bugs`, `code-review`, `to-spec`, `to-tickets`,
 ...). Installable as a plugin or copied editable via `npx skills@latest add`.
 
@@ -64,6 +65,7 @@ and the agent picks one arbitrarily. Cherry-picking individual skills later is
 still fine.
 
 ### ai-rulesmith
+
 `npm i -g ai-rulesmith` — explicitly eslint's mental model for agent rules.
 `AI_RULES.json` lists rules by slug, include-to-enable, override hierarchy
 project → global → built-in, `vars` for rule options, 29 built-in rules,
@@ -71,6 +73,7 @@ compiles to CLAUDE.md / .cursorrules / .windsurfrules / copilot-instructions.md
 / AGENTS.md.
 
 **Right shape, dead vehicle.** Verified 2026-08-23:
+
 - v0.4.3, created 2026-02-28, last publish 2026-03-01 — no release in ~6 months
 - 24 downloads in the trailing month
 
@@ -121,7 +124,7 @@ via one `claudeMdExcludes` glob, no build step to forget to run.
   this repo closes.
 - No hooks are configured in either `~/.claude/settings.json` or the project's
   `settings.local.json`. Separate concern — rules are advisory by design; if a
-  rule must be *enforced* (blocking), it belongs in a hook, not here.
+  rule must be _enforced_ (blocking), it belongs in a hook, not here.
 - Skills are a different mechanism from rules: rules load every session (or on
   path match), skills load on demand when invoked or judged relevant. A rule
   that's a multi-step procedure should be a skill instead.

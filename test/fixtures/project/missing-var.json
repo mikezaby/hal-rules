@@ -1,1 +1,0 @@
-{ "extends": ["../pack/recommended.json"], "rules": { "testing/framework": "on" } }

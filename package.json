@@ -1,8 +1,45 @@
 {
-  "name": "modular-skills",
+  "name": "ai-rules",
   "version": "0.1.0",
+  "description": "Compose Claude Code rules from shareable packs, eslint-style",
+  "author": "Michalis Zabaras",
+  "license": "ISC",
   "type": "module",
-  "bin": { "ai-rules": "./index.js" },
-  "files": ["index.js", "rules"],
-  "scripts": { "test": "node --test" }
+  "bin": {
+    "ai-rules": "./dist/cli.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "rules",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "clean:dist": "rm -rf ./dist",
+    "dev": "tsdown --watch --no-clean",
+    "lint": "eslint src",
+    "test": "node --test src/*.test.ts",
+    "tsc": "tsc --noEmit",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "release": "pnpm run build && pnpm publish --access public"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@trivago/prettier-plugin-sort-imports": "6.0.2",
+    "@types/node": "^24.0.0",
+    "eslint": "10.8.1",
+    "prettier": "3.9.6",
+    "tsdown": "0.22.14",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.67.0"
+  },
+  "packageManager": "pnpm@10.33.2"
 }

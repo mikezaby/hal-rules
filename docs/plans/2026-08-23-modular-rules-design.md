@@ -17,7 +17,7 @@ Verified against code.claude.com/docs, 2026-08-23.
 - **Subagents inherit the whole CLAUDE.md hierarchy, project rules included.**
   Built-in Explore and Plan agents skip it. Custom agents get their own system
   prompt, so per-agent behavior is a separate artifact, not a rule.
-- Plugins and MCP are *already* project-scoped and committed: `enabledPlugins`
+- Plugins and MCP are _already_ project-scoped and committed: `enabledPlugins`
   and `extraKnownMarketplaces` in `.claude/settings.json`, `mcpServers` in
   `.mcp.json`. superpowers, mattpocock/skills and figma all install this way.
 - **Claude Code never writes `.claude/settings.json` itself.** Standing
@@ -37,13 +37,13 @@ inherit a rule pack and disable rule #3.
 
 ## Ownership model
 
-| Artifact | Mode |
-|---|---|
-| `.claude/rules/generated/**` | Generated. Wiped and rewritten every build. Hand edits here are lost by design. |
-| `.claude/settings.json` | **Bootstrapped** — written if missing, then left alone. |
-| `.mcp.json` | **Bootstrapped** — same. |
-| `.claude/rules/*.md` (outside `generated/`) | Never touched. Hand-written rules live here. |
-| `.claude/settings.local.json` | Never touched. The per-developer override lane. |
+| Artifact                                    | Mode                                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------------- |
+| `.claude/rules/generated/**`                | Generated. Wiped and rewritten every build. Hand edits here are lost by design. |
+| `.claude/settings.json`                     | **Bootstrapped** — written if missing, then left alone.                         |
+| `.mcp.json`                                 | **Bootstrapped** — same.                                                        |
+| `.claude/rules/*.md` (outside `generated/`) | Never touched. Hand-written rules live here.                                    |
+| `.claude/settings.local.json`               | Never touched. The per-developer override lane.                                 |
 
 Bootstrapping rather than overwriting keeps the generator out of files that
 hold team `permissions`, `hooks`, `env` and `model` — things it has no business
@@ -70,7 +70,7 @@ modeling, and modeling them is how a config tool becomes a strictly-worse
   submodule dir and `./base.json` all work, so distribution needs no fetch
   layer, cache or registry.
 - Configs merge in order, later wins: extends first, own `rules` last.
-- Rule *files* resolve last-`rulesDir`-first, so a project shadows a pack's rule
+- Rule _files_ resolve last-`rulesDir`-first, so a project shadows a pack's rule
   by dropping its own `<slug>.md` in place. Shadowing replaces the whole file,
   `paths:` frontmatter included.
 - `"off"` drops an inherited rule; the out dir is wiped each build so it stops
