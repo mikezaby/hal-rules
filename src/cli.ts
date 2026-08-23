@@ -58,10 +58,10 @@ if (args[0] === "outdated" || args[0] === "sync") {
       );
     }
     if (args[0] === "outdated")
-      console.log("\nadd them with: npx hal-rules sync");
+      console.log("\nadd them with: npx hal-rules@latest sync");
     else
       console.log(
-        '\nfill in any values, switch what you want to "on", then: npx hal-rules',
+        '\nfill in any values, switch what you want to "on", then: npx hal-rules@latest',
       );
     process.exit(0);
   } catch (error) {
@@ -110,7 +110,7 @@ if (args[0] === "init") {
       status === "exists" ? `${path} exists, left alone` : `${status} ${path}`,
     );
   }
-  console.log("\nnext:\n  edit hal-rules.json, then run: npx hal-rules");
+  console.log("\nnext:\n  edit hal-rules.json, then run: npx hal-rules@latest");
   process.exit(0);
 }
 

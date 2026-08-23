@@ -63,7 +63,7 @@ Plus the bootstrap keys:
 }
 ```
 
-`npx hal-rules` writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
+`npx hal-rules@latest` writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
 the config is the artifact under review, not the output.
 
 **Works in non-JS repos.** `extends` accepts a bare specifier, which falls back to

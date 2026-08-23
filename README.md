@@ -13,7 +13,7 @@
 > Rules get added, reworded and removed as they prove themselves; three have been
 > dropped already for carrying one stack's assumptions. **A reworded rule changes
 > what your agent does**, so read `CHANGELOG.md` on update and use
-> `npx hal-rules --diff` to see exactly which instructions moved.
+> `npx hal-rules@latest --diff` to see exactly which instructions moved.
 >
 > Least settled: how a bootstrapped `settings.json` or `.mcp.json` should
 > reconcile when it disagrees with the config (today it only reports), and the
@@ -34,23 +34,32 @@ your own, all in one committed file your team edits in review.
 ## Use it
 
 ```bash
-npx hal-rules init      # scaffold hal-rules.json and gitignore the output
-npx hal-rules           # generate
-npx hal-rules validate  # is the config itself valid?
-npx hal-rules check     # does what is on disk match the config?
+npx hal-rules@latest init      # scaffold hal-rules.json and gitignore the output
+npx hal-rules@latest           # generate
+npx hal-rules@latest validate  # is the config itself valid?
+npx hal-rules@latest check     # does what is on disk match the config?
 ```
+
+**Use `@latest`, not a bare `npx hal-rules`.** npx caches by semver range, and a
+bare name is stored as `^<version you first ran>`. A newer `0.x` still satisfies
+that range, so npx can keep running the old copy. While the config format can
+change on a minor bump, the releases most likely to matter are exactly the ones
+a bare `npx` may skip.
 
 **No JavaScript project required.** Nothing is installed and no `package.json` or
 `node_modules` is created. The rule pack ships inside the package itself, so it
 works the same in a Rails, Python, Go or Elixir repo.
 
-In a JS project you can install it and use the shorter `hal` binary instead:
+In a JS project, installing it is better than either: the version lands in your
+lockfile, so everyone on the team runs the same one and an update is a reviewed
+change rather than whatever each person's npx cache happens to hold. You also get
+the shorter `hal` binary.
 
 ```bash
 pnpm add -D hal-rules && pnpm hal
 ```
 
-Use `npx hal-rules`, never `npx hal`. On npm, `hal` is an unrelated package
+Use `npx hal-rules@latest`, never `npx hal`. On npm, `hal` is an unrelated package
 (Hypertext Application Language).
 
 `init` never overwrites an existing `hal-rules.json`, so re-running it is safe.
@@ -127,7 +136,7 @@ want three. Name them the way the source groups them:
 Browse what a source offers:
 
 ```bash
-npx hal-rules skills list github:mattpocock/skills
+npx hal-rules@latest skills list github:mattpocock/skills
 ```
 
 ```
@@ -173,14 +182,14 @@ exists. `outdated` lists what a pack offers that your config never mentions,
 neither on nor off:
 
 ```
-$ npx hal-rules outdated
+$ npx hal-rules@latest outdated
 4 rule(s) available, not in your config:
   documentation/architecture-decisions   (needs adrDir)
   git/worktrees-for-risky-work
   workflow/before-finish   (needs checks)
   workflow/out-of-scope-findings   (needs findingsFile)
 
-add them with: npx hal-rules sync
+add them with: npx hal-rules@latest sync
 ```
 
 `sync` writes them into your config as `"off"`, with a worked example for any
@@ -217,7 +226,7 @@ directory, so it never writes into the repository it is checking.
 
 ```
   stale rule still on disk: git/never-push.md
-      run: npx hal-rules
+      run: npx hal-rules@latest
 1 problem(s). Generated output does not match the config
 ```
 
@@ -360,7 +369,7 @@ external source doesn't auto-install, so the teammate still runs
 - Drift _resolution_. The run reports a disagreement, it does not merge one.
 - Emitting `.claude/agents/*.md`.
 
-`npx hal-rules init` scaffolds a project today. `pnpm create hal-rules` can work
+`npx hal-rules@latest init` scaffolds a project today. `pnpm create hal-rules` can work
 too once `create-hal-rules` is published. That name is free, unlike the
 `create-ai-rules` that closed this path under the old name.
 

@@ -21,6 +21,9 @@ exactly which instructions moved.
 - Command output, error messages and the generated file header no longer use em
   dashes. The header text changed, so the first run after updating reports every
   rule as changed.
+- Docs and command hints say `npx hal-rules@latest`. npx caches a bare name as
+  `^<version you first ran>`, so a newer `0.x` satisfies the range and the old
+  copy keeps running.
 
 ## 0.5.0 — 2026-08-23
 

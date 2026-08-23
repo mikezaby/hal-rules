@@ -591,7 +591,7 @@ export function check(
     if (!existsSync(actualRoot)) {
       problems.push({
         what: `nothing generated yet (${expected.size} rules expected)`,
-        fix: "run: npx hal-rules",
+        fix: "run: npx hal-rules@latest",
       });
       return problems;
     }
@@ -606,19 +606,19 @@ export function check(
       if (!actual.has(rel))
         problems.push({
           what: `missing rule: ${rel}`,
-          fix: "run: npx hal-rules",
+          fix: "run: npx hal-rules@latest",
         });
       else if (actual.get(rel) !== body)
         problems.push({
           what: `out of date: ${rel}`,
-          fix: "run: npx hal-rules",
+          fix: "run: npx hal-rules@latest",
         });
     }
     for (const rel of actual.keys()) {
       if (!expected.has(rel)) {
         problems.push({
           what: `stale rule still on disk: ${rel}`,
-          fix: "run: npx hal-rules",
+          fix: "run: npx hal-rules@latest",
         });
       }
     }
@@ -658,7 +658,7 @@ function checkSkills(
     if (!lockedPaths.has(path)) {
       problems.push({
         what: `skill declared but not installed: ${path}`,
-        fix: "run: npx hal-rules",
+        fix: "run: npx hal-rules@latest",
       });
     }
   }
@@ -666,14 +666,14 @@ function checkSkills(
     if (!wanted.has(path)) {
       problems.push({
         what: `skill installed but no longer declared: ${name}`,
-        fix: "run: npx hal-rules",
+        fix: "run: npx hal-rules@latest",
       });
     } else if (
       !existsSync(join(projectDir, ".claude/skills", name, "SKILL.md"))
     ) {
       problems.push({
         what: `skill in the lock but missing on disk: ${name}`,
-        fix: "run: npx hal-rules (skills are committed, so this should not happen)",
+        fix: "run: npx hal-rules@latest (skills are committed, so this should not happen)",
       });
     }
   }
