@@ -32,7 +32,10 @@ test("scaffolds a config that extends the installed pack", () => {
   assert.equal(config?.status, "created");
   assert.equal(gitignore?.status, "created");
 
-  const written = JSON.parse(read(dir, "hal.json")) as Record<string, unknown>;
+  const written = JSON.parse(read(dir, "hal-rules.json")) as Record<
+    string,
+    unknown
+  >;
   assert.deepEqual(written.extends, [
     "node_modules/hal-rules/recommended.json",
   ]);
@@ -43,12 +46,12 @@ test("scaffolds a config that extends the installed pack", () => {
 
 test("never overwrites an existing config", () => {
   const dir = project("existing");
-  writeFileSync(join(dir, "hal.json"), '{"rules":{"ours/keep-me":"on"}}');
+  writeFileSync(join(dir, "hal-rules.json"), '{"rules":{"ours/keep-me":"on"}}');
 
   const [config] = init(dir);
   assert.equal(config?.status, "exists");
   assert.match(
-    read(dir, "hal.json"),
+    read(dir, "hal-rules.json"),
     /keep-me/,
     "the team's config must survive re-init",
   );

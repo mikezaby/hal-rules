@@ -46,7 +46,7 @@ const CONFIG_KEYS = new Set([
   "settings",
 ]);
 
-export const DEFAULT_CONFIG = "hal.json";
+export const DEFAULT_CONFIG = "hal-rules.json";
 export const DEFAULT_OUT = ".claude/rules/generated";
 
 /** Later configs win, exactly like eslint: extends first, own `rules` last. */

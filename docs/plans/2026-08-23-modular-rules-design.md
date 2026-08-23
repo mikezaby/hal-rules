@@ -52,7 +52,7 @@ modeling, and modeling them is how a config tool becomes a strictly-worse
 
 ## Config
 
-`hal.json`, resolved by `npx hal-rules`:
+`hal-rules.json`, resolved by `npx hal-rules`:
 
 ```json
 {
@@ -135,7 +135,7 @@ buildable now.
 6. **`.claude/agents/*.md` emit.** The second target the subagent finding turned
    up: per-agent behaviour cannot be expressed as a rule.
 7. **Publish to npm.** Nothing works via `npx` for anyone until this happens.
-8. **Prove it on a real repo.** Point blibliki's `hal.json` at the pack and
+8. **Prove it on a real repo.** Point blibliki's `hal-rules.json` at the pack and
    diff the generated rules against what its CLAUDE.md says today.
 
 ### Suggested order

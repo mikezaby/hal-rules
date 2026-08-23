@@ -22,7 +22,7 @@ function project(name: string, config: unknown) {
   const dir = join(root, name);
   mkdirSync(join(dir, "rules/ours"), { recursive: true });
   writeFileSync(join(dir, "rules/ours/real.md"), "# Real\n- a real rule\n");
-  const path = join(dir, "hal.json");
+  const path = join(dir, "hal-rules.json");
   writeFileSync(path, JSON.stringify(config));
   return { dir, path, out: join(dir, "out") };
 }
@@ -126,7 +126,9 @@ test("an unknown key in an extended pack names that pack, not the project", () =
     () => validate(child.path),
     (error: Error) => {
       assert.ok(error.message.includes(base.path));
-      assert.ok(!error.message.includes(dirname(child.path) + "/hal.json"));
+      assert.ok(
+        !error.message.includes(dirname(child.path) + "/hal-rules.json"),
+      );
       return true;
     },
   );

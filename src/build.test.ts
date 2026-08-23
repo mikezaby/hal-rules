@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { applyVars, build } from "./index.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const config = join(here, "fixtures/project/hal.json");
+const config = join(here, "fixtures/project/hal-rules.json");
 const pack = join(here, "fixtures/pack/recommended.json");
 const out = join(here, "fixtures/.out");
 const read = (slug: string) => readFileSync(join(out, `${slug}.md`), "utf8");

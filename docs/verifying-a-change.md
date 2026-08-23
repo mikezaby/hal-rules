@@ -30,7 +30,7 @@ D=$(mktemp -d /tmp/hal-check-XXXX) && cd "$D"
 git init -q                       # some rules are about git; give it a repo
 mkdir -p src && printf 'export const x = 1;\n' > src/app.ts
 
-cat > hal.json <<'EOF'
+cat > hal-rules.json <<'EOF'
 {
   "extends": ["/ABS/PATH/TO/modular-skills/recommended.json"],
   "rules": { "<the rule under test>": "on" }

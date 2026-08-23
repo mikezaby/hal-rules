@@ -19,15 +19,15 @@ your own — all in one committed file your team edits in review.
 ## Use it
 
 ```bash
-npx hal-rules init      # scaffold hal.json and gitignore the output
+npx hal-rules init      # scaffold hal-rules.json and gitignore the output
 pnpm add -D hal-rules
 pnpm hal          # generate
 pnpm hal validate # check the config without writing anything
 ```
 
-`init` never overwrites an existing `hal.json` — re-running it is safe.
+`init` never overwrites an existing `hal-rules.json` — re-running it is safe.
 
-The generate step reads `hal.json` and writes `.claude/rules/generated/<slug>.md`. Gitignore the
+The generate step reads `hal-rules.json` and writes `.claude/rules/generated/<slug>.md`. Gitignore the
 output — the config is the artifact under review, not what it compiles to.
 
 ```gitignore

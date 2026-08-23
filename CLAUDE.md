@@ -31,7 +31,7 @@ into `~/.claude/`) was the wrong problem.
 
 ## How it works
 
-`hal.json` per project, eslint-shaped:
+`hal-rules.json` per project, eslint-shaped:
 
 ```json
 {
@@ -106,7 +106,7 @@ pnpm format  prettier . --write
 
 Published flat as `hal-rules`, not scoped: a personal scope reads as a side
 project for something teams are asked to commit as shared infrastructure. The bin
-is `hal`, the config is `hal.json`. `create-hal-rules` is free, so `pnpm create
+is `hal`, the config is `hal-rules.json`. `create-hal-rules` is free, so `pnpm create
 hal-rules` stays open — unlike `create-ai-rules`, which is taken and closed that
 path under the old name.
 

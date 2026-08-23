@@ -25,7 +25,7 @@ function project(
 ) {
   const dir = join(root, name);
   mkdirSync(dir, { recursive: true });
-  const path = join(dir, "hal.json");
+  const path = join(dir, "hal-rules.json");
   writeFileSync(path, JSON.stringify(config));
   for (const [rel, body] of Object.entries(files)) {
     const target = join(dir, rel);
