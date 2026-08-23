@@ -115,10 +115,34 @@ A rule earns its place only when off and on differ.
 
 ## 5. Subagents
 
-Rules reach subagents — per Claude Code's docs, a subagent loads every level of
-the CLAUDE.md hierarchy the main conversation does. **That is documented, not
-something we have measured here**, so verify it by hand: ask Claude to delegate
-the same tempting task to a subagent and watch whether the rule still binds.
+```bash
+./scripts/verify-subagent.sh              # general-purpose: expects inheritance
+AGENT=Explore ./scripts/verify-subagent.sh # expects NO inheritance
+```
+
+**Measured, both directions.** A `general-purpose` subagent obeyed a generated
+rule; `Explore` did not, matching the documented exception.
+
+Getting this right took three broken designs, and the traps are worth knowing
+before writing another probe:
+
+1. **Lookup.** Asking "what is the canary value" is answerable by grepping the
+   rule file off disk and says nothing about context. Explore, a search agent,
+   did exactly that and produced a confident false positive. The canary must be
+   a _behaviour_ ("end every reply with this token") attached to an unrelated
+   question, so reading the file gives an agent no reason to comply.
+2. **The control removed the file.** Turning the rule `off` changes two things at
+   once: it leaves context _and_ leaves the disk. Keep the file and hide it with
+   `claudeMdExcludes` instead, so only loading differs.
+3. **Relay and async.** The parent has the same rules, so its final text is
+   contaminated — read the Task `tool_result`, the subagent's own output. And an
+   async Task returns launch metadata rather than a reply, which reads as a false
+   negative; the prompt must tell it to wait.
+
+A control run that _refuses_ is also not a control. An early probe phrased the
+canary as a secret, and the model correctly declined to delegate at all — the
+absent token then proved nothing. The script now demands delegation in every run
+and reports INCONCLUSIVE otherwise.
 
 **Known exception: the built-in Explore and Plan agents skip CLAUDE.md and rules
 entirely.** A rule that appears not to apply inside Explore or Plan is expected.

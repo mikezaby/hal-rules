@@ -153,7 +153,8 @@ Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design
 
 **Adding or changing a rule? Follow `docs/verifying-a-change.md`.**
 `./scripts/verify-loading.sh` automates the loading half: canary rule, real
-`claude -p` session in a throwaway project, plus the rule-off control run. A green test
+`claude -p` session in a throwaway project, plus the rule-off control run.
+`./scripts/verify-subagent.sh` does the same for subagent inheritance. A green test
 suite proves the file was written, never that Claude follows it — a rule is only
 verified when the same prompt behaves differently with it on and off.
 
@@ -163,7 +164,9 @@ verified when the same prompt behaves differently with it on and off.
   a `paths:` glob in frontmatter defers loading until a matching file is read.
 - **Subagents inherit the whole CLAUDE.md hierarchy, project rules included.**
   Not inherited: conversation history, read files, invoked skills, parent auto memory.
+  **Measured** — `./scripts/verify-subagent.sh`.
 - Built-in **Explore and Plan agents skip CLAUDE.md and rules entirely.**
+  **Measured** — `AGENT=Explore ./scripts/verify-subagent.sh`.
 - Custom agents (`.claude/agents/*.md`) supply their own system prompt and get
   "only this system prompt plus basic environment details" — so per-agent
   behavior is a second emit target, not something a rule file can express.
