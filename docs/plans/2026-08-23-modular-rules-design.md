@@ -126,8 +126,9 @@ buildable now.
 
 ### Buildable
 
-4. **`--check` for CI.** Fail the build on stale or drifted output. Smallest of
-   these, and the one that makes the rest self-policing.
+4. **`--check` for CI.** Fail the build on stale or drifted _output_. Distinct
+   from `ai-rules validate`, which is built and checks the _config_: every
+   problem at once, non-zero exit, and `build` refuses to write when any fail.
 5. **Per-rule `paths:` override from config.** Shadowing replaces the whole file
    today, frontmatter included, so a rule's globs cannot be retargeted without
    copying it.

@@ -36,6 +36,16 @@ export interface ResolvedConfig {
   settings: Record<string, unknown>;
 }
 
+const CONFIG_KEYS = new Set([
+  "extends",
+  "rulesDir",
+  "rules",
+  "marketplaces",
+  "plugins",
+  "mcp",
+  "settings",
+]);
+
 export const DEFAULT_CONFIG = "ai-rules.json";
 export const DEFAULT_OUT = ".claude/rules/generated";
 
@@ -57,7 +67,22 @@ export function loadConfig(
   if (loaded.has(path)) return out;
   loaded.add(path);
 
-  const config = JSON.parse(readFileSync(path, "utf8")) as AiRulesConfig;
+  let config: AiRulesConfig;
+  try {
+    config = JSON.parse(readFileSync(path, "utf8")) as AiRulesConfig;
+  } catch (error) {
+    // With extends chains, "which file" is the only useful part of the message.
+    throw new Error(
+      `${path}: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
+    );
+  }
+  const unknown = Object.keys(config).filter((key) => !CONFIG_KEYS.has(key));
+  if (unknown.length > 0) {
+    throw new Error(
+      `${path}: unknown key(s) ${unknown.join(", ")}\n  expected one of: ${[...CONFIG_KEYS].join(", ")}`,
+    );
+  }
   const base = dirname(path);
   for (const from of config.extends ?? []) {
     const inherited = loadConfig(resolve(base, from), loaded);
@@ -128,23 +153,95 @@ function withHeader(body: string, slug: string, source: string): string {
   return `${frontmatter[0]}${note}\n${body.slice(frontmatter[0].length)}`;
 }
 
-export function build(configPath: string, outDir: string): string[] {
-  const { rulesDirs, rules } = loadConfig(configPath);
-  rmSync(outDir, { recursive: true, force: true });
-
-  const written: string[] = [];
-  for (const [slug, state] of Object.entries(rules)) {
-    const [enabled, vars] = Array.isArray(state) ? state : [state, {}];
-    if (enabled === "off") continue;
-
-    const source = findRule(slug, rulesDirs);
-    const body = applyVars(readFileSync(source, "utf8"), vars, slug);
-    const dest = join(outDir, `${slug}.md`);
-    mkdirSync(dirname(dest), { recursive: true });
-    writeFileSync(dest, withHeader(body, slug, source));
-    written.push(slug);
+// `state` arrives from JSON, so it is unknown however the interface types it.
+function stateOf(
+  slug: string,
+  state: unknown,
+): [enabled: string, vars: Record<string, string>] {
+  if (state === "on" || state === "off") return [state, {}];
+  if (
+    Array.isArray(state) &&
+    state[0] === "on" &&
+    typeof state[1] === "object"
+  ) {
+    return state as [string, Record<string, string>];
   }
-  return written;
+  throw new Error(
+    `"${slug}" is set to ${JSON.stringify(state)} — expected "on", "off", or ["on", { var: "value" }]`,
+  );
+}
+
+/**
+ * Everything wrong with the config, not just the first thing. Returns the files
+ * to write so nothing is read twice.
+ */
+function plan(
+  config: ResolvedConfig,
+  outDir: string,
+): {
+  files: { path: string; content: string; slug: string }[];
+  errors: string[];
+} {
+  const files: { path: string; content: string; slug: string }[] = [];
+  const errors: string[] = [];
+
+  for (const [slug, state] of Object.entries(config.rules)) {
+    try {
+      const [enabled, vars] = stateOf(slug, state);
+      if (enabled === "off") continue;
+
+      const source = findRule(slug, config.rulesDirs);
+      const body = applyVars(readFileSync(source, "utf8"), vars, slug);
+      files.push({
+        path: join(outDir, `${slug}.md`),
+        content: withHeader(body, slug, source),
+        slug,
+      });
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  for (const [id, state] of Object.entries(config.plugins) as [
+    string,
+    unknown,
+  ][]) {
+    if (state !== "on" && state !== "off") {
+      errors.push(
+        `plugin "${id}" is set to ${JSON.stringify(state)} — expected "on" or "off"`,
+      );
+    } else if (!id.includes("@")) {
+      errors.push(
+        `plugin "${id}" is not a plugin id — expected "name@marketplace"`,
+      );
+    }
+  }
+
+  return { files, errors };
+}
+
+/** Every problem with the config, as a list. Empty means it will build. */
+export function validate(configPath: string): string[] {
+  return plan(loadConfig(configPath), ".").errors;
+}
+
+export function build(configPath: string, outDir: string): string[] {
+  const { files, errors } = plan(loadConfig(configPath), outDir);
+
+  // Resolve everything before touching disk: a config error must not leave the
+  // previous output half-wiped and half-rewritten.
+  if (errors.length > 0) {
+    throw new Error(
+      `${errors.length} problem(s) in the config:\n  ${errors.join("\n  ")}`,
+    );
+  }
+
+  rmSync(outDir, { recursive: true, force: true });
+  for (const { path, content } of files) {
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, content);
+  }
+  return files.map(({ slug }) => slug);
 }
 
 export interface BootstrapResult {

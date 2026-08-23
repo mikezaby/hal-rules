@@ -6,9 +6,25 @@ import {
   build,
   init,
   loadConfig,
+  validate,
 } from "./index.ts";
 
 const args = process.argv.slice(2);
+
+if (args[0] === "validate") {
+  try {
+    const errors = validate(args[1] ?? DEFAULT_CONFIG);
+    for (const error of errors) console.error(`  ${error}`);
+    console.log(
+      errors.length === 0 ? "config is valid" : `${errors.length} problem(s)`,
+    );
+    process.exit(errors.length === 0 ? 0 : 1);
+  } catch (error) {
+    // A malformed or unreadable config throws rather than returning a list.
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
 
 if (args[0] === "init") {
   for (const { path, status } of init()) {

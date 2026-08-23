@@ -92,6 +92,10 @@ TypeScript in `src/`, ESM, built with tsdown. Config extracted from blibliki:
 eslint flat config (`strictTypeChecked` + `stylisticTypeChecked`, `projectService`),
 prettier with the trivago import sorter, strict tsconfig with `noUncheckedIndexedAccess`.
 
+`ai-rules validate` reports every config problem at once and exits non-zero.
+`build` runs the same checks and writes nothing if any fail, so a bad config
+cannot leave the previous output half-wiped.
+
 ```
 pnpm build   tsdown -> dist/*.mjs + .d.mts
 pnpm test    node --test on src/*.test.ts (Node strips types natively, no test dep)

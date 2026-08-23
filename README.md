@@ -15,9 +15,10 @@ your own — all in one committed file your team edits in review.
 ## Use it
 
 ```bash
-npx ai-rules init     # scaffold ai-rules.json and gitignore the output
+npx ai-rules init      # scaffold ai-rules.json and gitignore the output
 pnpm add -D ai-rules
-pnpm ai-rules         # generate
+pnpm ai-rules          # generate
+pnpm ai-rules validate # check the config without writing anything
 ```
 
 `init` never overwrites an existing `ai-rules.json` — re-running it is safe.
@@ -73,6 +74,17 @@ Every key composes through `extends` the same way.
 Resolved relative to the config file, so `node_modules/@you/pack/recommended.json`,
 a git submodule directory and `./base.json` all work. There is no registry, no fetch
 step and no cache to go stale — distribution is whatever your project already uses.
+
+### Validation happens before anything is written
+
+`ai-rules validate` reports every problem in the config at once — unknown keys,
+rule slugs that resolve to no file, bad rule states, malformed plugin ids — and
+exits non-zero, so it drops straight into CI or a pre-commit hook.
+
+`ai-rules` runs the same checks itself and **writes nothing if any of them fail**.
+A config error leaves the previous generated output exactly as it was, rather
+than half-wiped. Errors name the file they came from, which matters once
+`extends` chains more than one config.
 
 ### Turning a rule off, and tuning one
 
@@ -170,7 +182,8 @@ external source doesn't auto-install — the teammate still runs `claude plugin 
 
 ## Not built yet
 
-- `--check` to fail CI on stale or drifted output
+- `--check` to fail CI on stale or drifted output (distinct from `validate`,
+  which checks the config rather than the output)
 - Drift _resolution_ — the run reports, it does not merge
 - Emitting `.claude/agents/*.md`
 
