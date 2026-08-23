@@ -4,6 +4,21 @@
 >
 > **Don't let the agent decide what your team's standards are.**
 
+> [!WARNING]
+> **Work in progress. Expect things to move.**
+>
+> Pre-1.0 and young. While on `0.x`, a **minor bump may break the config format** —
+> pin an exact version if that matters to you.
+>
+> Rules get added, reworded and removed as they prove themselves; three have been
+> dropped already for carrying one stack's assumptions. **A reworded rule changes
+> what your agent does**, so read `CHANGELOG.md` on update and use
+> `npx hal-rules --diff` to see exactly which instructions moved.
+>
+> Least settled: how a bootstrapped `settings.json` or `.mcp.json` should
+> reconcile when it disagrees with the config (today it only reports), and the
+> `skills` fetcher, which has had far less exercise than the rules path.
+
 Compose Claude Code rules from shareable packs, the way eslint composes lint rules.
 
 Claude Code already shares plugins and MCP servers with a team: commit

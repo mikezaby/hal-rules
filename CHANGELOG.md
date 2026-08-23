@@ -1,5 +1,9 @@
 # Changelog
 
+**Pre-1.0: a minor bump may break the config format.** Rule wording changes are
+listed as carefully as code changes, because a reworded rule changes what your
+agent does.
+
 Rule wording changes are listed as carefully as code changes: a reworded rule
 changes what your agent does. After updating, `npx hal-rules --diff` shows
 exactly which instructions moved.
