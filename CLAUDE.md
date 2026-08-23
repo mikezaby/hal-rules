@@ -78,6 +78,25 @@ pnpm format  prettier . --write
 `pnpm create ai-rules` is **not** available — `create-ai-rules` is taken on npm by an
 unrelated package. Use `pnpm dlx ai-rules` or `npx ai-rules`.
 
+## The pack
+
+`rules/` holds the registry, one file per rule, foldered by topic:
+`workflow` · `git` · `documentation` · `testing` · `code-style` · `architecture` · `safety`
+
+Every rule was carved from a CLAUDE.md that was actually in use, blibliki among
+them. No rule exists here without a source line in one of them — the pack is
+evidence, not invention.
+
+`recommended.json` enables the ten that apply to any codebase. Left opt-in because
+they need a project-specific value or only fit some stacks:
+`workflow/before-finish` (`checks`), `workflow/out-of-scope-findings` (`findingsFile`),
+`code-style/no-namespace-react`, `git/worktrees-for-risky-work`,
+`safety/never-apply-migrations`.
+
+Only four rules appeared in more than one project: `scope-discipline`,
+`before-finish`, `never-push`, `mark-deliberate-simplifications`. The rest are
+single-source, which is worth remembering before treating the pack as settled.
+
 ## Status
 
 Rules generator works, `node --test` covers resolution. No rule pack written yet.

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -60,6 +61,32 @@ test("a rule turned off is deleted on rebuild, not left behind", () => {
   );
 
   rmSync(out, { recursive: true, force: true });
+});
+
+test("the header drops a source path that climbs out of the project", () => {
+  build(pack, out); // cwd is the repo: the pack is inside it, so the path is useful
+  assert.match(
+    read("code-style/no-magic"),
+    /generated from code-style\/no-magic \(src\//,
+  );
+  rmSync(out, { recursive: true, force: true });
+
+  const cwd = process.cwd();
+  const elsewhere = mkdtempSync(join(tmpdir(), "ai-rules-"));
+  try {
+    process.chdir(elsewhere); // now the pack lives outside the project, as node_modules would
+    build(pack, out);
+    const text = read("code-style/no-magic");
+    assert.doesNotMatch(text, /\.\.\//, "a ../../.. path helps nobody");
+    assert.match(
+      text,
+      /generated from code-style\/no-magic — edit it in the pack/,
+    );
+  } finally {
+    process.chdir(cwd);
+    rmSync(elsewhere, { recursive: true, force: true });
+    rmSync(out, { recursive: true, force: true });
+  }
 });
 
 test("an unset variable fails the build instead of shipping the placeholder", () => {

@@ -83,6 +83,28 @@ modeling, and modeling them is how a config tool becomes a strictly-worse
 `index.js`, ~90 lines, no dependencies. Rules only. `node --test` covers
 resolution order, shadowing, `off`, stale-file removal and the unset-var guard.
 
+## Pack
+
+15 rules in `rules/`, carved from real CLAUDE.md files in use, blibliki
+among them. Folders: `workflow`, `git`, `documentation`,
+`testing`, `code-style`, `architecture`, `safety`.
+
+Recurrence across them is thin and worth recording honestly — only four
+rules showed up in more than one project (`scope-discipline`, `before-finish`,
+`never-push`, `mark-deliberate-simplifications`). Everything else is single-source.
+
+Two findings the carve confirmed about the design:
+
+- **`before-finish` is the case that justifies `{{vars}}`.** Identical rule,
+  different commands depending on the stack: `pnpm tsc/lint/test/format` in
+  blibliki, a Rails project's own test/lint/security commands elsewhere.
+- **`scope-discipline` and `out-of-scope-findings` are one rule with a
+  project-specific tail**, not two rules — only one of the source projects
+  names a findings file.
+
+Most of what is in a CLAUDE.md is not a rule at all — architecture prose,
+command lists, file inventories. That stays in each project's own file.
+
 ## Open — deliberately not answered yet
 
 1. **Drift.** Once `settings.json` and `.mcp.json` are bootstrapped, how does a

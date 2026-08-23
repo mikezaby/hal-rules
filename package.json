@@ -18,6 +18,7 @@
   "files": [
     "dist",
     "rules",
+    "recommended.json",
     "README.md"
   ],
   "scripts": {

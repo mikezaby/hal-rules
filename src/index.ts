@@ -83,9 +83,12 @@ export function applyVars(
 
 /** The header goes after any frontmatter — YAML has to start at line 1. */
 function withHeader(body: string, slug: string, source: string): string {
-  // Relative, so the output is identical on every machine.
+  // Relative, so output is identical on every machine. A path that climbs out of
+  // the project (a pack in node_modules or elsewhere) is noise: drop it.
   const from = relative(process.cwd(), source);
-  const note = `<!-- generated from ${slug} (${from}) — edit the source, then rerun ai-rules -->`;
+  const note = from.startsWith("..")
+    ? `<!-- generated from ${slug} — edit it in the pack, then rerun ai-rules -->`
+    : `<!-- generated from ${slug} (${from}) — edit the source, then rerun ai-rules -->`;
   const frontmatter = /^---\n[\s\S]*?\n---\n/.exec(body);
   if (!frontmatter) return `${note}\n${body}`;
   return `${frontmatter[0]}${note}\n${body.slice(frontmatter[0].length)}`;
