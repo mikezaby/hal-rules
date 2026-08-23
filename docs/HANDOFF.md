@@ -1,3 +1,7 @@
+> **Superseded on premise (2026-08-23).** This documents a *personal* ruleset
+> symlinked into `~/.claude/`. The project is a *project-scoped* generator instead —
+> see `../CLAUDE.md`. The mechanism research below is still accurate.
+
 # Modular Claude rules — handoff
 
 **Date:** 2026-08-23

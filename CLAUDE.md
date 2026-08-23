@@ -1,30 +1,34 @@
 # modular-skills
 
-Version control for `~/.claude/`. Holds a personal, shareable ruleset built on
-Claude Code's native `.claude/rules/` — one topic per markdown file, symlinked
-into the home config so every machine gets the same set.
+A rule registry and generator for AI-agent config, checked into the *project*
+it configures. One team, one committed source of truth: run the generator, get
+`CLAUDE.md` / `.claude/` files every developer on the repo shares.
 
-Rationale, options rejected, and the eslint-model comparison: `docs/HANDOFF.md`.
+Not a personal `~/.claude` setup. Not a skill bundle. The unit of reuse is the
+project, not the developer.
 
-## Layout
+## The model is eslint's
 
-```
-rules/     one-topic-per-file .md, YAML frontmatter (`paths:` to glob-scope)
-docs/      decision records
-```
+- a **registry** of small, named, independently-addressable rules
+- a **shareable base config** a project extends
+- each rule **on or off** per project
+- each rule **tunable** (options), because "which" is rarely the whole answer
+- projects **add their own** rules that ship with nobody else's
+- config is **committed**, so the team evolves it in review like any other code
 
-## Setup
+Teams don't adopt a ruleset, they negotiate one. The config file is where that
+negotiation lives.
 
-```sh
-ln -s ~/projects/me/modular-skills/rules ~/.claude/rules
-```
+## Prior art
 
-Verify with `/context` (→ Memory files) and `/doctor`.
+`docs/ai-rulesmith-review.md` — teardown of the closest existing thing. Take
+its rule file format, slug namespace, `vars` substitution and target adapters;
+it has no `extends` and no disable, which is the half that matters here.
 
-## Conventions
+`docs/HANDOFF.md` — earlier conversation. Its research on Claude Code's native
+`.claude/rules/` mechanism stands; its conclusion (personal ruleset symlinked
+into `~/.claude/`) was the wrong problem.
 
-- One rule per file, named for the rule (`scope-discipline.md`).
-- Generic rules live here; project-specific ones stay in that project's `.claude/rules/`.
-- Rules are advisory. Anything that must *block* is a hook, not a rule.
-- A multi-step procedure is a skill, not a rule.
-- Write values inline — no templating, no vars.
+## Status
+
+Design. Nothing implemented.
