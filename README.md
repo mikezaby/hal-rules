@@ -312,6 +312,7 @@ that claims to be generic.
 | `documentation/architecture-decisions`         | A decision made during a change gets an ADR in the same commit, and is never worked around silently |                  | `adrDir`       |             |
 | `documentation/docs-in-the-same-commit`        | A change that invalidates a doc fixes that doc too                                                  |        ✓         |                |             |
 | `documentation/no-scratch-files`               | Plans and checklists belong in the conversation, not the repo                                       |        ✓         |                |             |
+| `documentation/plain-prose`                    | Write like the person who did the work, not like a tool announcing it                               |        ✓         |                |             |
 | `git/never-push`                               | Commit locally when asked; pushing is the human's call                                              |        ✓         |                |             |
 | `safety/never-publish`                         | Preparing a release is fine; pushing it to a registry is a human's call                             |        ✓         |                |             |
 | `safety/bump-only-when-asked`                  | A version number is a release decision; wait to be told                                             |        ✓         |                |             |

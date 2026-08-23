@@ -9,6 +9,7 @@
     "safety/bump-only-when-asked": "on",
     "documentation/docs-in-the-same-commit": "on",
     "documentation/no-scratch-files": "on",
+    "documentation/plain-prose": "on",
     "testing/test-organization": "on",
     "code-style/comments": "on",
     "architecture/reuse-existing-components": "on",

@@ -140,7 +140,7 @@ Every rule was carved from a CLAUDE.md that was actually in use, blibliki among
 them. No rule exists here without a source line in one of them — the pack is
 evidence, not invention.
 
-`recommended.json` enables twelve of them; the rest need a project-specific value
+`recommended.json` enables thirteen of them; the rest need a project-specific value
 (`checks`, `findingsFile`, `adrDir`) or are a team preference. Left opt-in because
 they need a project-specific value or only fit some stacks:
 `workflow/before-finish` (`checks`), `workflow/out-of-scope-findings` (`findingsFile`),
