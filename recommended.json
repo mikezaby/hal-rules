@@ -8,11 +8,12 @@
     "documentation/no-scratch-files": "on",
     "testing/test-organization": "on",
     "code-style/comments": "on",
-    "code-style/no-nested-ternaries": "on",
     "architecture/reuse-existing-components": "on",
     "architecture/mark-deliberate-simplifications": [
       "on",
-      { "marker": "ponytail:" }
+      {
+        "marker": "ponytail:"
+      }
     ]
   }
 }

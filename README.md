@@ -143,7 +143,6 @@ TypeScript monorepo, a Rails service and a Nuxt app. None were invented.
 | `architecture/reuse-existing-components`       | Read the component library before building any control                   |        ✓         |                |             |
 | `code-style/comments`                          | Default to no comments; write one only where the code cannot say it      |        ✓         |                |             |
 | `code-style/no-namespace-react`                | Import named or default bindings from react, never the namespace         |                  |                |      ✓      |
-| `code-style/no-nested-ternaries`               | A ternary whose branch is another ternary becomes guard clauses          |        ✓         |                |      ✓      |
 | `documentation/docs-in-the-same-commit`        | A change that invalidates a doc fixes that doc too                       |        ✓         |                |             |
 | `documentation/no-scratch-files`               | Plans and checklists belong in the conversation, not the repo            |        ✓         |                |             |
 | `git/never-push`                               | Commit locally when asked; pushing is the human's call                   |        ✓         |                |             |

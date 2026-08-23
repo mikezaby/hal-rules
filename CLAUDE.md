@@ -124,7 +124,7 @@ Every rule was carved from a CLAUDE.md that was actually in use, blibliki among
 them. No rule exists here without a source line in one of them — the pack is
 evidence, not invention.
 
-`recommended.json` enables the ten that apply to any codebase. Left opt-in because
+`recommended.json` enables the nine that apply to any codebase. Left opt-in because
 they need a project-specific value or only fit some stacks:
 `workflow/before-finish` (`checks`), `workflow/out-of-scope-findings` (`findingsFile`),
 `code-style/no-namespace-react`, `git/worktrees-for-risky-work`,
