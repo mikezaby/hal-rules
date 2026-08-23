@@ -14,6 +14,30 @@ const PACKAGE_ROOT = fileURLToPath(new URL("..", import.meta.url));
 /** Where the pack lives in this repo, kept apart from the generator's code. */
 const REGISTRY_DIR = "registry";
 
+/** A registry holds its rule bodies here. Convention, not configuration. */
+export const RULES_DIR = "rules";
+
+/** The preset a registry offers when none is named. */
+export const DEFAULT_PRESET = "recommended";
+
+/**
+ * A registry plus which preset to take from it. The registry is a directory —
+ * a path, or a `github:owner/repo` fetched into the pack cache — holding
+ * `<preset>.json` and a `rules/` directory.
+ */
+export interface RegistryRef {
+  registry: string;
+  preset?: string;
+  ref?: string;
+}
+
+/** A config file path, or a registry and the preset wanted out of it. */
+export type ExtendsEntry = string | RegistryRef;
+
+export function isRegistryRef(entry: ExtendsEntry): entry is RegistryRef {
+  return typeof entry === "object";
+}
+
 export interface Pack {
   source: Source;
   /** Path to the config file inside the repo. */
@@ -50,37 +74,53 @@ export function parsePack(spec: string): Pack {
   };
 }
 
+const REGISTRY_RE = /^github:([^/#]+)\/([^/#]+)(?:\/([^#]+))?$/;
+
+/** The github form of a registry reference, as the same Pack a spec produces. */
+export function packFromRef(entry: RegistryRef): Pack {
+  const match = REGISTRY_RE.exec(entry.registry);
+  if (!match) {
+    throw new Error(
+      `Unrecognised registry: "${entry.registry}"\n` +
+        `  expected github:owner/repo or github:owner/repo/dir, with the preset\n` +
+        `  in "preset" and any ref in "ref"`,
+    );
+  }
+  const [, owner = "", repo = "", dir] = match;
+  return {
+    source: { owner, repo, ref: entry.ref },
+    // A registry may sit in a subdirectory of its repo, so the preset path
+    // carries it and `dirname` gives the directory back where rules are looked up.
+    path: join(dir ?? ".", `${entry.preset ?? DEFAULT_PRESET}.json`),
+    spec: `github:${owner}/${repo}`,
+  };
+}
+
 /** One checkout per repo, however many configs are extended out of it. */
 export function packDir(pack: Pack, projectDir: string): string {
   return join(projectDir, PACK_DIR, `${pack.source.owner}-${pack.source.repo}`);
 }
 
 /**
- * A path (`./base.json`, `/abs/base.json`) resolves against the config file.
- * `github:...` resolves into this project's pack cache, which a build fetches
- * before any config is read.
+ * Where an `extends` entry's config file lives.
  *
- * Anything else is a bare specifier: an installed package if there is one, and
- * otherwise the pack shipped inside this package, under `registry/`. That
- * fallback is what lets `npx hal-rules` work in a repo with no node_modules.
- * A Rails or Python project has nowhere to install a pack.
+ * An object names a **registry**: a directory holding `<preset>.json` and a
+ * `rules/` directory. A string is a config file directly — a path resolved
+ * against the config that names it, a `github:` spec, or a bare specifier
+ * resolving to an installed package and otherwise to the pack shipped inside
+ * this one under `registry/`. That last fallback is what lets `npx hal-rules`
+ * work in a repo with no node_modules; a Rails or Python project has nowhere
+ * to install a pack.
  */
 export function resolveExtends(
-  spec: string,
+  entry: ExtendsEntry,
   base: string,
   projectDir: string,
 ): string {
-  if (isPackSpec(spec)) {
-    const pack = parsePack(spec);
-    const file = join(packDir(pack, projectDir), pack.path);
-    if (!existsSync(file)) {
-      throw new Error(
-        `${spec} is not fetched yet (looked in ${file})\n` +
-          `  run: npx hal-rules@latest`,
-      );
-    }
-    return file;
-  }
+  if (isRegistryRef(entry)) return resolveRegistry(entry, base, projectDir);
+
+  const spec = entry;
+  if (isPackSpec(spec)) return packConfig(parsePack(spec), projectDir, spec);
   if (spec.startsWith(".") || isAbsolute(spec)) return resolve(base, spec);
   try {
     return createRequire(join(base, "_.js")).resolve(spec);
@@ -93,11 +133,80 @@ export function resolveExtends(
   }
 }
 
+/** A fetched pack's config, or a clear reason it is not there yet. */
+function packConfig(pack: Pack, projectDir: string, named: string): string {
+  const file = join(packDir(pack, projectDir), pack.path);
+  if (!existsSync(file)) {
+    throw new Error(
+      `${named} is not fetched yet (looked in ${file})\n` +
+        `  run: npx hal-rules@latest`,
+    );
+  }
+  return file;
+}
+
+/**
+ * A registry is a directory by convention: `<preset>.json` beside a `rules/`
+ * holding the bodies. Enforced, because a registry without rules resolves every
+ * slug to nothing and the failure is otherwise reported once per rule.
+ */
+function resolveRegistry(
+  entry: RegistryRef,
+  base: string,
+  projectDir: string,
+): string {
+  const preset = `${entry.preset ?? DEFAULT_PRESET}.json`;
+  let dir: string;
+  if (entry.registry.startsWith("github:")) {
+    const pack = packFromRef(entry);
+    packConfig(pack, projectDir, entry.registry);
+    dir = join(packDir(pack, projectDir), dirname(pack.path));
+  } else {
+    if (entry.ref !== undefined) {
+      throw new Error(
+        `Registry "${entry.registry}" is a path, so "ref" means nothing here.\n` +
+          `  A ref only applies to a github: registry.`,
+      );
+    }
+    dir = resolve(base, entry.registry);
+    if (!existsSync(dir)) {
+      throw new Error(
+        `Registry not found: ${entry.registry}\n  looked in ${dir}`,
+      );
+    }
+  }
+
+  const file = join(dir, preset);
+  if (!existsSync(file)) {
+    throw new Error(
+      `Registry "${entry.registry}" has no preset "${entry.preset ?? DEFAULT_PRESET}"\n` +
+        `  looked for ${file}`,
+    );
+  }
+  if (!existsSync(join(dir, RULES_DIR))) {
+    throw new Error(
+      `Registry "${entry.registry}" has no ${RULES_DIR}/ directory\n` +
+        `  expected ${join(dir, RULES_DIR)}, which is where a registry keeps its rule bodies`,
+    );
+  }
+  return file;
+}
+
 /**
  * Every pack reachable from a config, descending only through checkouts that
  * are already on disk. A build calls this repeatedly: each fetch reveals the
  * next layer, so the fixpoint is the whole graph without a second walker.
  */
+/** The pack an entry names, in either form, or undefined if it names no repo. */
+function packOf(entry: ExtendsEntry): Pack | undefined {
+  if (isRegistryRef(entry)) {
+    return entry.registry.startsWith("github:")
+      ? packFromRef(entry)
+      : undefined;
+  }
+  return isPackSpec(entry) ? parsePack(entry) : undefined;
+}
+
 export function collectPacks(
   configPath: string,
   projectDir: string,
@@ -116,14 +225,14 @@ export function collectPacks(
     } catch {
       return; // loadConfig reports a malformed config with a better message.
     }
-    for (const spec of config.extends ?? []) {
-      if (isPackSpec(spec)) {
-        const pack = parsePack(spec);
+    for (const entry of config.extends ?? []) {
+      const pack = packOf(entry);
+      if (pack) {
         const dir = packDir(pack, projectDir);
         found.push({ ...pack, dir });
         visit(join(dir, pack.path));
       } else {
-        visit(resolveExtends(spec, dirname(path), projectDir));
+        visit(resolveExtends(entry, dirname(path), projectDir));
       }
     }
   };

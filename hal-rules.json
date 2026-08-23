@@ -1,6 +1,9 @@
 {
-  "extends": ["./registry/recommended.json"],
-  "rulesDir": ["registry/rules"],
+  "extends": [
+    {
+      "registry": "./registry"
+    }
+  ],
   "rules": {
     "workflow/before-finish": [
       "on",

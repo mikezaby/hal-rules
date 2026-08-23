@@ -1,5 +1,4 @@
 {
-  "rulesDir": ["rules"],
   "rules": {
     "workflow/scope-discipline": "on",
     "workflow/incremental-delivery": "on",

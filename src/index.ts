@@ -9,6 +9,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
+import type { ExtendsEntry } from "./packs.ts";
 import { PACK_DIR, collectPacks, resolveExtends } from "./packs.ts";
 import type { LockEntry } from "./skills.ts";
 
@@ -25,7 +26,7 @@ export type RuleState = "on" | "off" | ["on" | "off", RuleVars];
 export type PluginState = "on" | "off";
 
 export interface AiRulesConfig {
-  extends?: string[];
+  extends?: ExtendsEntry[];
   rulesDir?: string[];
   rules?: Record<string, RuleState>;
   /** Marketplace name -> `{ source: { ... } }`, verbatim into settings.json. */

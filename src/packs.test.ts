@@ -16,6 +16,7 @@ import {
   collectPacks,
   installPacks,
   packDir,
+  packFromRef,
   parsePack,
   resolveExtends,
 } from "./packs.ts";
@@ -184,4 +185,86 @@ test("init --expand survives a pack that is not fetched yet", () => {
     readFileSync(join(dir, "hal-rules.json"), "utf8"),
   ) as { rules: Record<string, unknown> };
   assert.ok(Object.keys(written.rules).length > 0, "a bare config still works");
+});
+
+test("a registry is a directory: preset beside a rules/ folder", () => {
+  const { dir, path } = project("reg-basic", {
+    extends: [{ registry: "./pack" }],
+    rules: { "x/r": "on" },
+  });
+  mkdirSync(join(dir, "pack/rules/x"), { recursive: true });
+  writeFileSync(join(dir, "pack/rules/x/r.md"), "# R\n");
+  writeFileSync(join(dir, "pack/recommended.json"), "{}");
+  writeFileSync(join(dir, "pack/strict.json"), '{"rules":{"x/r":"on"}}');
+
+  const config = loadConfig(path);
+  assert.ok(
+    config.rulesDirs.includes(join(dir, "pack/rules")),
+    "the convention supplies the rules dir, with no rulesDir declared anywhere",
+  );
+  assert.equal(
+    resolveExtends({ registry: "./pack", preset: "strict" }, dir, dir),
+    join(dir, "pack/strict.json"),
+    "preset names the file",
+  );
+});
+
+test("a registry missing its rules/ is named, not silently empty", () => {
+  const dir = join(root, "reg-norules");
+  mkdirSync(join(dir, "pack"), { recursive: true });
+  writeFileSync(join(dir, "pack/recommended.json"), "{}");
+  assert.throws(
+    () => resolveExtends({ registry: "./pack" }, dir, dir),
+    /has no rules\/ directory/,
+  );
+});
+
+test("a preset that is not there names what it looked for", () => {
+  const dir = join(root, "reg-nopreset");
+  mkdirSync(join(dir, "pack/rules"), { recursive: true });
+  writeFileSync(join(dir, "pack/recommended.json"), "{}");
+  assert.throws(
+    () => resolveExtends({ registry: "./pack", preset: "nope" }, dir, dir),
+    /has no preset "nope"/,
+  );
+});
+
+test("a ref on a path registry is a mistake, not ignored", () => {
+  const dir = join(root, "reg-badref");
+  mkdirSync(join(dir, "pack/rules"), { recursive: true });
+  writeFileSync(join(dir, "pack/recommended.json"), "{}");
+  assert.throws(
+    () => resolveExtends({ registry: "./pack", ref: "main" }, dir, dir),
+    /"ref" means nothing here/,
+  );
+});
+
+test("a github registry may live in a subdirectory of its repo", () => {
+  const entry = { registry: "github:me/pack/registry", preset: "strict" };
+  const pack = packFromRef(entry);
+  assert.equal(pack.path, join("registry", "strict.json"));
+  assert.equal(pack.spec, "github:me/pack", "still one checkout per repo");
+
+  const { dir, path } = project("reg-sub", {
+    extends: [entry],
+    rules: { "x/r": "on" },
+  });
+  const at = join(packDir(pack, dir), "registry");
+  mkdirSync(join(at, "rules/x"), { recursive: true });
+  writeFileSync(join(at, "rules/x/r.md"), "# R\n");
+  writeFileSync(join(at, "strict.json"), "{}");
+
+  assert.ok(loadConfig(path).rulesDirs.includes(join(at, "rules")));
+  assert.deepEqual(
+    collectPacks(path, dir).map((p) => p.spec),
+    ["github:me/pack"],
+  );
+});
+
+test("a github registry ref is pinned the same as a spec", async () => {
+  const entry = { registry: "github:me/pack", ref: "main" };
+  const { dir, path } = project("reg-pin", { extends: [entry] });
+  checkout(dir, "github:me/pack", {});
+  const report = await installPacks(path, dir, locked("github:me/pack"));
+  assert.deepEqual(report.installed, [], "pinned and present, so no fetch");
 });

@@ -108,7 +108,7 @@ artifact under review, not what it compiles to.
 
 | Key            | Effect                                                      |
 | -------------- | ----------------------------------------------------------- |
-| `extends`      | Paths or `github:` sources. Merged in order, later wins.    |
+| `extends`      | Registries or config files. Merged in order, later wins.    |
 | `rulesDir`     | Where to find rule files by slug. Defaults to `rules`.      |
 | `rules`        | `"on"`, `"off"`, or `["on", { var: value }]` per rule slug. |
 | `marketplaces` | Verbatim into `extraKnownMarketplaces`.                     |
@@ -165,11 +165,49 @@ Two sources providing the same skill name is an error, not a silent overwrite.
 
 ### How `extends` resolves
 
+An entry is either a **registry** you name a preset out of, or a **config file**
+directly.
+
+#### A registry
+
+A registry is a directory holding presets beside the rules they turn on:
+
+```
+your-pack/
+  recommended.json     the default preset
+  strict.json          another one
+  rules/
+    code-style/comments.md
+```
+
+`rules/` is convention, not configuration. Nothing declares it and nothing can
+move it, which is why extending a registry needs no `rulesDir`:
+
+```json
+{
+  "extends": [
+    { "registry": "./vendor/your-pack" },
+    { "registry": "github:acme/rules", "preset": "strict", "ref": "main" }
+  ]
+}
+```
+
+| Field      | Meaning                                                 |
+| ---------- | ------------------------------------------------------- |
+| `registry` | A directory: a path, or `github:owner/repo[/dir]`.      |
+| `preset`   | Which `<preset>.json` in it. Defaults to `recommended`. |
+| `ref`      | Branch, tag or commit. `github:` registries only.       |
+
+A registry missing its `rules/`, or a preset that is not there, is an error
+naming the path it looked for. A registry that resolves to nothing would
+otherwise fail once per rule.
+
+#### A config file
+
 A **path** (`./base.json`, `/abs/base.json`) resolves against the config file.
 A git submodule or a vendored pack works this way.
 
-A **`github:` source** is fetched into `.hal/packs/` and pinned by commit in
-`hal-rules.lock.json`:
+A **`github:` source** is fetched and pinned exactly as a `github:` registry is:
 
 ```json
 {
@@ -178,8 +216,11 @@ A **`github:` source** is fetched into `.hal/packs/` and pinned by commit in
 ```
 
 The form is `github:owner/repo[/path/to/config.json][#ref]` — path first so it
-can nest, ref last. It defaults to `recommended.json` at the repo root. One
-checkout per repo, however many configs you extend out of it.
+can nest, ref last. It defaults to `recommended.json` at the repo root.
+
+Either way a `github:` source lands in `.hal/packs/`, pinned by commit in
+`hal-rules.lock.json`, one checkout per repo however many presets you take
+out of it.
 
 **Commit `.hal/packs/`.** A pack is not reproducible from anything local, the
 same reason skills are committed. It also means a build never needs the network
