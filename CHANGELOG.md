@@ -24,6 +24,9 @@ exactly which instructions moved.
 ### Tool
 
 - `hal check` — read-only comparison of generated output against the config.
+- `hal outdated` and `hal sync` — find rules a pack offers that your config never
+  mentions, and add them as `"off"` with example values. Nothing switches itself
+  on.
 - `hal skills list` and the `skills` config key — cherry-pick individual skills
   from a GitHub repo instead of adopting a whole plugin. Pinned by SHA in
   `hal-rules.lock.json`.

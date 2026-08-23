@@ -9,7 +9,9 @@ import {
   formatDiff,
   init,
   loadConfig,
+  outdated,
   readLock,
+  sync,
   summarise,
   validate,
   writeLock,
@@ -32,6 +34,35 @@ if (args[0] === "skills" && args[1] === "list") {
       console.log(`${group.padEnd(14)}${names.join(" · ")}\n`);
     }
     console.log('copy a path into your config, e.g. "engineering/tdd"');
+    process.exit(0);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
+
+if (args[0] === "outdated" || args[0] === "sync") {
+  try {
+    const configPath = args[1] ?? DEFAULT_CONFIG;
+    const found = args[0] === "sync" ? sync(configPath) : outdated(configPath);
+    if (found.length === 0) {
+      console.log("nothing new — every rule in your packs is in your config");
+      process.exit(0);
+    }
+    const verb =
+      args[0] === "sync" ? 'added as "off"' : "available, not in your config";
+    console.log(`${found.length} rule(s) ${verb}:`);
+    for (const { slug, vars } of found) {
+      console.log(
+        `  ${slug}${vars.length > 0 ? `   (needs ${vars.join(", ")})` : ""}`,
+      );
+    }
+    if (args[0] === "outdated")
+      console.log("\nadd them with: npx hal-rules sync");
+    else
+      console.log(
+        '\nfill in any values, switch what you want to "on", then: npx hal-rules',
+      );
     process.exit(0);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));

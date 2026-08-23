@@ -149,6 +149,29 @@ otherwise the pack bundled inside `hal-rules`. That fallback is what makes
 
 Either way there is no registry lookup, no fetch step, and no cache to go stale.
 
+### Adopting rules a pack added later
+
+A sparse config inherits new pack rules automatically. An expanded one pins
+today's list, so a rule that ships later never appears and nothing tells you it
+exists. `outdated` lists what a pack offers that your config never mentions —
+neither on nor off:
+
+```
+$ npx hal-rules outdated
+4 rule(s) available, not in your config:
+  documentation/architecture-decisions   (needs adrDir)
+  git/worktrees-for-risky-work
+  workflow/before-finish   (needs checks)
+  workflow/out-of-scope-findings   (needs findingsFile)
+
+add them with: npx hal-rules sync
+```
+
+`sync` writes them into your config as `"off"`, with a worked example for any
+variable they need. **Adoption stays a deliberate edit** — nothing switches
+itself on, and rules you already set to `"off"` are left alone, because that was
+a decision rather than an omission.
+
 ### Seeing what changed after an update
 
 Rule bodies come from the installed pack, so updating it changes what your agent

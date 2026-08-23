@@ -162,6 +162,14 @@ function findRule(slug: string, dirs: string[]): string {
 export function applyVars(body: string, vars: RuleVars, slug: string): string {
   let out = body;
   for (const [name, value] of Object.entries(vars)) {
+    if (value === "") {
+      // A blank is what `sync` scaffolds; enabling the rule without filling it
+      // in would silently render the sentence with a hole in it.
+      throw new Error(
+        `Rule "${slug}": {{${name}}} has no value.\n` +
+          `  Fill it in, or set the rule to "off" until you have it.`,
+      );
+    }
     if (Array.isArray(value)) {
       // An empty list renders to nothing, leaving "all of these must pass"
       // followed by silence. That is a broken rule, not an empty one.
@@ -721,4 +729,69 @@ export function summarise(changes: Change[]): string[] {
     .slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
     .map(({ kind, slug }) => `  ${mark[kind]} ${slug}`);
+}
+
+export interface Available {
+  slug: string;
+  /** Variables the rule needs, so `sync` can scaffold placeholders. */
+  vars: string[];
+}
+
+/**
+ * Rules that exist in a pack but appear nowhere in the config — neither on nor
+ * off. A sparse config inherits new pack rules automatically, but an expanded
+ * one pins today's list, and nothing otherwise tells you a rule shipped.
+ */
+export function outdated(configPath = DEFAULT_CONFIG): Available[] {
+  const config = loadConfig(configPath);
+  const known = new Set(Object.keys(config.rules));
+  const found = new Map<string, Available>();
+
+  for (const dir of config.rulesDirs) {
+    if (!existsSync(dir)) continue;
+    for (const rel of listMarkdown(dir)) {
+      const slug = rel.replace(/\.md$/, "");
+      if (known.has(slug) || found.has(slug)) continue;
+      const body = readFileSync(join(dir, rel), "utf8");
+      found.set(slug, {
+        slug,
+        vars: [
+          ...new Set(
+            [...body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1] ?? ""),
+          ),
+        ],
+      });
+    }
+  }
+  return [...found.values()].sort((a, b) => a.slug.localeCompare(b.slug));
+}
+
+/**
+ * Adds the rules `outdated` found to the project's own config as `"off"`, so
+ * adopting one stays a deliberate edit rather than something that switches
+ * itself on. Only the project's file is touched, never an inherited pack.
+ */
+export function sync(configPath = DEFAULT_CONFIG): Available[] {
+  const additions = outdated(configPath);
+  if (additions.length === 0) return [];
+
+  const path = resolve(configPath);
+  const raw = JSON.parse(readFileSync(path, "utf8")) as AiRulesConfig;
+  const rules: Record<string, RuleState> = { ...(raw.rules ?? {}) };
+
+  for (const { slug, vars } of additions) {
+    if (vars.length === 0) {
+      rules[slug] = "off";
+      continue;
+    }
+    // Reuse init's worked examples where we have them, so a list-valued
+    // variable is scaffolded as a list rather than a misleading empty string.
+    const example = STARTER_RULES[slug];
+    rules[slug] = Array.isArray(example)
+      ? ["off", example[1]]
+      : ["off", Object.fromEntries(vars.map((name) => [name, ""]))];
+  }
+  raw.rules = rules;
+  writeFileSync(path, `${JSON.stringify(raw, null, 2)}\n`);
+  return additions;
 }
