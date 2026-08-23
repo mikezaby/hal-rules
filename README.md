@@ -20,10 +20,22 @@ your own — all in one committed file your team edits in review.
 
 ```bash
 npx hal-rules init      # scaffold hal-rules.json and gitignore the output
-pnpm add -D hal-rules
-pnpm hal          # generate
-pnpm hal validate # check the config without writing anything
+npx hal-rules           # generate
+npx hal-rules validate  # check the config without writing anything
 ```
+
+**No JavaScript project required.** Nothing is installed and no `package.json` or
+`node_modules` is created — the rule pack ships inside the package itself. It
+works the same in a Rails, Python, Go or Elixir repo.
+
+In a JS project you can install it and use the shorter `hal` binary instead:
+
+```bash
+pnpm add -D hal-rules && pnpm hal
+```
+
+Use `npx hal-rules`, never `npx hal` — `hal` on npm is an unrelated package
+(Hypertext Application Language).
 
 `init` never overwrites an existing `hal-rules.json` — re-running it is safe.
 
@@ -78,11 +90,16 @@ output — the config is the artifact under review, not what it compiles to.
 
 Every key composes through `extends` the same way.
 
-### `extends` is just a path
+### How `extends` resolves
 
-Resolved relative to the config file, so `node_modules/@you/pack/recommended.json`,
-a git submodule directory and `./base.json` all work. There is no registry, no fetch
-step and no cache to go stale — distribution is whatever your project already uses.
+A **path** — `./base.json`, `/abs/base.json` — resolves against the config file.
+A git submodule or a vendored pack works this way.
+
+Anything else is a **bare specifier**: an installed package if there is one, and
+otherwise the pack bundled inside `hal-rules`. That fallback is what makes
+`hal-rules/recommended.json` work in a repo with no `node_modules`.
+
+Either way there is no registry lookup, no fetch step, and no cache to go stale.
 
 ### Validation happens before anything is written
 
