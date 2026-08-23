@@ -168,7 +168,12 @@ at the cost of pinning today's set instead of inheriting later additions.
 
 **The full remaining-work list — nine items, three of them decisions — lives in
 `docs/plans/2026-08-23-modular-rules-design.md` under "Remaining work".** Keep it
-there rather than in chat.
+there rather than in chat. This is the deliberate exception to
+`documentation/no-scratch-files`, which is on here and otherwise forbids a plan
+file: the design doc is a real doc in its proper place, not a scratch pad, and it
+outlives the conversation that produced it. The usual fix — shadow the rule from
+your own `rulesDir` — is unavailable to the one repo whose `rulesDir` _is_ the
+pack, so the carve-out is stated here.
 
 Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
 

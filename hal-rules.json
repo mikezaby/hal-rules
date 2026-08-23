@@ -1,0 +1,24 @@
+{
+  "extends": ["./recommended.json"],
+  "rulesDir": ["rules"],
+  "rules": {
+    "workflow/before-finish": [
+      "on",
+      {
+        "checks": ["pnpm tsc", "pnpm lint", "pnpm test"]
+      }
+    ],
+    "workflow/out-of-scope-findings": [
+      "off",
+      {
+        "findingsFile": "docs/findings.md"
+      }
+    ],
+    "documentation/architecture-decisions": [
+      "off",
+      {
+        "adrDir": "docs/adr/"
+      }
+    ]
+  }
+}
