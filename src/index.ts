@@ -387,14 +387,21 @@ const STARTER_CONFIG = {
 };
 
 /**
- * Scaffolded off, but filled in — JSON has no comments, so a worked example is
- * the only way to show the shape. Replace the commands, then switch it on.
+ * Every rule that needs a variable, scaffolded off but filled in. JSON has no
+ * comments, so a worked example is the only way to show the shape — and without
+ * this, enabling one of these is a build error rather than a rule.
+ * Replace the values, then switch the ones you want to "on".
  */
 const STARTER_RULES: Record<string, RuleState> = {
   "workflow/before-finish": [
     "off",
     { checks: ["pnpm tsc", "pnpm lint", "pnpm test"] },
   ],
+  "workflow/out-of-scope-findings": [
+    "off",
+    { findingsFile: "docs/findings.md" },
+  ],
+  "documentation/architecture-decisions": ["off", { adrDir: "docs/adr/" }],
 };
 
 /** Adds a line to .gitignore unless it is already there. */

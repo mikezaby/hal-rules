@@ -3,12 +3,14 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { after, test } from "node:test";
+import { fileURLToPath } from "node:url";
 import { init } from "./index.ts";
 
 const root = mkdtempSync(join(tmpdir(), "hal-init-"));
@@ -138,4 +140,38 @@ test("handles a .gitignore with no trailing newline", () => {
 
   init(dir);
   assert.equal(read(dir, ".gitignore"), "dist/\n.claude/rules/generated/\n");
+});
+
+test("every rule that needs a variable is scaffolded", () => {
+  // Without this, enabling such a rule is a build error rather than a rule.
+  // A new var-taking rule added to the pack must be added to the scaffold too.
+  const packRules = join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "rules",
+  );
+  const needsVars = readdirSync(packRules, {
+    recursive: true,
+    encoding: "utf8",
+  })
+    .filter((f) => f.endsWith(".md"))
+    .filter((f) => /\{\{\w+\}\}/.test(readFileSync(join(packRules, f), "utf8")))
+    .map((f) => f.replace(/\.md$/, "").replaceAll("\\", "/"));
+
+  const dir = project("allvars");
+  init(dir);
+  const scaffolded = JSON.parse(read(dir, "hal-rules.json")) as {
+    rules: Record<string, unknown>;
+  };
+
+  const recommended = JSON.parse(
+    readFileSync(join(packRules, "..", "recommended.json"), "utf8"),
+  ) as { rules: Record<string, unknown> };
+
+  for (const slug of needsVars) {
+    // Either the scaffold offers it, or recommended already supplies the value.
+    const covered =
+      slug in scaffolded.rules || Array.isArray(recommended.rules[slug]);
+    assert.ok(covered, `${slug} needs a variable but nothing supplies one`);
+  }
 });

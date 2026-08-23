@@ -39,6 +39,11 @@ Use `npx hal-rules`, never `npx hal` — `hal` on npm is an unrelated package
 
 `init` never overwrites an existing `hal-rules.json` — re-running it is safe.
 
+It scaffolds **every rule that needs a variable**, switched `"off"` with a worked
+example value. JSON has no comments, so that is the only way to show the shape —
+and without it, enabling one of those rules is a build error rather than a rule.
+Edit the values, flip the ones you want to `"on"`.
+
 `hal init --expand` writes the inherited rules out as explicit entries, so you can
 read and toggle them without opening `node_modules`. The trade-off: an expanded
 config pins today's set, so rules added to the pack later won't switch themselves
