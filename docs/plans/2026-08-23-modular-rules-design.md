@@ -105,21 +105,53 @@ Two findings the carve confirmed about the design:
 Most of what is in a CLAUDE.md is not a rule at all — architecture prose,
 command lists, file inventories. That stays in each project's own file.
 
-## Open — deliberately not answered yet
+## Remaining work
 
-1. **Drift resolution.** Bootstrap now _reports_ what an existing file lacks
+Eight items. Three are decisions with no code until they are made; five are
+buildable now.
+
+### Blocked on a decision
+
+1. **Drift resolution.** Bootstrap _reports_ what an existing file lacks
    (`! declared but absent: enabledPlugins.figma@claude-plugins-official`).
    How a change actually reaches that file — prompt, patch, three-way merge —
-   is still undecided.
-2. **Conflict management** when a bootstrapped file has been hand-edited and the
-   pack also moved. Undecided.
-3. ~~Whether `plugins` and `mcp` compose through `extends`.~~ **Decided: they do.**
-   Same merge, later wins, one code path for all declaration kinds.
-4. Whether the tool ever shells out to `claude plugin install`, or only prints
-   the commands a fresh clone still needs.
-5. Per-rule `paths:` override from config. Today shadowing is whole-file only.
-6. `.claude/agents/*.md` as a second emit target — the subagent finding says
-   per-agent behavior can't be expressed as a rule.
+   is undecided.
+2. **Conflict management** when a bootstrapped file has been hand-edited _and_
+   the pack moved. Undecided. This and (1) are one question wearing two hats:
+   what happens when the config and an existing file disagree.
+3. **`claude plugin install`.** Does the tool shell out, or only print the
+   commands a fresh clone still needs? Printing is the safer default — shelling
+   out to a network-installing command unasked is the kind of thing that
+   surprises people.
+
+### Buildable
+
+4. **`--check` for CI.** Fail the build on stale or drifted output. Smallest of
+   these, and the one that makes the rest self-policing.
+5. **Per-rule `paths:` override from config.** Shadowing replaces the whole file
+   today, frontmatter included, so a rule's globs cannot be retargeted without
+   copying it.
+6. **`.claude/agents/*.md` emit.** The second target the subagent finding turned
+   up: per-agent behaviour cannot be expressed as a rule.
+7. **Publish to npm.** Nothing works via `npx` for anyone until this happens.
+8. **Prove it on a real repo.** Point blibliki's `ai-rules.json` at the pack and
+   diff the generated rules against what its CLAUDE.md says today.
+
+### Suggested order
+
+**(8) first, before any of the code.** Everything so far is verified against
+fixtures and scratch directories. Running it on blibliki is what turns the pack
+from a plausible artifact into a used one — and it answers (1) and (2) with
+evidence rather than speculation, because it meets a real `settings.json` that
+disagrees with the config.
+
+### Decided along the way
+
+- `plugins` and `mcp` compose through `extends` like `rules`. Same merge, later
+  wins, one code path for every declaration kind.
+- Published flat as `ai-rules`, not user-scoped. A personal scope reads as a side
+  project for something teams are asked to commit as shared infrastructure, and
+  `init` covers the `pnpm create` path that scoping would have preserved.
 
 ## Not doing
 

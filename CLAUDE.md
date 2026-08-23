@@ -135,8 +135,9 @@ config is verified by running it.
 `ai-rules init` scaffolds a config and gitignores the output; it never overwrites
 an existing config.
 
-Not built: `--check` for CI, drift _resolution_ (only reporting),
-`.claude/agents/*.md` emit. Not published to npm.
+**The full remaining-work list — eight items, three of them decisions — lives in
+`docs/plans/2026-08-23-modular-rules-design.md` under "Remaining work".** Keep it
+there rather than in chat.
 
 Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
 
