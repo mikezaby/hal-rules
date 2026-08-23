@@ -70,7 +70,7 @@ const PACKAGE_ROOT = fileURLToPath(new URL("..", import.meta.url));
  *
  * Anything else is a bare specifier: an installed package if there is one, and
  * otherwise the pack shipped inside this package. That fallback is what lets
- * `npx hal-rules` work in a repo with no node_modules — a Rails or Python
+ * `npx hal-rules` work in a repo with no node_modules. A Rails or Python
  * project has nowhere to install a pack.
  */
 function resolveExtends(spec: string, base: string): string {
@@ -199,14 +199,14 @@ export function applyVars(body: string, vars: RuleVars, slug: string): string {
   return out;
 }
 
-/** The header goes after any frontmatter — YAML has to start at line 1. */
+/** The header goes after any frontmatter, because YAML has to start at line 1. */
 function withHeader(body: string, slug: string, source: string): string {
   // Relative, so output is identical on every machine. A path that climbs out of
   // the project (a pack in node_modules or elsewhere) is noise: drop it.
   const from = relative(process.cwd(), source);
   const note = from.startsWith("..")
-    ? `<!-- generated from ${slug} — edit it in the pack, then rerun hal -->`
-    : `<!-- generated from ${slug} (${from}) — edit the source, then rerun hal -->`;
+    ? `<!-- generated from ${slug}. Edit it in the pack, then rerun hal -->`
+    : `<!-- generated from ${slug} (${from}). Edit the source, then rerun hal -->`;
   const frontmatter = /^---\n[\s\S]*?\n---\n/.exec(body);
   if (!frontmatter) return `${note}\n${body}`;
   return `${frontmatter[0]}${note}\n${body.slice(frontmatter[0].length)}`;
@@ -227,7 +227,7 @@ function stateOf(
     return state as [string, RuleVars];
   }
   throw new Error(
-    `"${slug}" is set to ${JSON.stringify(state)} — expected "on", "off", or ["on", { var: "value" }]`,
+    `"${slug}" is set to ${JSON.stringify(state)}. Expected "on", "off", or ["on", { var: "value" }]`,
   );
 }
 
@@ -268,11 +268,11 @@ function plan(
   ][]) {
     if (state !== "on" && state !== "off") {
       errors.push(
-        `plugin "${id}" is set to ${JSON.stringify(state)} — expected "on" or "off"`,
+        `plugin "${id}" is set to ${JSON.stringify(state)}. Expected "on" or "off"`,
       );
     } else if (!id.includes("@")) {
       errors.push(
-        `plugin "${id}" is not a plugin id — expected "name@marketplace"`,
+        `plugin "${id}" is not a plugin id. Expected "name@marketplace"`,
       );
     }
   }
@@ -294,7 +294,7 @@ export interface Change {
 
 /**
  * What this run would alter, compared with what is already on disk. The previous
- * output is still there — gitignored, but present — so the tool can show what
+ * output is still there (gitignored, but present), so the tool can show what
  * moved without anyone committing derived files.
  */
 function diffAgainstDisk(
@@ -389,7 +389,7 @@ function has(file: Record<string, unknown>, entry: string): boolean {
 /**
  * Write the file if it is absent, otherwise leave it alone and report what it
  * lacks. Claude Code never writes .claude/settings.json itself, but people and
- * `/plugin install` do — overwriting their work to assert a source of truth
+ * `/plugin install` do, and overwriting their work to assert a source of truth
  * would cost more than it buys. Merging is a decision still to be made.
  */
 function bootstrapFile(
@@ -460,7 +460,7 @@ const STARTER_CONFIG = {
 
 /**
  * Every rule that needs a variable, scaffolded off but filled in. JSON has no
- * comments, so a worked example is the only way to show the shape — and without
+ * comments, so a worked example is the only way to show the shape. Without
  * this, enabling one of these is a build error rather than a rule.
  * Replace the values, then switch the ones you want to "on".
  */
@@ -495,7 +495,7 @@ function ignore(path: string, entry: string): InitResult {
 }
 
 /**
- * Scaffold a config. Never overwrites one that exists — an existing config is
+ * Scaffold a config. Never overwrites one that exists, because an existing config is
  * the team's, and re-running init must not be a way to lose it.
  *
  * `expand` writes the inherited rules out as explicit entries so they can be
@@ -738,7 +738,7 @@ export interface Available {
 }
 
 /**
- * Rules that exist in a pack but appear nowhere in the config — neither on nor
+ * Rules that exist in a pack but appear nowhere in the config, neither on nor
  * off. A sparse config inherits new pack rules automatically, but an expanded
  * one pins today's list, and nothing otherwise tells you a rule shipped.
  */

@@ -7,8 +7,8 @@
 > [!WARNING]
 > **Work in progress. Expect things to move.**
 >
-> Pre-1.0 and young. While on `0.x`, a **minor bump may break the config format** —
-> pin an exact version if that matters to you.
+> Pre-1.0 and young. While on `0.x`, a **minor bump may break the config format**.
+> Pin an exact version if that matters to you.
 >
 > Rules get added, reworded and removed as they prove themselves; three have been
 > dropped already for carrying one stack's assumptions. **A reworded rule changes
@@ -23,13 +23,13 @@ Compose Claude Code rules from shareable packs, the way eslint composes lint rul
 
 Claude Code already shares plugins and MCP servers with a team: commit
 `.claude/settings.json` and `.mcp.json` and everyone who clones gets them. What it
-has no answer for is **partial adoption**. Plugins are all-or-nothing — you enable
-a pack whole, you cannot take one rule from it and drop another. `claudeMdExcludes`
+has no answer for is **partial adoption**. Plugins are all-or-nothing. You enable a
+pack whole, and you cannot take one rule from it and drop another. `claudeMdExcludes`
 matches file paths, not rule names.
 
 So a team's shared standards end up copy-pasted between `CLAUDE.md` files and drift
 apart. This closes that gap: inherit a pack, switch rules off, retune them, add
-your own — all in one committed file your team edits in review.
+your own, all in one committed file your team edits in review.
 
 ## Use it
 
@@ -41,7 +41,7 @@ npx hal-rules check     # does what is on disk match the config?
 ```
 
 **No JavaScript project required.** Nothing is installed and no `package.json` or
-`node_modules` is created — the rule pack ships inside the package itself. It
+`node_modules` is created. The rule pack ships inside the package itself, so it
 works the same in a Rails, Python, Go or Elixir repo.
 
 In a JS project you can install it and use the shorter `hal` binary instead:
@@ -50,14 +50,14 @@ In a JS project you can install it and use the shorter `hal` binary instead:
 pnpm add -D hal-rules && pnpm hal
 ```
 
-Use `npx hal-rules`, never `npx hal` — `hal` on npm is an unrelated package
+Use `npx hal-rules`, never `npx hal`. On npm, `hal` is an unrelated package
 (Hypertext Application Language).
 
-`init` never overwrites an existing `hal-rules.json` — re-running it is safe.
+`init` never overwrites an existing `hal-rules.json`, so re-running it is safe.
 
 It scaffolds **every rule that needs a variable**, switched `"off"` with a worked
-example value. JSON has no comments, so that is the only way to show the shape —
-and without it, enabling one of those rules is a build error rather than a rule.
+example value. JSON has no comments, so that is the only way to show the shape.
+Without it, enabling one of those rules is a build error rather than a rule.
 Edit the values, flip the ones you want to `"on"`.
 
 `hal init --expand` writes the inherited rules out as explicit entries, so you can
@@ -65,8 +65,9 @@ read and toggle them without opening `node_modules`. The trade-off: an expanded
 config pins today's set, so rules added to the pack later won't switch themselves
 on. A bare `extends` keeps inheriting; expand when you want to see the menu.
 
-The generate step reads `hal-rules.json` and writes `.claude/rules/generated/<slug>.md`. Gitignore the
-output — the config is the artifact under review, not what it compiles to.
+The generate step reads `hal-rules.json` and writes
+`.claude/rules/generated/<slug>.md`. Gitignore the output. The config is the
+artifact under review, not what it compiles to.
 
 ```gitignore
 .claude/rules/generated/
@@ -137,7 +138,7 @@ productivity/ grill-me · handoff · teach · writing-for-agents …
 The folder is the **config's** vocabulary, not a layout on disk. Claude Code
 discovers skills exactly one level deep and treats the directory name as the
 command, so `engineering/tdd` installs to `.claude/skills/tdd/` and runs as
-`/tdd`. A nested directory would never load — this is measured, not assumed.
+`/tdd`. A nested directory would never load. That is measured, not assumed.
 The whole skill directory is copied, since most skills ship supporting files
 alongside `SKILL.md`.
 
@@ -147,15 +148,15 @@ pinned to a SHA, because otherwise someone else's edit silently changes
 instructions your agent follows.
 
 **Commit the fetched skills.** Unlike generated rules, they are not reproducible
-from anything local — having them in the repo means the team reviews the diff
-when a version moves, and nobody needs the network to work. Drop a skill from
+from anything local. Having them in the repo means the team reviews the diff when
+a version moves, and nobody needs the network to work. Drop a skill from
 the config and the next run deletes it.
 
 Two sources providing the same skill name is an error, not a silent overwrite.
 
 ### How `extends` resolves
 
-A **path** — `./base.json`, `/abs/base.json` — resolves against the config file.
+A **path** (`./base.json`, `/abs/base.json`) resolves against the config file.
 A git submodule or a vendored pack works this way.
 
 Anything else is a **bare specifier**: an installed package if there is one, and
@@ -168,7 +169,7 @@ Either way there is no registry lookup, no fetch step, and no cache to go stale.
 
 A sparse config inherits new pack rules automatically. An expanded one pins
 today's list, so a rule that ships later never appears and nothing tells you it
-exists. `outdated` lists what a pack offers that your config never mentions —
+exists. `outdated` lists what a pack offers that your config never mentions,
 neither on nor off:
 
 ```
@@ -183,9 +184,9 @@ add them with: npx hal-rules sync
 ```
 
 `sync` writes them into your config as `"off"`, with a worked example for any
-variable they need. **Adoption stays a deliberate edit** — nothing switches
-itself on, and rules you already set to `"off"` are left alone, because that was
-a decision rather than an omission.
+variable they need. **Adoption stays a deliberate edit.** Nothing switches itself
+on, and rules you already set to `"off"` are left alone, because that was a
+decision rather than an omission.
 
 ### Seeing what changed after an update
 
@@ -203,7 +204,7 @@ is told. Generating reports what moved:
 ```
 
 `--diff` shows the lines. It compares against the output already on disk, so it
-needs no git, no `diff` binary, and nothing committed — the generated directory
+needs no git, no `diff` binary, and nothing committed. The generated directory
 stays gitignored. A first run reports nothing, since there is nothing to compare.
 
 `CHANGELOG.md` in this package lists rule wording changes alongside code ones.
@@ -211,13 +212,13 @@ stays gitignored. A first run reports nothing, since there is nothing to compare
 ### Checking what is on disk
 
 `hal-rules check` compares the generated output against the config and exits
-non-zero if they disagree. It is strictly read-only — it generates into a temp
+non-zero if they disagree. It is strictly read-only: it generates into a temp
 directory, so it never writes into the repository it is checking.
 
 ```
   stale rule still on disk: git/never-push.md
       run: npx hal-rules
-1 problem(s) — generated output does not match the config
+1 problem(s). Generated output does not match the config
 ```
 
 It catches a rule you switched off that is still on disk, a rule you added but
@@ -227,16 +228,16 @@ short-circuits, so you get the one real cause instead of a cascade.
 
 **Where this is worth wiring up.** Generated rules are gitignored, so a fresh CI
 checkout has nothing to compare and `check` only reports "nothing generated yet".
-For rules it earns its keep **locally** — a pre-commit hook, or before starting a
+For rules it earns its keep **locally**: a pre-commit hook, or before starting a
 session, catching the case where you edited the config and your agent is still
 reading yesterday's rules. For **skills** it is a genuine CI gate, because those
 are committed and can drift from the config.
 
 ### Validation happens before anything is written
 
-`hal validate` reports every problem in the config at once — unknown keys,
-rule slugs that resolve to no file, bad rule states, malformed plugin ids — and
-exits non-zero, so it drops straight into CI or a pre-commit hook.
+`hal validate` reports every problem in the config at once (unknown keys, rule
+slugs that resolve to no file, bad rule states, malformed plugin ids), and exits
+non-zero, so it drops straight into CI or a pre-commit hook.
 
 `hal` runs the same checks itself and **writes nothing if any of them fail**.
 A config error leaves the previous generated output exactly as it was, rather
@@ -255,19 +256,19 @@ commands are written the obvious way rather than as one string with `\n` in it:
 "workflow/before-finish": ["on", { "checks": ["pnpm tsc", "pnpm lint", "pnpm test"] }]
 ```
 
-An **empty** list is an error, not an empty section — a rule saying "all of these
+An **empty** list is an error, not an empty section. A rule saying "all of these
 must pass" followed by nothing is broken. Set the rule `"off"` until you have the
 values; a disabled rule may keep its variables, which is how `hal init` scaffolds
 `before-finish` with example commands ready to edit.
 
 `{{var}}` placeholders in a rule body are filled from the config. `before-finish` is
 the reason they exist: the same rule needs `pnpm tsc` in one repo and `bin/rubocop`
-in the next. **An unset variable fails the build** — shipping a literal
+in the next. **An unset variable fails the build.** Shipping a literal
 `{{framework}}` to Claude as an instruction is worse than a red CI run.
 
 ### Overriding a rule's text
 
-Drop your own `<slug>.md` into your `rulesDir` and it wins over the pack's copy —
+Drop your own `<slug>.md` into your `rulesDir` and it wins over the pack's copy:
 last `rulesDir` wins. This replaces the whole file, `paths:` frontmatter included.
 
 ## Writing a rule
@@ -290,8 +291,8 @@ Work is not done until these pass:
 ```
 
 `paths:` is Claude Code's own frontmatter: the rule stays out of context until
-Claude reads a matching file. Use it for anything stack-specific — it costs nothing
-in a repo it doesn't apply to.
+Claude reads a matching file. Use it for anything stack-specific, since it costs
+nothing in a repo it doesn't apply to.
 
 Rules are advisory context, not enforcement. Something that must _block_ belongs in
 a [hook](https://code.claude.com/docs/en/hooks-guide). A multi-step procedure
@@ -300,9 +301,9 @@ belongs in a [skill](https://code.claude.com/docs/en/skills).
 ## The bundled pack
 
 Every rule was carved from a `CLAUDE.md` that was actually in use, across a
-TypeScript monorepo, a Rails service and a Nuxt app. None were invented — and
-three have since been removed for carrying one stack's assumptions into a pack
-that claims to be generic.
+TypeScript monorepo, a Rails service and a Nuxt app. None were invented. Three
+have since been removed for carrying one stack's assumptions into a pack that
+claims to be generic.
 
 | Rule                                           |                                                                                                     | in `recommended` | vars           | path-scoped |
 | ---------------------------------------------- | --------------------------------------------------------------------------------------------------- | :--------------: | -------------- | :---------: |
@@ -316,7 +317,7 @@ that claims to be generic.
 | `git/never-push`                               | Commit locally when asked; pushing is the human's call                                              |        ✓         |                |             |
 | `safety/never-publish`                         | Preparing a release is fine; pushing it to a registry is a human's call                             |        ✓         |                |             |
 | `safety/bump-only-when-asked`                  | A version number is a release decision; wait to be told                                             |        ✓         |                |             |
-| `safety/never-deploy`                          | Build it, plan it, diff it — then hand the command to a human                                       |        ✓         |                |             |
+| `safety/never-deploy`                          | Build it, plan it, diff it, then hand the command to a human                                        |        ✓         |                |             |
 | `git/worktrees-for-risky-work`                 | Work in the current checkout for small changes                                                      |                  |                |             |
 | `testing/test-organization`                    | One test file per unit, grouped with describe blocks                                                |        ✓         |                |      ✓      |
 | `workflow/before-finish`                       | The checks that must pass before work is called done                                                |                  | `checks`       |             |
@@ -324,11 +325,11 @@ that claims to be generic.
 | `workflow/out-of-scope-findings`               | Record problems you are not fixing instead of fixing or dropping them                               |                  | `findingsFile` |             |
 | `workflow/scope-discipline`                    | Change only what the request asks for                                                               |        ✓         |                |             |
 
-The three outside `recommended` are opt-in: three need a project-specific value
-(`checks`, `findingsFile`, `adrDir`) and one is a team preference.
+The four outside `recommended` are opt-in. Three need a project-specific value
+(`checks`, `findingsFile`, `adrDir`), and one is a team preference.
 
 Worth knowing before you treat the pack as settled: only four of these appeared in
-more than one of the three source projects — `scope-discipline`, `before-finish`,
+more than one of the three source projects: `scope-discipline`, `before-finish`,
 `never-push` and `mark-deliberate-simplifications`. The rest are single-source.
 
 ## settings.json and .mcp.json are bootstrapped, not owned
@@ -339,11 +340,11 @@ what it lacks:
 
 ```
 11 rules -> .claude/rules/generated
-.claude/settings.json exists — left alone
+.claude/settings.json exists, left alone
   ! declared but absent: enabledPlugins.figma@claude-plugins-official
 ```
 
-Claude Code never writes `.claude/settings.json` itself — standing approvals and
+Claude Code never writes `.claude/settings.json` itself. Standing approvals and
 `/config` toggles go to `settings.local.json`, which it gitignores for you. But
 people do, and so does `/plugin install --scope project`. Overwriting that to assert
 a source of truth costs more than it buys, so for now the tool reports and you
@@ -351,17 +352,16 @@ decide. `settings.local.json` is never touched: it stays each developer's privat
 override lane.
 
 One thing this does **not** do: install plugins. A project-scoped plugin from an
-external source doesn't auto-install — the teammate still runs `claude plugin install`.
+external source doesn't auto-install, so the teammate still runs
+`claude plugin install`.
 
 ## Not built yet
 
-- `--check` to fail CI on stale or drifted output (distinct from `validate`,
-  which checks the config rather than the output)
-- Drift _resolution_ — the run reports, it does not merge
-- Emitting `.claude/agents/*.md`
+- Drift _resolution_. The run reports a disagreement, it does not merge one.
+- Emitting `.claude/agents/*.md`.
 
 `npx hal-rules init` scaffolds a project today. `pnpm create hal-rules` can work
-too once `create-hal-rules` is published — that name is free, unlike the
+too once `create-hal-rules` is published. That name is free, unlike the
 `create-ai-rules` that closed this path under the old name.
 
 ## Develop

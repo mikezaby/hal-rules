@@ -16,6 +16,12 @@ exactly which instructions moved.
   marketing vocabulary, no reflexive three-item lists. Applies to docs, commit
   messages, PR text and comments.
 
+### Tool
+
+- Command output, error messages and the generated file header no longer use em
+  dashes. The header text changed, so the first run after updating reports every
+  rule as changed.
+
 ## 0.5.0 — 2026-08-23
 
 Versions 0.3.0 and 0.4.0 were prepared but never published; their changes are

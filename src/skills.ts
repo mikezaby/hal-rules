@@ -139,7 +139,7 @@ export interface InstallReport {
 
 /**
  * Skills land flat in `.claude/skills/<name>/` because that is the only layout
- * Claude Code discovers — the directory name IS the command. The category from
+ * Claude Code discovers, since the directory name IS the command. The category from
  * the config is kept in the lock file so provenance is not lost.
  */
 export async function installSkills(

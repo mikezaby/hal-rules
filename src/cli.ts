@@ -46,7 +46,7 @@ if (args[0] === "outdated" || args[0] === "sync") {
     const configPath = args[1] ?? DEFAULT_CONFIG;
     const found = args[0] === "sync" ? sync(configPath) : outdated(configPath);
     if (found.length === 0) {
-      console.log("nothing new — every rule in your packs is in your config");
+      console.log("nothing new. Every rule in your packs is in your config");
       process.exit(0);
     }
     const verb =
@@ -78,7 +78,7 @@ if (args[0] === "check") {
     console.log(
       problems.length === 0
         ? "up to date"
-        : `${problems.length} problem(s) — generated output does not match the config`,
+        : `${problems.length} problem(s). Generated output does not match the config`,
     );
     process.exit(problems.length === 0 ? 0 : 1);
   } catch (error) {
@@ -107,7 +107,7 @@ if (args[0] === "init") {
     expand: args.includes("--expand"),
   })) {
     console.log(
-      status === "exists" ? `${path} exists — left alone` : `${status} ${path}`,
+      status === "exists" ? `${path} exists, left alone` : `${status} ${path}`,
     );
   }
   console.log("\nnext:\n  edit hal-rules.json, then run: npx hal-rules");
@@ -156,7 +156,7 @@ try {
       console.log(`created ${result.path}`);
       continue;
     }
-    console.log(`${result.path} exists — left alone`);
+    console.log(`${result.path} exists, left alone`);
     for (const entry of result.missing)
       console.log(`  ! declared but absent: ${entry}`);
   }

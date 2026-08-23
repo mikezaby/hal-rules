@@ -67,7 +67,7 @@ test("a bad rule state is named, with what was expected", () => {
   assert.match(String(error), /"ours\/real" is set to true/);
   assert.match(
     String(error),
-    /expected "on", "off", or \["on", \{ var: "value" \}\]/,
+    /Expected "on", "off", or \["on", \{ var: "value" \}\]/,
   );
 });
 

@@ -93,7 +93,7 @@ test("the header drops a source path that climbs out of the project", () => {
     assert.doesNotMatch(text, /\.\.\//, "a ../../.. path helps nobody");
     assert.match(
       text,
-      /generated from code-style\/no-magic — edit it in the pack/,
+      /generated from code-style\/no-magic\. Edit it in the pack/,
     );
   } finally {
     process.chdir(cwd);
