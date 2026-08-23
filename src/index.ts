@@ -1,12 +1,15 @@
 import {
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { LockEntry } from "./skills.ts";
 
@@ -487,4 +490,138 @@ export function writeLock(lock: Lock, projectDir = "."): void {
     return;
   }
   writeFileSync(path, `${JSON.stringify(lock, null, 2)}\n`);
+}
+
+export interface CheckProblem {
+  what: string;
+  fix: string;
+}
+
+/**
+ * Read-only. Generates into a temp directory and compares, so a check can never
+ * write into the repository it is checking.
+ */
+export function check(
+  configPath = DEFAULT_CONFIG,
+  projectDir = ".",
+  outDir = DEFAULT_OUT,
+): CheckProblem[] {
+  const problems: CheckProblem[] = [];
+
+  const invalid = validate(configPath);
+  if (invalid.length > 0) {
+    // A config that cannot resolve makes every later comparison meaningless.
+    return invalid.map((what) => ({ what, fix: "fix hal-rules.json" }));
+  }
+
+  const config = loadConfig(configPath);
+  const expectedDir = mkdtempSync(join(tmpdir(), "hal-check-"));
+  try {
+    build(configPath, expectedDir);
+    const expected = new Map(
+      listMarkdown(expectedDir).map((rel) => [
+        rel,
+        readFileSync(join(expectedDir, rel), "utf8"),
+      ]),
+    );
+    const actualRoot = join(projectDir, outDir);
+    // Nothing generated at all is one fact, not one per rule.
+    if (!existsSync(actualRoot)) {
+      problems.push({
+        what: `nothing generated yet (${expected.size} rules expected)`,
+        fix: "run: npx hal-rules",
+      });
+      return problems;
+    }
+    const actual = new Map(
+      listMarkdown(actualRoot).map((rel) => [
+        rel,
+        readFileSync(join(actualRoot, rel), "utf8"),
+      ]),
+    );
+
+    for (const [rel, body] of expected) {
+      if (!actual.has(rel))
+        problems.push({
+          what: `missing rule: ${rel}`,
+          fix: "run: npx hal-rules",
+        });
+      else if (actual.get(rel) !== body)
+        problems.push({
+          what: `out of date: ${rel}`,
+          fix: "run: npx hal-rules",
+        });
+    }
+    for (const rel of actual.keys()) {
+      if (!expected.has(rel)) {
+        problems.push({
+          what: `stale rule still on disk: ${rel}`,
+          fix: "run: npx hal-rules",
+        });
+      }
+    }
+  } finally {
+    rmSync(expectedDir, { recursive: true, force: true });
+  }
+
+  problems.push(...checkSkills(config, projectDir));
+
+  for (const result of bootstrap(config, projectDir)) {
+    for (const entry of result.missing) {
+      problems.push({
+        what: `${result.path} lacks declared entry: ${entry}`,
+        fix: "add it by hand, or delete the file and rerun to regenerate it",
+      });
+    }
+  }
+  return problems;
+}
+
+/** Config, lock and disk must agree. No network: refetching in CI is slow and flaky. */
+function checkSkills(
+  config: ResolvedConfig,
+  projectDir: string,
+): CheckProblem[] {
+  const problems: CheckProblem[] = [];
+  const locked = readLock(projectDir).skills;
+  const wanted = new Set(Object.values(config.skills).flat());
+
+  const lockedPaths = new Map(
+    Object.entries(locked).map(([name, entry]) => [
+      entry.path.replace(/^skills\//, ""),
+      name,
+    ]),
+  );
+  for (const path of wanted) {
+    if (!lockedPaths.has(path)) {
+      problems.push({
+        what: `skill declared but not installed: ${path}`,
+        fix: "run: npx hal-rules",
+      });
+    }
+  }
+  for (const [path, name] of lockedPaths) {
+    if (!wanted.has(path)) {
+      problems.push({
+        what: `skill installed but no longer declared: ${name}`,
+        fix: "run: npx hal-rules",
+      });
+    } else if (
+      !existsSync(join(projectDir, ".claude/skills", name, "SKILL.md"))
+    ) {
+      problems.push({
+        what: `skill in the lock but missing on disk: ${name}`,
+        fix: "run: npx hal-rules (skills are committed, so this should not happen)",
+      });
+    }
+  }
+  return problems;
+}
+
+function listMarkdown(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { recursive: true, encoding: "utf8" })
+    .filter((rel) => rel.endsWith(".md"))
+    .map((rel) => rel.split(sep).join("/"))
+    .sort();
 }

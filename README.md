@@ -21,7 +21,8 @@ your own — all in one committed file your team edits in review.
 ```bash
 npx hal-rules init      # scaffold hal-rules.json and gitignore the output
 npx hal-rules           # generate
-npx hal-rules validate  # check the config without writing anything
+npx hal-rules validate  # is the config itself valid?
+npx hal-rules check     # does what is on disk match the config?
 ```
 
 **No JavaScript project required.** Nothing is installed and no `package.json` or
@@ -147,6 +148,30 @@ otherwise the pack bundled inside `hal-rules`. That fallback is what makes
 `hal-rules/recommended.json` work in a repo with no `node_modules`.
 
 Either way there is no registry lookup, no fetch step, and no cache to go stale.
+
+### Checking what is on disk
+
+`hal-rules check` compares the generated output against the config and exits
+non-zero if they disagree. It is strictly read-only — it generates into a temp
+directory, so it never writes into the repository it is checking.
+
+```
+  stale rule still on disk: git/never-push.md
+      run: npx hal-rules
+1 problem(s) — generated output does not match the config
+```
+
+It catches a rule you switched off that is still on disk, a rule you added but
+did not generate, a generated file someone hand-edited, skills that disagree with
+the lock, and declared plugins missing from `settings.json`. An invalid config
+short-circuits, so you get the one real cause instead of a cascade.
+
+**Where this is worth wiring up.** Generated rules are gitignored, so a fresh CI
+checkout has nothing to compare and `check` only reports "nothing generated yet".
+For rules it earns its keep **locally** — a pre-commit hook, or before starting a
+session, catching the case where you edited the config and your agent is still
+reading yesterday's rules. For **skills** it is a genuine CI gate, because those
+are committed and can drift from the config.
 
 ### Validation happens before anything is written
 

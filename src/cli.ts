@@ -5,6 +5,7 @@ import {
   DEFAULT_OUT,
   bootstrap,
   build,
+  check,
   init,
   loadConfig,
   readLock,
@@ -30,6 +31,23 @@ if (args[0] === "skills" && args[1] === "list") {
     }
     console.log('copy a path into your config, e.g. "engineering/tdd"');
     process.exit(0);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
+
+if (args[0] === "check") {
+  try {
+    const problems = check(args[1] ?? DEFAULT_CONFIG);
+    for (const { what, fix } of problems)
+      console.error(`  ${what}\n      ${fix}`);
+    console.log(
+      problems.length === 0
+        ? "up to date"
+        : `${problems.length} problem(s) — generated output does not match the config`,
+    );
+    process.exit(problems.length === 0 ? 0 : 1);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);

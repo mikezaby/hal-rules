@@ -126,9 +126,12 @@ buildable now.
 
 ### Buildable
 
-4. **`--check` for CI.** Fail the build on stale or drifted _output_. Distinct
-   from `hal validate`, which is built and checks the _config_: every
-   problem at once, non-zero exit, and `build` refuses to write when any fail.
+4. ~~**`--check` for CI.**~~ **Built as `hal check`.** Read-only comparison of
+   generated output against the config. One finding along the way: because
+   generated rules are gitignored, a fresh CI checkout has nothing to compare, so
+   for rules this is a local pre-flight rather than a CI gate. It is a true CI
+   gate for skills, which are committed. Making generated rules committable would
+   turn it into a full gate — an open option, not a decision.
 5. **Per-rule `paths:` override from config.** Shadowing replaces the whole file
    today, frontmatter included, so a rule's globs cannot be retargeted without
    copying it.

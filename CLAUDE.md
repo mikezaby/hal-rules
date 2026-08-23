@@ -98,6 +98,10 @@ TypeScript in `src/`, ESM, built with tsdown. Config extracted from blibliki:
 eslint flat config (`strictTypeChecked` + `stylisticTypeChecked`, `projectService`),
 prettier with the trivago import sorter, strict tsconfig with `noUncheckedIndexedAccess`.
 
+`hal check` compares generated output against the config, read-only, exiting
+non-zero on drift. Rules are gitignored so it is a local pre-flight for them;
+for committed skills it is a real CI gate.
+
 `hal validate` reports every config problem at once and exits non-zero.
 `build` runs the same checks and writes nothing if any fail, so a bad config
 cannot leave the previous output half-wiped.
