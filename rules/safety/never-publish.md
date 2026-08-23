@@ -6,7 +6,7 @@ description: Preparing a release is fine; pushing it to a registry is a human's 
 # Never Publish a Package
 
 **Never run a publish or release command.** This covers every registry and
-ecosystem — `npm publish`, `pnpm publish`, `yarn publish`, `gem push`,
+ecosystem: `npm publish`, `pnpm publish`, `yarn publish`, `gem push`,
 `cargo publish`, `twine upload`, `mvn deploy`, `dotnet nuget push`, `go` module
 tags, `docker push`, `helm push`, a GitHub release, and anything else that makes
 an artifact available to other people.
@@ -20,7 +20,7 @@ on someone else's behalf.
 
 - bump the version, update the changelog, build the artifact
 - run the dry run (`npm publish --dry-run`, `cargo publish --dry-run`, …)
-- verify what would actually ship — the file list, the size, the metadata
+- verify what would actually ship: the file list, the size, the metadata
 - report what you checked, then print the exact command for a human to run
 
 Say clearly that you have not published and that the final step is theirs. If a

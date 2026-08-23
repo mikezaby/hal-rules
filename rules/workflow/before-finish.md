@@ -6,7 +6,7 @@ description: The checks that must pass before work is called done
 # Before Finish
 
 Work is not done until all of these pass. Run them, read the output, and fix
-what they report — do not claim success without having seen it.
+what they report. Do not claim success without having seen it.
 
 {{checks}}
 

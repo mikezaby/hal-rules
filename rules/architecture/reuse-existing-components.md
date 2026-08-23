@@ -13,7 +13,7 @@ moment either side changes.
 
 A hand-rolled native element is right only when the thing genuinely is not one of
 the existing components. "Close enough, I'll override the classes" is not that
-case — and overriding a component's base utilities from the call site often does
+case, and overriding a component's base utilities from the call site often does
 not work anyway, since conflicting utilities resolve by stylesheet order.
 
 When the design calls for a component the library should have but doesn't, say
