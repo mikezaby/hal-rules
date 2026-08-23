@@ -20,13 +20,13 @@
       }
     ],
     "workflow/out-of-scope-findings": [
-      "off",
+      "on",
       {
         "findingsFile": "docs/findings.md"
       }
     ],
     "documentation/architecture-decisions": [
-      "off",
+      "on",
       {
         "adrDir": "docs/adr/"
       }
