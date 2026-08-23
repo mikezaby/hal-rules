@@ -118,17 +118,16 @@ Code's own docs warn about when rules conflict.
 ## The pack
 
 `rules/` holds the registry, one file per rule, foldered by topic:
-`workflow` · `git` · `documentation` · `testing` · `code-style` · `architecture` · `safety`
+`workflow` · `git` · `documentation` · `testing` · `code-style` · `architecture`
 
 Every rule was carved from a CLAUDE.md that was actually in use, blibliki among
 them. No rule exists here without a source line in one of them — the pack is
 evidence, not invention.
 
-`recommended.json` enables the nine that apply to any codebase. Left opt-in because
+`recommended.json` enables nine of them; the rest need a project-specific value. Left opt-in because
 they need a project-specific value or only fit some stacks:
 `workflow/before-finish` (`checks`), `workflow/out-of-scope-findings` (`findingsFile`),
-`code-style/no-namespace-react`, `git/worktrees-for-risky-work`,
-`safety/never-apply-migrations`.
+`git/worktrees-for-risky-work`.
 
 Only four rules appeared in more than one project: `scope-discipline`,
 `before-finish`, `never-push`, `mark-deliberate-simplifications`. The rest are

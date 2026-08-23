@@ -135,27 +135,27 @@ belongs in a [skill](https://code.claude.com/docs/en/skills).
 ## The bundled pack
 
 Every rule was carved from a `CLAUDE.md` that was actually in use, across a
-TypeScript monorepo, a Rails service and a Nuxt app. None were invented.
+TypeScript monorepo, a Rails service and a Nuxt app. None were invented — and
+three have since been removed for carrying one stack's assumptions into a pack
+that claims to be generic.
 
 | Rule                                           |                                                                          | in `recommended` | vars           | path-scoped |
 | ---------------------------------------------- | ------------------------------------------------------------------------ | :--------------: | -------------- | :---------: |
 | `architecture/mark-deliberate-simplifications` | A knowing shortcut carries a comment naming its ceiling and upgrade path |        ✓         | `marker`       |             |
 | `architecture/reuse-existing-components`       | Read the component library before building any control                   |        ✓         |                |             |
 | `code-style/comments`                          | Default to no comments; write one only where the code cannot say it      |        ✓         |                |             |
-| `code-style/no-namespace-react`                | Import named or default bindings from react, never the namespace         |                  |                |      ✓      |
 | `documentation/docs-in-the-same-commit`        | A change that invalidates a doc fixes that doc too                       |        ✓         |                |             |
 | `documentation/no-scratch-files`               | Plans and checklists belong in the conversation, not the repo            |        ✓         |                |             |
 | `git/never-push`                               | Commit locally when asked; pushing is the human's call                   |        ✓         |                |             |
 | `git/worktrees-for-risky-work`                 | Work in the current checkout for small changes                           |                  |                |             |
-| `safety/never-apply-migrations`                | Generating a migration is fine; running it against a database is not     |                  |                |             |
 | `testing/test-organization`                    | One test file per unit, grouped with describe blocks                     |        ✓         |                |      ✓      |
 | `workflow/before-finish`                       | The checks that must pass before work is called done                     |                  | `checks`       |             |
 | `workflow/incremental-delivery`                | Ship one agreed item at a time so each can be tested                     |        ✓         |                |             |
 | `workflow/out-of-scope-findings`               | Record problems you are not fixing instead of fixing or dropping them    |                  | `findingsFile` |             |
 | `workflow/scope-discipline`                    | Change only what the request asks for                                    |        ✓         |                |             |
 
-The five outside `recommended` are opt-in because they need a project-specific value
-or only fit some stacks.
+The three outside `recommended` are opt-in: two need a project-specific value
+(`checks`, `findingsFile`) and one is a team preference.
 
 Worth knowing before you treat the pack as settled: only four of these appeared in
 more than one of the three source projects — `scope-discipline`, `before-finish`,

@@ -85,9 +85,9 @@ resolution order, shadowing, `off`, stale-file removal and the unset-var guard.
 
 ## Pack
 
-14 rules in `rules/`, carved from real CLAUDE.md files in use, blibliki
+12 rules in `rules/`, carved from real CLAUDE.md files in use, blibliki
 among them. Folders: `workflow`, `git`, `documentation`,
-`testing`, `code-style`, `architecture`, `safety`.
+`testing`, `code-style`, `architecture`.
 
 Recurrence across them is thin and worth recording honestly — only four
 rules showed up in more than one project (`scope-discipline`, `before-finish`,
