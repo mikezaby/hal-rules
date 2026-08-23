@@ -1,10 +1,6 @@
 {
-  "extends": [
-    "./registry/recommended.json"
-  ],
-  "rulesDir": [
-    "registry/rules"
-  ],
+  "extends": ["./registry/recommended.json"],
+  "rulesDir": ["registry/rules"],
   "rules": {
     "workflow/before-finish": [
       "on",
@@ -13,6 +9,7 @@
           "pnpm build",
           "pnpm tsc",
           "pnpm lint",
+          "pnpm format:check",
           "pnpm test",
           "./scripts/verify-loading.sh",
           "./scripts/verify-subagent.sh"
