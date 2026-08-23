@@ -58,8 +58,14 @@ Plus the bootstrap keys:
 }
 ```
 
-`npx hal-rules` (or `pnpm dlx hal-rules`) writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
+`npx hal-rules` writes `.claude/rules/generated/<slug>.md`. Gitignore that dir —
 the config is the artifact under review, not the output.
+
+**Works in non-JS repos.** `extends` accepts a bare specifier, which falls back to
+the pack bundled in this package when there is no `node_modules`, so a Rails or
+Python project needs no install and gets no `package.json`. Two bin names ship:
+`hal` for local installs, `hal-rules` because `npx hal` would fetch an unrelated
+package of that name.
 
 `.claude/settings.json` and `.mcp.json` are **bootstrapped, not owned**: written when
 absent, and on every later run left untouched with a report of what they lack.
