@@ -277,7 +277,59 @@ export function validate(configPath: string): string[] {
   return plan(loadConfig(configPath), ".").errors;
 }
 
+export interface Change {
+  kind: "added" | "changed" | "removed";
+  slug: string;
+  before?: string;
+  after?: string;
+}
+
+/**
+ * What this run would alter, compared with what is already on disk. The previous
+ * output is still there — gitignored, but present — so the tool can show what
+ * moved without anyone committing derived files.
+ */
+function diffAgainstDisk(
+  files: { path: string; content: string; slug: string }[],
+  outDir: string,
+): Change[] {
+  // No previous output means nothing to compare, not "everything is new".
+  if (!existsSync(outDir)) return [];
+
+  const changes: Change[] = [];
+  const expected = new Set(files.map(({ path }) => path));
+
+  for (const { path, content, slug } of files) {
+    if (!existsSync(path)) {
+      changes.push({ kind: "added", slug, after: content });
+      continue;
+    }
+    const before = readFileSync(path, "utf8");
+    if (before !== content)
+      changes.push({ kind: "changed", slug, before, after: content });
+  }
+
+  for (const rel of listMarkdown(outDir)) {
+    const path = join(outDir, rel);
+    if (!expected.has(path)) {
+      changes.push({
+        kind: "removed",
+        slug: rel.replace(/\.md$/, ""),
+        before: readFileSync(path, "utf8"),
+      });
+    }
+  }
+  return changes;
+}
+
 export function build(configPath: string, outDir: string): string[] {
+  return buildWithChanges(configPath, outDir).written;
+}
+
+export function buildWithChanges(
+  configPath: string,
+  outDir: string,
+): { written: string[]; changes: Change[] } {
   const { files, errors } = plan(loadConfig(configPath), outDir);
 
   // Resolve everything before touching disk: a config error must not leave the
@@ -288,12 +340,14 @@ export function build(configPath: string, outDir: string): string[] {
     );
   }
 
+  const changes = diffAgainstDisk(files, outDir);
+
   rmSync(outDir, { recursive: true, force: true });
   for (const { path, content } of files) {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, content);
   }
-  return files.map(({ slug }) => slug);
+  return { written: files.map(({ slug }) => slug), changes };
 }
 
 export interface BootstrapResult {
@@ -624,4 +678,47 @@ function listMarkdown(dir: string): string[] {
     .filter((rel) => rel.endsWith(".md"))
     .map((rel) => rel.split(sep).join("/"))
     .sort();
+}
+
+/**
+ * A line-level diff with the common prefix and suffix trimmed. Deliberately not
+ * an LCS: rule files are small and change in whole paragraphs, and this needs no
+ * git, no `diff` binary and no dependency.
+ */
+export function formatDiff(change: Change): string {
+  const before = (change.before ?? "").split("\n");
+  const after = (change.after ?? "").split("\n");
+
+  let head = 0;
+  while (
+    head < before.length &&
+    head < after.length &&
+    before[head] === after[head]
+  )
+    head++;
+
+  let tail = 0;
+  while (
+    tail < before.length - head &&
+    tail < after.length - head &&
+    before[before.length - 1 - tail] === after[after.length - 1 - tail]
+  ) {
+    tail++;
+  }
+
+  const removed = before.slice(head, before.length - tail);
+  const added = after.slice(head, after.length - tail);
+  const lines = [
+    ...removed.map((line) => `  - ${line}`),
+    ...added.map((line) => `  + ${line}`),
+  ];
+  return lines.length > 0 ? lines.join("\n") : "  (no textual change)";
+}
+
+export function summarise(changes: Change[]): string[] {
+  const mark = { added: "+", changed: "~", removed: "-" } as const;
+  return changes
+    .slice()
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+    .map(({ kind, slug }) => `  ${mark[kind]} ${slug}`);
 }

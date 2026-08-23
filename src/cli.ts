@@ -4,11 +4,13 @@ import {
   DEFAULT_CONFIG,
   DEFAULT_OUT,
   bootstrap,
-  build,
+  buildWithChanges,
   check,
+  formatDiff,
   init,
   loadConfig,
   readLock,
+  summarise,
   validate,
   writeLock,
 } from "./index.ts";
@@ -88,8 +90,21 @@ const config =
   DEFAULT_CONFIG;
 
 try {
-  const written = build(config, out);
+  const { written, changes } = buildWithChanges(config, out);
   console.log(`${written.length} rules -> ${out}`);
+
+  if (changes.length > 0) {
+    console.log(`\n${changes.length} change(s) since the last run:`);
+    for (const line of summarise(changes)) console.log(line);
+    if (args.includes("--diff")) {
+      for (const change of changes) {
+        console.log(`\n${change.kind} ${change.slug}`);
+        console.log(formatDiff(change));
+      }
+    } else {
+      console.log("  (--diff to see what moved)");
+    }
+  }
 
   const resolved = loadConfig(config);
   if (

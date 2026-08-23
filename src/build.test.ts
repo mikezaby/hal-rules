@@ -1,10 +1,23 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { applyVars, build } from "./index.ts";
+import {
+  applyVars,
+  build,
+  buildWithChanges,
+  formatDiff,
+  summarise,
+} from "./index.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const config = join(here, "fixtures/project/hal-rules.json");
@@ -125,4 +138,51 @@ test("string variables still work alongside list ones", () => {
     applyVars("{{a}} then {{b}}", { a: "one", b: ["two", "three"] }, "slug"),
     "one then - `two`\n- `three`",
   );
+});
+
+test("a first run reports no changes: there is nothing to compare", () => {
+  const fresh = join(here, "fixtures/.first");
+  rmSync(fresh, { recursive: true, force: true });
+  assert.deepEqual(buildWithChanges(pack, fresh).changes, []);
+  rmSync(fresh, { recursive: true, force: true });
+});
+
+test("a rebuild reports what a pack update moved", () => {
+  const dir = mkdtempSync(join(tmpdir(), "hal-changes-"));
+  const rules = join(dir, "rules/ours");
+  mkdirSync(rules, { recursive: true });
+  writeFileSync(join(rules, "keep.md"), "# Keep\n");
+  writeFileSync(join(rules, "edit.md"), "# Edit\n- before\n");
+  writeFileSync(join(rules, "drop.md"), "# Drop\n");
+  const cfg = join(dir, "hal-rules.json");
+  const write = (slugs: string[]) =>
+    writeFileSync(
+      cfg,
+      JSON.stringify({
+        rulesDir: ["rules"],
+        rules: Object.fromEntries(slugs.map((s) => [s, "on"])),
+      }),
+    );
+
+  write(["ours/keep", "ours/edit", "ours/drop"]);
+  const target = join(dir, "out");
+  buildWithChanges(cfg, target);
+
+  writeFileSync(join(rules, "edit.md"), "# Edit\n- after\n"); // the pack changed a rule
+  writeFileSync(join(rules, "new.md"), "# New\n");
+  write(["ours/keep", "ours/edit", "ours/new"]); // dropped one, added one
+
+  const { changes } = buildWithChanges(cfg, target);
+  assert.deepEqual(
+    summarise(changes),
+    ["  - ours/drop", "  ~ ours/edit", "  + ours/new"],
+    "unchanged rules stay out of the report",
+  );
+
+  const edited = changes.find((c) => c.slug === "ours/edit");
+  const shown = formatDiff(edited!);
+  assert.match(shown, /- - before/);
+  assert.match(shown, /\+ - after/);
+
+  rmSync(dir, { recursive: true, force: true });
 });

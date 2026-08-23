@@ -38,6 +38,7 @@
     "./rules/*": "./rules/*"
   },
   "files": [
+    "CHANGELOG.md",
     "LICENSE",
     "README.md",
     "dist",

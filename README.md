@@ -149,6 +149,27 @@ otherwise the pack bundled inside `hal-rules`. That fallback is what makes
 
 Either way there is no registry lookup, no fetch step, and no cache to go stale.
 
+### Seeing what changed after an update
+
+Rule bodies come from the installed pack, so updating it changes what your agent
+is told. Generating reports what moved:
+
+```
+13 rules -> .claude/rules/generated
+
+3 change(s) since the last run:
+  - git/never-push
+  ~ workflow/scope-discipline
+  + safety/never-publish
+  (--diff to see what moved)
+```
+
+`--diff` shows the lines. It compares against the output already on disk, so it
+needs no git, no `diff` binary, and nothing committed — the generated directory
+stays gitignored. A first run reports nothing, since there is nothing to compare.
+
+`CHANGELOG.md` in this package lists rule wording changes alongside code ones.
+
 ### Checking what is on disk
 
 `hal-rules check` compares the generated output against the config and exits
