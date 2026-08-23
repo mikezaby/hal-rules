@@ -86,8 +86,12 @@ so no Claude Code setting needs modelling here. All four keys compose through
 
 Resolution:
 
-- `extends` is a **path**, resolved relative to the config file. `node_modules/...`,
-  a submodule dir, `./base.json` all work; no fetch or registry layer exists.
+- `extends` is a **path** resolved relative to the config file (`node_modules/...`,
+  a submodule dir, `./base.json`), a bare specifier falling back to the bundled
+  pack, or `github:owner/repo[/config.json][#ref]`. A GitHub source is fetched
+  into `.hal/packs/` (committed, like skills) and pinned by SHA in the lock file;
+  a pinned pack already on disk is never refetched, so builds and `check` stay
+  offline until `--update`.
 - Configs merge in order, later wins — extends first, own `rules` last.
 - Rule _files_ resolve last-`rulesDir`-first, so a project shadows a pack rule by
   dropping its own `<slug>.md` in place. Shadowing replaces the whole file, `paths:`
@@ -162,7 +166,7 @@ config is verified by running it.
 existing config. `--expand` spells out the inherited rules so they can be toggled,
 at the cost of pinning today's set instead of inheriting later additions.
 
-**The full remaining-work list — eight items, three of them decisions — lives in
+**The full remaining-work list — nine items, three of them decisions — lives in
 `docs/plans/2026-08-23-modular-rules-design.md` under "Remaining work".** Keep it
 there rather than in chat.
 

@@ -108,7 +108,7 @@ artifact under review, not what it compiles to.
 
 | Key            | Effect                                                      |
 | -------------- | ----------------------------------------------------------- |
-| `extends`      | Paths to other configs. Merged in order, later wins.        |
+| `extends`      | Paths or `github:` sources. Merged in order, later wins.    |
 | `rulesDir`     | Where to find rule files by slug. Defaults to `rules`.      |
 | `rules`        | `"on"`, `"off"`, or `["on", { var: value }]` per rule slug. |
 | `marketplaces` | Verbatim into `extraKnownMarketplaces`.                     |
@@ -168,11 +168,34 @@ Two sources providing the same skill name is an error, not a silent overwrite.
 A **path** (`./base.json`, `/abs/base.json`) resolves against the config file.
 A git submodule or a vendored pack works this way.
 
+A **`github:` source** is fetched into `.hal/packs/` and pinned by commit in
+`hal-rules.lock.json`:
+
+```json
+{
+  "extends": ["github:you/your-pack/recommended.json#main"]
+}
+```
+
+The form is `github:owner/repo[/path/to/config.json][#ref]` — path first so it
+can nest, ref last. It defaults to `recommended.json` at the repo root. One
+checkout per repo, however many configs you extend out of it.
+
+**Commit `.hal/packs/`.** A pack is not reproducible from anything local, the
+same reason skills are committed. It also means a build never needs the network
+twice: a pinned pack already on disk is not refetched, so `hal check` stays
+offline in CI and a push upstream cannot change what instructs Claude until
+someone asks:
+
+```
+$ npx hal-rules@latest --update
+  pack github:you/your-pack  @ main (a1b2c3d4)
+```
+
 Anything else is a **bare specifier**: an installed package if there is one, and
 otherwise the pack bundled inside `hal-rules`. That fallback is what makes
-`hal-rules/recommended.json` work in a repo with no `node_modules`.
-
-Either way there is no registry lookup, no fetch step, and no cache to go stale.
+`hal-rules/recommended.json` work in a repo with no `node_modules`, and it needs
+no network at all.
 
 ### Adopting rules a pack added later
 

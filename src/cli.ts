@@ -16,6 +16,7 @@ import {
   validate,
   writeLock,
 } from "./index.ts";
+import { installPacks } from "./packs.ts";
 import { fetchSource, groupForDisplay, installSkills } from "./skills.ts";
 
 const args = process.argv.slice(2);
@@ -121,6 +122,23 @@ const config =
   DEFAULT_CONFIG;
 
 try {
+  const previous = readLock();
+  // Packs land before anything reads the config: resolution is synchronous.
+  const packs = await installPacks(config, ".", previous.packs, {
+    update: args.includes("--update"),
+  });
+  for (const line of packs.installed) console.log(`  pack ${line}`);
+  for (const spec of packs.removed)
+    console.log(`  removed pack ${spec} (no longer in config)`);
+  // An --update that found nothing new still hit the network; say so.
+  if (
+    args.includes("--update") &&
+    packs.installed.length === 0 &&
+    Object.keys(packs.lock).length > 0
+  ) {
+    console.log("  packs already current");
+  }
+
   const { written, changes } = buildWithChanges(config, out);
   console.log(`${written.length} rules -> ${out}`);
 
@@ -138,17 +156,18 @@ try {
   }
 
   const resolved = loadConfig(config);
+  let skills = previous.skills;
   if (
     Object.keys(resolved.skills).length > 0 ||
-    Object.keys(readLock().skills).length > 0
+    Object.keys(previous.skills).length > 0
   ) {
-    const previous = readLock().skills;
-    const report = await installSkills(resolved.skills, ".", previous);
+    const report = await installSkills(resolved.skills, ".", previous.skills);
     for (const line of report.installed) console.log(`  skill ${line}`);
     for (const name of report.removed)
       console.log(`  removed skill ${name} (no longer in config)`);
-    writeLock({ skills: report.lock });
+    skills = report.lock;
   }
+  writeLock({ skills, packs: packs.lock });
 
   for (const result of bootstrap(loadConfig(config))) {
     if (result.status === "empty") continue;
