@@ -32,3 +32,17 @@ into `~/.claude/`) was the wrong problem.
 ## Status
 
 Design. Nothing implemented.
+
+## Mechanism facts (verified 2026-08-23, code.claude.com/docs)
+
+- `.claude/rules/*.md` load every session at `.claude/CLAUDE.md` priority;
+  a `paths:` glob in frontmatter defers loading until a matching file is read.
+- **Subagents inherit the whole CLAUDE.md hierarchy, project rules included.**
+  Not inherited: conversation history, read files, invoked skills, parent auto memory.
+- Built-in **Explore and Plan agents skip CLAUDE.md and rules entirely.**
+- Custom agents (`.claude/agents/*.md`) supply their own system prompt and get
+  "only this system prompt plus basic environment details" — so per-agent
+  behavior is a second emit target, not something a rule file can express.
+- Rules are advisory context, never enforcement. Blocking belongs in a hook.
+- `claudeMdExcludes` (glob, any settings layer, arrays merge) is the only native
+  off switch — path-based, not rule-name-based.
