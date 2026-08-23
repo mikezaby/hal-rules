@@ -55,7 +55,7 @@ output — the config is the artifact under review, not what it compiles to.
 
 ```json
 {
-  "extends": ["node_modules/hal-rules/recommended.json"],
+  "extends": ["hal-rules/recommended.json"],
   "rulesDir": ["rules"],
 
   "rules": {
