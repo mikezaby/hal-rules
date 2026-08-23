@@ -10,9 +10,12 @@
       "on",
       {
         "checks": [
+          "pnpm build",
           "pnpm tsc",
           "pnpm lint",
-          "pnpm test"
+          "pnpm test",
+          "./scripts/verify-loading.sh",
+          "./scripts/verify-subagent.sh"
         ]
       }
     ],
