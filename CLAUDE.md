@@ -63,7 +63,10 @@ Resolution:
 
 ## Status
 
-Generator works, `node --test` covers resolution. No rule pack written yet.
+Rules generator works, `node --test` covers resolution. No rule pack written yet.
+`settings.json` and `.mcp.json` bootstrapping is designed, not built.
+
+Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
 
 ## Mechanism facts (verified 2026-08-23, code.claude.com/docs)
 
