@@ -155,7 +155,7 @@ test("a rebuild reports what a pack update moved", () => {
   writeFileSync(join(rules, "edit.md"), "# Edit\n- before\n");
   writeFileSync(join(rules, "drop.md"), "# Drop\n");
   const cfg = join(dir, "hal-rules.json");
-  const write = (slugs: string[]) =>
+  const write = (slugs: string[]) => {
     writeFileSync(
       cfg,
       JSON.stringify({
@@ -163,6 +163,7 @@ test("a rebuild reports what a pack update moved", () => {
         rules: Object.fromEntries(slugs.map((s) => [s, "on"])),
       }),
     );
+  };
 
   write(["ours/keep", "ours/edit", "ours/drop"]);
   const target = join(dir, "out");
