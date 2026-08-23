@@ -15,10 +15,14 @@ your own — all in one committed file your team edits in review.
 ## Use it
 
 ```bash
-npx ai-rules          # or: pnpm dlx ai-rules
+npx ai-rules init     # scaffold ai-rules.json and gitignore the output
+pnpm add -D ai-rules
+pnpm ai-rules         # generate
 ```
 
-Reads `ai-rules.json` and writes `.claude/rules/generated/<slug>.md`. Gitignore the
+`init` never overwrites an existing `ai-rules.json` — re-running it is safe.
+
+The generate step reads `ai-rules.json` and writes `.claude/rules/generated/<slug>.md`. Gitignore the
 output — the config is the artifact under review, not what it compiles to.
 
 ```gitignore
@@ -166,7 +170,6 @@ external source doesn't auto-install — the teammate still runs `claude plugin 
 
 ## Not built yet
 
-- `ai-rules init` to scaffold a config
 - `--check` to fail CI on stale or drifted output
 - Drift _resolution_ — the run reports, it does not merge
 - Emitting `.claude/agents/*.md`

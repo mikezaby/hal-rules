@@ -40,7 +40,9 @@ EOF
 node /ABS/PATH/TO/modular-skills/dist/cli.mjs
 ```
 
-> `ai-rules init` does not exist yet. When it does, it replaces the heredoc.
+> `ai-rules init` scaffolds this same file, but points `extends` at
+> `node_modules/ai-rules/...`. For verification the pack is the working copy, not
+> an installed dependency, so write the absolute path by hand as above.
 
 Confirm the file landed and reads the way you intended:
 

@@ -4,10 +4,22 @@ import {
   DEFAULT_OUT,
   bootstrap,
   build,
+  init,
   loadConfig,
 } from "./index.ts";
 
 const args = process.argv.slice(2);
+
+if (args[0] === "init") {
+  for (const { path, status } of init()) {
+    console.log(
+      status === "exists" ? `${path} exists — left alone` : `${status} ${path}`,
+    );
+  }
+  console.log("\nnext:\n  pnpm add -D ai-rules\n  pnpm ai-rules");
+  process.exit(0);
+}
+
 const outFlag = args.indexOf("--out");
 const out = outFlag === -1 ? DEFAULT_OUT : (args[outFlag + 1] ?? DEFAULT_OUT);
 const config =

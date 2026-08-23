@@ -236,3 +236,51 @@ export function bootstrap(
     bootstrapFile(join(projectDir, ".mcp.json"), mcp),
   ];
 }
+
+export interface InitResult {
+  path: string;
+  status: "created" | "exists" | "updated";
+}
+
+const STARTER_CONFIG = {
+  extends: ["node_modules/ai-rules/recommended.json"],
+  rulesDir: ["rules"],
+  rules: {},
+};
+
+/** Adds a line to .gitignore unless it is already there. */
+function ignore(path: string, entry: string): InitResult {
+  if (!existsSync(path)) {
+    writeFileSync(path, `${entry}\n`);
+    return { path, status: "created" };
+  }
+
+  const current = readFileSync(path, "utf8");
+  if (current.split("\n").some((line) => line.trim() === entry)) {
+    return { path, status: "exists" };
+  }
+  writeFileSync(
+    path,
+    current.endsWith("\n") ? `${current}${entry}\n` : `${current}\n${entry}\n`,
+  );
+  return { path, status: "updated" };
+}
+
+/**
+ * Scaffold a config. Never overwrites one that exists — an existing config is
+ * the team's, and re-running init must not be a way to lose it.
+ */
+export function init(projectDir = "."): InitResult[] {
+  const config = join(projectDir, DEFAULT_CONFIG);
+  const results: InitResult[] = [];
+
+  if (existsSync(config)) {
+    results.push({ path: config, status: "exists" });
+  } else {
+    writeFileSync(config, `${JSON.stringify(STARTER_CONFIG, null, 2)}\n`);
+    results.push({ path: config, status: "created" });
+  }
+
+  results.push(ignore(join(projectDir, ".gitignore"), `${DEFAULT_OUT}/`));
+  return results;
+}

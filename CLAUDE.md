@@ -130,7 +130,10 @@ Rules generator and the `settings.json` / `.mcp.json` bootstrap both work;
 README covers usage, the config reference, rule authoring and the pack; its example
 config is verified by running it.
 
-Not built: `ai-rules init`, `--check` for CI, drift _resolution_ (only reporting),
+`ai-rules init` scaffolds a config and gitignores the output; it never overwrites
+an existing config.
+
+Not built: `--check` for CI, drift _resolution_ (only reporting),
 `.claude/agents/*.md` emit. Not published to npm.
 
 Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
