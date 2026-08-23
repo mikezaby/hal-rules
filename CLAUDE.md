@@ -127,8 +127,11 @@ single-source, which is worth remembering before treating the pack as settled.
 Rules generator and the `settings.json` / `.mcp.json` bootstrap both work;
 10 tests cover resolution, composition and drift reporting.
 
+README covers usage, the config reference, rule authoring and the pack; its example
+config is verified by running it.
+
 Not built: `ai-rules init`, `--check` for CI, drift _resolution_ (only reporting),
-`.claude/agents/*.md` emit, README. Not published to npm.
+`.claude/agents/*.md` emit. Not published to npm.
 
 Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
 
