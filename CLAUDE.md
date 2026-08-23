@@ -100,8 +100,10 @@ pnpm lint    eslint src
 pnpm format  prettier . --write
 ```
 
-`pnpm create ai-rules` is **not** available — `create-ai-rules` is taken on npm by an
-unrelated package. Use `pnpm dlx ai-rules` or `npx ai-rules`.
+Published flat as `ai-rules`, not scoped: a personal scope reads as a side project
+for something teams are asked to commit as shared infrastructure. There is no
+`pnpm create ai-rules` — `create-ai-rules` is taken — but `ai-rules init` covers
+that path, so nothing is lost.
 
 ## The pack
 

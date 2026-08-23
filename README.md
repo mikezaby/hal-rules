@@ -174,8 +174,8 @@ external source doesn't auto-install — the teammate still runs `claude plugin 
 - Drift _resolution_ — the run reports, it does not merge
 - Emitting `.claude/agents/*.md`
 
-`pnpm create ai-rules` will not work: `create-ai-rules` on npm belongs to an
-unrelated package. Use `pnpm dlx ai-rules`.
+There is no `pnpm create ai-rules`: the `create-ai-rules` name on npm belongs to
+an unrelated package. `npx ai-rules init` does the same job, so nothing is missing.
 
 ## Develop
 
