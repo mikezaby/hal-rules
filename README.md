@@ -38,7 +38,19 @@ npx hal-rules@latest init      # scaffold hal-rules.json and gitignore the outpu
 npx hal-rules@latest           # generate
 npx hal-rules@latest validate  # is the config itself valid?
 npx hal-rules@latest check     # does what is on disk match the config?
+npx hal-rules@latest outdated  # what does the pack offer that you never decided on?
 ```
+
+Two flags worth knowing:
+
+```bash
+npx hal-rules@latest --update           # move a pinned github: registry to its ref
+npx hal-rules@latest --out docs/rules   # write somewhere other than the default
+```
+
+`--out` overrides `.claude/rules/generated`, and `check --out <dir>` compares
+against the same place. Whatever you choose, that directory is wiped and
+rewritten on every run, so point it at generated output and nothing else.
 
 **Use `@latest`, not a bare `npx hal-rules`.** npx caches by semver range, and a
 bare name is stored as `^<version you first ran>`. A newer `0.x` still satisfies

@@ -21,6 +21,17 @@ import { fetchSource, groupForDisplay, installSkills } from "./skills.ts";
 
 const args = process.argv.slice(2);
 
+const outFlag = args.indexOf("--out");
+const out = outFlag === -1 ? DEFAULT_OUT : (args[outFlag + 1] ?? DEFAULT_OUT);
+// Flags, and the value after --out, are not arguments. Reading args[1] directly
+// made `check --out dir` treat the flag itself as the config path.
+const positional = args.filter(
+  (arg, i) => !arg.startsWith("--") && i !== outFlag + 1,
+);
+/** The config a subcommand was given, or the default. */
+const configArg = (after: number): string =>
+  positional[after] ?? DEFAULT_CONFIG;
+
 if (args[0] === "skills" && args[1] === "list") {
   const spec = args[2];
   if (!spec) {
@@ -44,8 +55,9 @@ if (args[0] === "skills" && args[1] === "list") {
 
 if (args[0] === "outdated" || args[0] === "sync") {
   try {
-    const configPath = args[1] ?? DEFAULT_CONFIG;
-    const found = args[0] === "sync" ? sync(configPath) : outdated(configPath);
+    const configPath = configArg(1);
+    const found =
+      positional[0] === "sync" ? sync(configPath) : outdated(configPath);
     if (found.length === 0) {
       console.log("nothing new. Every rule in your packs is in your config");
       process.exit(0);
@@ -73,7 +85,7 @@ if (args[0] === "outdated" || args[0] === "sync") {
 
 if (args[0] === "check") {
   try {
-    const problems = check(args[1] ?? DEFAULT_CONFIG);
+    const problems = check(configArg(1), ".", out);
     for (const { what, fix } of problems)
       console.error(`  ${what}\n      ${fix}`);
     console.log(
@@ -90,7 +102,7 @@ if (args[0] === "check") {
 
 if (args[0] === "validate") {
   try {
-    const errors = validate(args[1] ?? DEFAULT_CONFIG);
+    const errors = validate(configArg(1));
     for (const error of errors) console.error(`  ${error}`);
     console.log(
       errors.length === 0 ? "config is valid" : `${errors.length} problem(s)`,
@@ -115,11 +127,7 @@ if (args[0] === "init") {
   process.exit(0);
 }
 
-const outFlag = args.indexOf("--out");
-const out = outFlag === -1 ? DEFAULT_OUT : (args[outFlag + 1] ?? DEFAULT_OUT);
-const config =
-  args.find((arg, i) => !arg.startsWith("--") && i !== outFlag + 1) ??
-  DEFAULT_CONFIG;
+const config = configArg(0);
 
 try {
   const previous = readLock();
