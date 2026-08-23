@@ -42,7 +42,7 @@ test("lists rules in the pack that the config never mentions", () => {
   );
 });
 
-test("a rule that is explicitly off is not outdated — it was decided", () => {
+test("a rule that is explicitly off is not outdated, it was decided", () => {
   const { path } = project("decided", { "ours/one": "on", "ours/two": "off" });
   assert.deepEqual(
     outdated(path).map((r) => r.slug),
