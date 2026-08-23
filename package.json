@@ -2,6 +2,25 @@
   "name": "hal-rules",
   "version": "0.1.0",
   "description": "Compose Claude Code rules from shareable packs, eslint-style: extend a base config, turn rules off, tune them",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "rules",
+    "config",
+    "eslint",
+    "ai",
+    "agent",
+    "mcp",
+    "monorepo"
+  ],
+  "homepage": "https://github.com/mikezaby/hal-rules#readme",
+  "bugs": {
+    "url": "https://github.com/mikezaby/hal-rules/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikezaby/hal-rules.git"
+  },
   "author": "Michalis Zabaras",
   "license": "ISC",
   "type": "module",
@@ -16,11 +35,15 @@
     "./package.json": "./package.json"
   },
   "files": [
+    "LICENSE",
+    "README.md",
     "dist",
-    "rules",
     "recommended.json",
-    "README.md"
+    "rules"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsdown",
     "clean:dist": "rm -rf ./dist",
@@ -30,7 +53,8 @@
     "tsc": "tsc --noEmit",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "release": "pnpm run build && pnpm publish --access public"
+    "release": "pnpm run build && pnpm publish --access public",
+    "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -42,16 +66,5 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.67.0"
   },
-  "packageManager": "pnpm@10.33.2",
-  "keywords": [
-    "claude",
-    "claude-code",
-    "rules",
-    "config",
-    "eslint",
-    "ai",
-    "agent",
-    "mcp",
-    "monorepo"
-  ]
+  "packageManager": "pnpm@10.33.2"
 }
