@@ -60,10 +60,7 @@ output — the config is the artifact under review, not what it compiles to.
 
   "rules": {
     "architecture/reuse-existing-components": "off",
-    "workflow/before-finish": [
-      "on",
-      { "checks": "- `pnpm tsc`\n- `pnpm lint`\n- `pnpm test`" }
-    ],
+    "workflow/before-finish": ["on", { "checks": ["pnpm tsc", "pnpm lint"] }],
     "ours/deploy-checklist": "on"
   },
 
