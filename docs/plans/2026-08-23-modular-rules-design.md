@@ -107,7 +107,7 @@ command lists, file inventories. That stays in each project's own file.
 
 ## Open — deliberately not answered yet
 
-1. **Drift resolution.** Bootstrap now *reports* what an existing file lacks
+1. **Drift resolution.** Bootstrap now _reports_ what an existing file lacks
    (`! declared but absent: enabledPlugins.figma@claude-plugins-official`).
    How a change actually reaches that file — prompt, patch, three-way merge —
    is still undecided.

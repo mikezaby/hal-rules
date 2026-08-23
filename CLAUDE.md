@@ -49,7 +49,9 @@ Plus the bootstrap keys:
 
 ```json
 {
-  "marketplaces": { "my-team": { "source": { "source": "github", "repo": "org/plugins" } } },
+  "marketplaces": {
+    "my-team": { "source": { "source": "github", "repo": "org/plugins" } }
+  },
   "plugins": { "figma@claude-plugins-official": "on" },
   "mcp": { "internal-api": { "command": "./bin/mcp-server" } },
   "settings": { "permissions": { "allow": ["Bash(pnpm test:*)"] } }
@@ -125,7 +127,7 @@ single-source, which is worth remembering before treating the pack as settled.
 Rules generator and the `settings.json` / `.mcp.json` bootstrap both work;
 10 tests cover resolution, composition and drift reporting.
 
-Not built: `ai-rules init`, `--check` for CI, drift *resolution* (only reporting),
+Not built: `ai-rules init`, `--check` for CI, drift _resolution_ (only reporting),
 `.claude/agents/*.md` emit, README. Not published to npm.
 
 Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
