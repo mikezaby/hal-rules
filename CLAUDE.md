@@ -142,8 +142,9 @@ Rules generator and the `settings.json` / `.mcp.json` bootstrap both work;
 README covers usage, the config reference, rule authoring and the pack; its example
 config is verified by running it.
 
-`hal init` scaffolds a config and gitignores the output; it never overwrites
-an existing config.
+`hal init` scaffolds a config and gitignores the output; it never overwrites an
+existing config. `--expand` spells out the inherited rules so they can be toggled,
+at the cost of pinning today's set instead of inheriting later additions.
 
 **The full remaining-work list — eight items, three of them decisions — lives in
 `docs/plans/2026-08-23-modular-rules-design.md` under "Remaining work".** Keep it

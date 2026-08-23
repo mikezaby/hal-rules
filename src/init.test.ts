@@ -44,6 +44,48 @@ test("scaffolds a config that extends the installed pack", () => {
   assert.equal(read(dir, ".gitignore"), ".claude/rules/generated/\n");
 });
 
+test("--expand writes the inherited rules out so they can be toggled", () => {
+  const dir = project("expanded");
+  // Stand in for an installed pack at the path the starter config points to.
+  const pack = join(dir, "node_modules/hal-rules");
+  mkdirSync(join(pack, "rules/demo"), { recursive: true });
+  writeFileSync(join(pack, "rules/demo/one.md"), "# One\n");
+  writeFileSync(
+    join(pack, "recommended.json"),
+    JSON.stringify({
+      rulesDir: ["rules"],
+      rules: { "demo/one": "on", "demo/two": ["on", { a: "b" }] },
+    }),
+  );
+
+  init(dir, { expand: true });
+  const written = JSON.parse(read(dir, "hal-rules.json")) as Record<
+    string,
+    unknown
+  >;
+  assert.deepEqual(written.rules, {
+    "demo/one": "on",
+    "demo/two": ["on", { a: "b" }],
+  });
+});
+
+test("--expand on a project with no pack installed still writes a usable config", () => {
+  const dir = project("nopack");
+  init(dir, { expand: true });
+  const written = JSON.parse(read(dir, "hal-rules.json")) as Record<
+    string,
+    unknown
+  >;
+  assert.deepEqual(
+    written.rules,
+    {},
+    "no pack to read: empty rules, not a crash",
+  );
+  assert.deepEqual(written.extends, [
+    "node_modules/hal-rules/recommended.json",
+  ]);
+});
+
 test("never overwrites an existing config", () => {
   const dir = project("existing");
   writeFileSync(join(dir, "hal-rules.json"), '{"rules":{"ours/keep-me":"on"}}');

@@ -27,7 +27,9 @@ if (args[0] === "validate") {
 }
 
 if (args[0] === "init") {
-  for (const { path, status } of init()) {
+  for (const { path, status } of init(".", {
+    expand: args.includes("--expand"),
+  })) {
     console.log(
       status === "exists" ? `${path} exists — left alone` : `${status} ${path}`,
     );

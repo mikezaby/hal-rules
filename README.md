@@ -27,6 +27,11 @@ pnpm hal validate # check the config without writing anything
 
 `init` never overwrites an existing `hal-rules.json` — re-running it is safe.
 
+`hal init --expand` writes the inherited rules out as explicit entries, so you can
+read and toggle them without opening `node_modules`. The trade-off: an expanded
+config pins today's set, so rules added to the pack later won't switch themselves
+on. A bare `extends` keeps inheriting; expand when you want to see the menu.
+
 The generate step reads `hal-rules.json` and writes `.claude/rules/generated/<slug>.md`. Gitignore the
 output — the config is the artifact under review, not what it compiles to.
 

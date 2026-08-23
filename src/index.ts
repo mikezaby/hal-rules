@@ -342,7 +342,6 @@ export interface InitResult {
 const STARTER_CONFIG = {
   extends: ["node_modules/hal-rules/recommended.json"],
   rulesDir: ["rules"],
-  rules: {},
 };
 
 /** Adds a line to .gitignore unless it is already there. */
@@ -366,15 +365,34 @@ function ignore(path: string, entry: string): InitResult {
 /**
  * Scaffold a config. Never overwrites one that exists — an existing config is
  * the team's, and re-running init must not be a way to lose it.
+ *
+ * `expand` writes the inherited rules out as explicit entries so they can be
+ * read and toggled without opening node_modules. The trade-off is real: an
+ * expanded config pins today's set, so rules added to the pack later will not
+ * switch themselves on.
  */
-export function init(projectDir = "."): InitResult[] {
+export function init(projectDir = ".", { expand = false } = {}): InitResult[] {
   const config = join(projectDir, DEFAULT_CONFIG);
   const results: InitResult[] = [];
 
   if (existsSync(config)) {
     results.push({ path: config, status: "exists" });
   } else {
-    writeFileSync(config, `${JSON.stringify(STARTER_CONFIG, null, 2)}\n`);
+    const starter: {
+      extends: string[];
+      rulesDir: string[];
+      rules: Record<string, RuleState>;
+    } = {
+      ...STARTER_CONFIG,
+      rules: {},
+    };
+    if (expand) {
+      const base = resolve(projectDir, starter.extends[0] ?? "");
+      // Nothing to expand before the pack is installed; a bare config still works.
+      if (existsSync(base))
+        Object.assign(starter.rules, loadConfig(base).rules);
+    }
+    writeFileSync(config, `${JSON.stringify(starter, null, 2)}\n`);
     results.push({ path: config, status: "created" });
   }
 
