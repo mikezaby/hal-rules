@@ -10,8 +10,6 @@ paths:
 
 Do not use namespace React imports:
 
-Don't do this:
-
 ```tsx
 import * as React from "react";
 ```
