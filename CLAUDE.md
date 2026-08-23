@@ -87,7 +87,9 @@ so no Claude Code setting needs modelling here. All four keys compose through
 Resolution:
 
 - `extends` entries are either `{ registry, preset?, ref? }` — a directory holding
-  `<preset>.json` beside a `rules/`, by convention, so no `rulesDir` is needed —
+  `<preset>.json` beside a `rules/`, by convention, so no `rulesDir` is needed;
+  `registry` takes a path, a package name (what `init` scaffolds) or
+  `github:owner/repo[/dir]` —
   or a config file directly: a **path** relative to the config file
   (`node_modules/...`, a submodule dir, `./base.json`), a bare specifier falling
   back to the bundled pack, or `github:owner/repo[/config.json][#ref]`. A
@@ -101,6 +103,9 @@ Resolution:
   frontmatter included.
 - `"off"` drops an inherited rule. The out dir is wiped each build, so a rule turned
   off stops instructing Claude instead of lingering as a stale file.
+- `rulesDir` is for a project's **own** rule files. An unset default that is not
+  on disk is not searched; a declared one that is missing still is, so a typo
+  surfaces instead of resolving to nothing.
 - `{{var}}` in a rule body is substituted from the config. An unset one is a build
   error, never passed through to Claude.
 

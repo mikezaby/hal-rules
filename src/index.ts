@@ -111,8 +111,12 @@ export function loadConfig(
     out.rulesDirs.push(...inherited.rulesDirs);
     merge(out, inherited);
   }
+  // A declared rulesDir that is missing stays an error worth seeing; the
+  // implicit default is a guess, so it only counts when it is really there.
+  const declared = config.rulesDir;
+  const dirs = (declared ?? ["rules"]).map((dir) => resolve(base, dir));
   out.rulesDirs.push(
-    ...(config.rulesDir ?? ["rules"]).map((dir) => resolve(base, dir)),
+    ...(declared ? dirs : dirs.filter((dir) => existsSync(dir))),
   );
   merge(out, config);
   return out;
@@ -438,8 +442,9 @@ export interface InitResult {
 }
 
 const STARTER_CONFIG = {
-  extends: ["hal-rules/recommended.json"],
-  rulesDir: ["rules"],
+  // A registry, so the rules/ convention supplies the bodies and a project
+  // needs no rulesDir until it writes rules of its own.
+  extends: [{ registry: "hal-rules" }],
 };
 
 /**
@@ -495,8 +500,7 @@ export function init(projectDir = ".", { expand = false } = {}): InitResult[] {
     results.push({ path: config, status: "exists" });
   } else {
     const starter: {
-      extends: string[];
-      rulesDir: string[];
+      extends: ExtendsEntry[];
       rules: Record<string, RuleState>;
     } = {
       ...STARTER_CONFIG,
@@ -507,11 +511,11 @@ export function init(projectDir = ".", { expand = false } = {}): InitResult[] {
       // A bundled or installed pack resolves to a path that may not exist; an
       // unfetched `github:` one throws, and means the same thing here.
       try {
-        const base = resolveExtends(
-          starter.extends[0] ?? "",
-          projectDir,
-          projectDir,
-        );
+        const first = starter.extends[0];
+        const base =
+          first === undefined
+            ? ""
+            : resolveExtends(first, projectDir, projectDir);
         if (existsSync(base))
           Object.assign(starter.rules, loadConfig(base).rules);
       } catch {

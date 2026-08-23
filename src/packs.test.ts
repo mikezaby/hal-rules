@@ -8,11 +8,19 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { after, test } from "node:test";
-import { check, init, loadConfig, readLock, writeLock } from "./index.ts";
+import {
+  build,
+  check,
+  init,
+  loadConfig,
+  readLock,
+  writeLock,
+} from "./index.ts";
 import {
   PACK_DIR,
+  RULES_DIR,
   collectPacks,
   installPacks,
   packDir,
@@ -267,4 +275,48 @@ test("a github registry ref is pinned the same as a spec", async () => {
   checkout(dir, "github:me/pack", {});
   const report = await installPacks(path, dir, locked("github:me/pack"));
   assert.deepEqual(report.installed, [], "pinned and present, so no fetch");
+});
+
+test("a bare specifier names a registry, bundled or installed", () => {
+  const dir = join(root, "reg-bare");
+  mkdirSync(dir, { recursive: true });
+  // Nothing is installed here, so this is the npx path: the registry shipped
+  // inside this package, found without a node_modules to look in.
+  const file = resolveExtends({ registry: "hal-rules" }, dir, dir);
+  assert.equal(basename(file), "recommended.json");
+  assert.ok(
+    existsSync(join(dirname(file), RULES_DIR)),
+    "and the rules/ convention holds for it too",
+  );
+});
+
+test("an implicit rules dir that is not there is not searched", () => {
+  const { dir, path } = project("no-own-rules", {
+    extends: [{ registry: "./pack" }],
+  });
+  mkdirSync(join(dir, "pack/rules"), { recursive: true });
+  writeFileSync(join(dir, "pack/recommended.json"), "{}");
+
+  assert.deepEqual(
+    loadConfig(path).rulesDirs,
+    [join(dir, "pack/rules")],
+    "no phantom ./rules from a project that never declared one",
+  );
+});
+
+test("a declared rules dir that is not there still counts, so a typo shows", () => {
+  const { dir, path } = project("typo-rules", {
+    extends: [{ registry: "./pack" }],
+    rulesDir: ["rulez"],
+    rules: { "x/r": "on" },
+  });
+  mkdirSync(join(dir, "pack/rules"), { recursive: true });
+  writeFileSync(join(dir, "pack/recommended.json"), "{}");
+
+  assert.ok(loadConfig(path).rulesDirs.includes(join(dir, "rulez")));
+  assert.throws(
+    () => build(path, join(dir, "out")),
+    /rulez/,
+    "the searched paths name the typo rather than hiding it",
+  );
 });

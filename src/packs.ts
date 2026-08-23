@@ -122,6 +122,11 @@ export function resolveExtends(
   const spec = entry;
   if (isPackSpec(spec)) return packConfig(parsePack(spec), projectDir, spec);
   if (spec.startsWith(".") || isAbsolute(spec)) return resolve(base, spec);
+  return resolveBare(spec, base);
+}
+
+/** An installed package, else the pack shipped inside this one. */
+function resolveBare(spec: string, base: string): string {
   try {
     return createRequire(join(base, "_.js")).resolve(spec);
   } catch {
@@ -168,7 +173,13 @@ function resolveRegistry(
           `  A ref only applies to a github: registry.`,
       );
     }
-    dir = resolve(base, entry.registry);
+    if (entry.registry.startsWith(".") || isAbsolute(entry.registry)) {
+      dir = resolve(base, entry.registry);
+    } else {
+      // A bare specifier names a package, so let the preset resolve through the
+      // same path a string takes and read the registry directory back off it.
+      dir = dirname(resolveBare(`${entry.registry}/${preset}`, base));
+    }
     if (!existsSync(dir)) {
       throw new Error(
         `Registry not found: ${entry.registry}\n  looked in ${dir}`,

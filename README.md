@@ -109,7 +109,7 @@ artifact under review, not what it compiles to.
 | Key            | Effect                                                      |
 | -------------- | ----------------------------------------------------------- |
 | `extends`      | Registries or config files. Merged in order, later wins.    |
-| `rulesDir`     | Where to find rule files by slug. Defaults to `rules`.      |
+| `rulesDir`     | Where **your own** rule files live. Defaults to `rules`.    |
 | `rules`        | `"on"`, `"off"`, or `["on", { var: value }]` per rule slug. |
 | `marketplaces` | Verbatim into `extraKnownMarketplaces`.                     |
 | `plugins`      | `"name@marketplace"` → on/off, into `enabledPlugins`.       |
@@ -181,22 +181,29 @@ your-pack/
 ```
 
 `rules/` is convention, not configuration. Nothing declares it and nothing can
-move it, which is why extending a registry needs no `rulesDir`:
+move it, which is why extending a registry needs no `rulesDir` — that key is
+only for rule files of your own, and an unset one that is not on disk is not
+searched:
 
 ```json
 {
   "extends": [
+    { "registry": "hal-rules" },
     { "registry": "./vendor/your-pack" },
     { "registry": "github:acme/rules", "preset": "strict", "ref": "main" }
   ]
 }
 ```
 
-| Field      | Meaning                                                 |
-| ---------- | ------------------------------------------------------- |
-| `registry` | A directory: a path, or `github:owner/repo[/dir]`.      |
-| `preset`   | Which `<preset>.json` in it. Defaults to `recommended`. |
-| `ref`      | Branch, tag or commit. `github:` registries only.       |
+A bare name is a package: an installed one, and otherwise the registry bundled
+inside `hal-rules`. That is what `hal init` scaffolds, and what makes
+`npx hal-rules` work in a repo with no `node_modules`.
+
+| Field      | Meaning                                                       |
+| ---------- | ------------------------------------------------------------- |
+| `registry` | A directory: a path, a package, or `github:owner/repo[/dir]`. |
+| `preset`   | Which `<preset>.json` in it. Defaults to `recommended`.       |
+| `ref`      | Branch, tag or commit. `github:` registries only.             |
 
 A registry missing its `rules/`, or a preset that is not there, is an error
 naming the path it looked for. A registry that resolves to nothing would
