@@ -63,7 +63,26 @@ context until Claude reads a matching file. Ask it to read `src/app.ts` first,
 then re-check `/context`. A missing path-scoped rule before that read is correct
 behaviour, not a bug.
 
-## 3. Probe the behaviour
+## 3a. Automated check: did the rule load at all?
+
+```bash
+./scripts/verify-loading.sh
+```
+
+Builds a throwaway project, generates one rule whose whole content is "emit this
+token", launches a real session there with `claude -p`, and greps the reply. Then
+runs the same prompt with the rule `off`. Two small calls, deterministic, no
+judgement involved.
+
+It verifies **loading**, not adherence — that a generated rule reaches a real
+session's context and changes the output. Whether Claude _obeys_ a rule like
+`never-push` still needs the tempting prompts below and a human reading the reply.
+
+**Why a subagent cannot do this.** A subagent starts in the parent session's
+working directory and loads _that_ project's rules. Only launching a session in
+the scratch directory tests the scratch project.
+
+## 3b. Probe the behaviour
 
 Write a prompt that makes violating the rule the natural thing to do. Not
 "do you follow rule X" — the answer to that is always yes and it proves nothing.
@@ -96,8 +115,10 @@ A rule earns its place only when off and on differ.
 
 ## 5. Subagents
 
-Rules reach subagents, so verify there too. Ask Claude to delegate the same
-tempting task to a subagent and watch whether the rule still binds.
+Rules reach subagents — per Claude Code's docs, a subagent loads every level of
+the CLAUDE.md hierarchy the main conversation does. **That is documented, not
+something we have measured here**, so verify it by hand: ask Claude to delegate
+the same tempting task to a subagent and watch whether the rule still binds.
 
 **Known exception: the built-in Explore and Plan agents skip CLAUDE.md and rules
 entirely.** A rule that appears not to apply inside Explore or Plan is expected.

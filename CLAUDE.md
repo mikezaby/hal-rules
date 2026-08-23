@@ -151,7 +151,9 @@ there rather than in chat.
 
 Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
 
-**Adding or changing a rule? Follow `docs/verifying-a-change.md`.** A green test
+**Adding or changing a rule? Follow `docs/verifying-a-change.md`.**
+`./scripts/verify-loading.sh` automates the loading half: canary rule, real
+`claude -p` session in a throwaway project, plus the rule-off control run. A green test
 suite proves the file was written, never that Claude follows it — a rule is only
 verified when the same prompt behaves differently with it on and off.
 
