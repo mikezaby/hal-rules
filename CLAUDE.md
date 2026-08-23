@@ -124,13 +124,13 @@ Code's own docs warn about when rules conflict.
 ## The pack
 
 `rules/` holds the registry, one file per rule, foldered by topic:
-`workflow` · `git` · `documentation` · `testing` · `code-style` · `architecture`
+`workflow` · `git` · `documentation` · `testing` · `code-style` · `architecture` · `safety`
 
 Every rule was carved from a CLAUDE.md that was actually in use, blibliki among
 them. No rule exists here without a source line in one of them — the pack is
 evidence, not invention.
 
-`recommended.json` enables nine of them; the rest need a project-specific value
+`recommended.json` enables eleven of them; the rest need a project-specific value
 (`checks`, `findingsFile`, `adrDir`) or are a team preference. Left opt-in because
 they need a project-specific value or only fit some stacks:
 `workflow/before-finish` (`checks`), `workflow/out-of-scope-findings` (`findingsFile`),

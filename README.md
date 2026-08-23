@@ -229,6 +229,8 @@ that claims to be generic.
 | `documentation/docs-in-the-same-commit`        | A change that invalidates a doc fixes that doc too                                                  |        ✓         |                |             |
 | `documentation/no-scratch-files`               | Plans and checklists belong in the conversation, not the repo                                       |        ✓         |                |             |
 | `git/never-push`                               | Commit locally when asked; pushing is the human's call                                              |        ✓         |                |             |
+| `safety/never-publish`                         | Preparing a release is fine; pushing it to a registry is a human's call                             |        ✓         |                |             |
+| `safety/never-deploy`                          | Build it, plan it, diff it — then hand the command to a human                                       |        ✓         |                |             |
 | `git/worktrees-for-risky-work`                 | Work in the current checkout for small changes                                                      |                  |                |             |
 | `testing/test-organization`                    | One test file per unit, grouped with describe blocks                                                |        ✓         |                |      ✓      |
 | `workflow/before-finish`                       | The checks that must pass before work is called done                                                |                  | `checks`       |             |
@@ -236,7 +238,7 @@ that claims to be generic.
 | `workflow/out-of-scope-findings`               | Record problems you are not fixing instead of fixing or dropping them                               |                  | `findingsFile` |             |
 | `workflow/scope-discipline`                    | Change only what the request asks for                                                               |        ✓         |                |             |
 
-The four outside `recommended` are opt-in: three need a project-specific value
+The three outside `recommended` are opt-in: three need a project-specific value
 (`checks`, `findingsFile`, `adrDir`) and one is a team preference.
 
 Worth knowing before you treat the pack as settled: only four of these appeared in

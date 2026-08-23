@@ -4,6 +4,8 @@
     "workflow/scope-discipline": "on",
     "workflow/incremental-delivery": "on",
     "git/never-push": "on",
+    "safety/never-publish": "on",
+    "safety/never-deploy": "on",
     "documentation/docs-in-the-same-commit": "on",
     "documentation/no-scratch-files": "on",
     "testing/test-organization": "on",
