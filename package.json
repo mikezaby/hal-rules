@@ -1,7 +1,7 @@
 {
   "name": "hal-rules",
   "version": "0.1.0",
-  "description": "I'm sorry Dave, I'm afraid I can't do that \u2014 composable, committed rules for Claude Code",
+  "description": "Compose Claude Code rules from shareable packs, eslint-style: extend a base config, turn rules off, tune them",
   "author": "Michalis Zabaras",
   "license": "ISC",
   "type": "module",
@@ -42,5 +42,16 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.67.0"
   },
-  "packageManager": "pnpm@10.33.2"
+  "packageManager": "pnpm@10.33.2",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "rules",
+    "config",
+    "eslint",
+    "ai",
+    "agent",
+    "mcp",
+    "monorepo"
+  ]
 }
