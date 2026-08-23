@@ -165,6 +165,15 @@ Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design
 suite proves the file was written, never that Claude follows it — a rule is only
 verified when the same prompt behaves differently with it on and off.
 
+## Skills
+
+`skills` fetches selected skills from a GitHub repo into `.claude/skills/<name>/`,
+pinned by SHA in `hal-rules.lock.json`. Config names them by the source's own
+folders (`engineering/tdd`); disk is flat because **Claude Code discovers skills
+exactly one level deep and the directory name is the command** — measured, and a
+nested directory silently never loads. Fetched skills are committed, not
+gitignored: they are not reproducible from anything local.
+
 ## Mechanism facts (verified 2026-08-23, code.claude.com/docs)
 
 - `.claude/rules/*.md` load every session at `.claude/CLAUDE.md` priority;

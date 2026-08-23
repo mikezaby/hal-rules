@@ -92,6 +92,51 @@ output — the config is the artifact under review, not what it compiles to.
 
 Every key composes through `extends` the same way.
 
+### Cherry-pick skills from a repo
+
+Plugins are all-or-nothing. `mattpocock/skills` ships 36 skills and you probably
+want three. Name them the way the source groups them:
+
+```json
+"skills": {
+  "github:mattpocock/skills#v1.4.0": [
+    "engineering/tdd",
+    "engineering/to-tickets",
+    "productivity/writing-for-agents"
+  ]
+}
+```
+
+Browse what a source offers:
+
+```bash
+npx hal-rules skills list github:mattpocock/skills
+```
+
+```
+engineering/  ask-matt · code-review · diagnosing-bugs · tdd · to-spec · to-tickets …
+productivity/ grill-me · handoff · teach · writing-for-agents …
+```
+
+The folder is the **config's** vocabulary, not a layout on disk. Claude Code
+discovers skills exactly one level deep and treats the directory name as the
+command, so `engineering/tdd` installs to `.claude/skills/tdd/` and runs as
+`/tdd`. A nested directory would never load — this is measured, not assumed.
+The whole skill directory is copied, since most skills ship supporting files
+alongside `SKILL.md`.
+
+`hal-rules.lock.json` records the source, the resolved commit and the original
+path for each skill, so provenance survives the flattening. A ref is always
+pinned to a SHA, because otherwise someone else's edit silently changes
+instructions your agent follows.
+
+**Commit the fetched skills.** Unlike generated rules, they are not reproducible
+from anything local — having them in the repo means the team reviews the diff
+when a version moves, and nobody needs the network to work. Drop a skill from
+the config and the next run deletes it.
+
+Two sources providing the same skill name is an error, not a silent overwrite.
+
 ### How `extends` resolves
 
 A **path** — `./base.json`, `/abs/base.json` — resolves against the config file.

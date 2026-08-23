@@ -8,6 +8,7 @@ import {
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { LockEntry } from "./skills.ts";
 
 /** A variable value: a string, or a list rendered as markdown bullets. */
 export type RuleVars = Record<string, string | string[]>;
@@ -33,6 +34,8 @@ export interface AiRulesConfig {
   mcp?: Record<string, unknown>;
   /** Copied into settings.json as-is, so no Claude Code setting needs modelling here. */
   settings?: Record<string, unknown>;
+  /** `"github:owner/repo#ref"` -> skill paths as the source groups them. */
+  skills?: Record<string, string[]>;
 }
 
 export interface ResolvedConfig {
@@ -42,6 +45,7 @@ export interface ResolvedConfig {
   plugins: Record<string, PluginState>;
   mcp: Record<string, unknown>;
   settings: Record<string, unknown>;
+  skills: Record<string, string[]>;
 }
 
 const CONFIG_KEYS = new Set([
@@ -52,6 +56,7 @@ const CONFIG_KEYS = new Set([
   "plugins",
   "mcp",
   "settings",
+  "skills",
 ]);
 
 /** This package's own root, so the bundled pack is reachable with no install. */
@@ -91,6 +96,7 @@ export function loadConfig(
     plugins: {},
     mcp: {},
     settings: {},
+    skills: {},
   };
   // A diamond or a cycle: the first load already applied it.
   if (loaded.has(path)) return out;
@@ -135,6 +141,7 @@ function merge(
   Object.assign(out.plugins, from.plugins ?? {});
   Object.assign(out.mcp, from.mcp ?? {});
   Object.assign(out.settings, from.settings ?? {});
+  Object.assign(out.skills, from.skills ?? {});
 }
 
 /** Last dir wins, so a project shadows a pack's rule by slug. */
@@ -458,4 +465,26 @@ export function init(projectDir = ".", { expand = false } = {}): InitResult[] {
 
   results.push(ignore(join(projectDir, ".gitignore"), `${DEFAULT_OUT}/`));
   return results;
+}
+
+export const LOCK_FILE = "hal-rules.lock.json";
+
+interface Lock {
+  skills: Record<string, LockEntry>;
+}
+
+export function readLock(projectDir = "."): Lock {
+  const path = join(projectDir, LOCK_FILE);
+  if (!existsSync(path)) return { skills: {} };
+  return JSON.parse(readFileSync(path, "utf8")) as Lock;
+}
+
+export function writeLock(lock: Lock, projectDir = "."): void {
+  const path = join(projectDir, LOCK_FILE);
+  // Nothing tracked and nothing to track: don't leave an empty file behind.
+  if (Object.keys(lock.skills).length === 0) {
+    rmSync(path, { force: true });
+    return;
+  }
+  writeFileSync(path, `${JSON.stringify(lock, null, 2)}\n`);
 }
