@@ -117,6 +117,18 @@ than half-wiped. Errors name the file they came from, which matters once
 `"off"` drops an inherited rule. The output directory is wiped on every build, so a
 rule you disable stops instructing Claude rather than lingering as a stale file.
 
+A variable is a **string** or a **list**. A list renders as markdown bullets, so
+commands are written the obvious way rather than as one string with `\n` in it:
+
+```json
+"workflow/before-finish": ["on", { "checks": ["pnpm tsc", "pnpm lint", "pnpm test"] }]
+```
+
+An **empty** list is an error, not an empty section — a rule saying "all of these
+must pass" followed by nothing is broken. Set the rule `"off"` until you have the
+values; a disabled rule may keep its variables, which is how `hal init` scaffolds
+`before-finish` with example commands ready to edit.
+
 `{{var}}` placeholders in a rule body are filled from the config. `before-finish` is
 the reason they exist: the same rule needs `pnpm tsc` in one repo and `bin/rubocop`
 in the next. **An unset variable fails the build** — shipping a literal

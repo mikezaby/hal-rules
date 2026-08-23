@@ -99,3 +99,30 @@ test("an unset variable fails the build instead of shipping the placeholder", ()
 test("applyVars replaces every occurrence", () => {
   assert.equal(applyVars("{{a}} and {{a}}", { a: "x" }, "slug"), "x and x");
 });
+
+test("a list variable renders as markdown bullets", () => {
+  assert.equal(
+    applyVars(
+      "run:\n{{checks}}",
+      { checks: ["pnpm tsc", "pnpm lint"] },
+      "slug",
+    ),
+    "run:\n- `pnpm tsc`\n- `pnpm lint`",
+  );
+});
+
+test("an empty list is a broken rule, not an empty one", () => {
+  assert.throws(
+    () =>
+      applyVars("run:\n{{checks}}", { checks: [] }, "workflow/before-finish"),
+    /\{\{checks\}\} is an empty list/,
+    "rendering nothing would leave 'all of these must pass' followed by silence",
+  );
+});
+
+test("string variables still work alongside list ones", () => {
+  assert.equal(
+    applyVars("{{a}} then {{b}}", { a: "one", b: ["two", "three"] }, "slug"),
+    "one then - `two`\n- `three`",
+  );
+});

@@ -38,7 +38,11 @@ test("scaffolds a config that extends the installed pack", () => {
   >;
   assert.deepEqual(written.extends, ["hal-rules/recommended.json"]);
   assert.deepEqual(written.rulesDir, ["rules"]);
-  assert.deepEqual(written.rules, {});
+  assert.deepEqual(
+    (written.rules as Record<string, unknown>)["workflow/before-finish"],
+    ["off", { checks: ["pnpm tsc", "pnpm lint", "pnpm test"] }],
+    "scaffolded off but filled in: JSON has no comments, so show the shape",
+  );
   assert.equal(read(dir, ".gitignore"), ".claude/rules/generated/\n");
 });
 
@@ -61,10 +65,21 @@ test("--expand writes the inherited rules out so they can be toggled", () => {
     string,
     unknown
   >;
-  assert.deepEqual(written.rules, {
-    "demo/one": "on",
-    "demo/two": ["on", { a: "b" }],
-  });
+  const rules = written.rules as Record<string, unknown>;
+  assert.equal(
+    rules["demo/one"],
+    "on",
+    "an installed pack wins over the bundled one",
+  );
+  assert.deepEqual(
+    rules["demo/two"],
+    ["on", { a: "b" }],
+    "vars survive expansion",
+  );
+  assert.ok(
+    rules["workflow/before-finish"],
+    "the scaffolded starter rule survives expansion",
+  );
 });
 
 test("--expand falls back to the bundled pack when there is no node_modules", () => {

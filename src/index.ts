@@ -9,8 +9,14 @@ import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** `"on"`, `"off"`, or `["on", { varName: value }]`. */
-export type RuleState = "on" | "off" | ["on", Record<string, string>];
+/** A variable value: a string, or a list rendered as markdown bullets. */
+export type RuleVars = Record<string, string | string[]>;
+
+/**
+ * `"on"`, `"off"`, or a pair carrying variables. `["off", vars]` is allowed so a
+ * disabled rule can keep its configuration ready to switch on.
+ */
+export type RuleState = "on" | "off" | ["on" | "off", RuleVars];
 
 /** A plugin is on or off; there is nothing to tune. */
 export type PluginState = "on" | "off";
@@ -143,14 +149,26 @@ function findRule(slug: string, dirs: string[]): string {
   );
 }
 
-export function applyVars(
-  body: string,
-  vars: Record<string, string>,
-  slug: string,
-): string {
+export function applyVars(body: string, vars: RuleVars, slug: string): string {
   let out = body;
-  for (const [name, value] of Object.entries(vars))
+  for (const [name, value] of Object.entries(vars)) {
+    if (Array.isArray(value)) {
+      // An empty list renders to nothing, leaving "all of these must pass"
+      // followed by silence. That is a broken rule, not an empty one.
+      if (value.length === 0) {
+        throw new Error(
+          `Rule "${slug}": {{${name}}} is an empty list.\n` +
+            `  Fill it in, or set the rule to "off" until you have the values.`,
+        );
+      }
+      out = out.replaceAll(
+        `{{${name}}}`,
+        value.map((item) => `- \`${item}\``).join("\n"),
+      );
+      continue;
+    }
     out = out.replaceAll(`{{${name}}}`, value);
+  }
 
   const [, unset] = /\{\{(\w+)\}\}/.exec(out) ?? [];
   // Shipping a literal "{{framework}}" to Claude as an instruction is worse than failing.
@@ -180,14 +198,15 @@ function withHeader(body: string, slug: string, source: string): string {
 function stateOf(
   slug: string,
   state: unknown,
-): [enabled: string, vars: Record<string, string>] {
+): [enabled: string, vars: RuleVars] {
   if (state === "on" || state === "off") return [state, {}];
   if (
     Array.isArray(state) &&
-    state[0] === "on" &&
-    typeof state[1] === "object"
+    (state[0] === "on" || state[0] === "off") &&
+    typeof state[1] === "object" &&
+    state[1] !== null
   ) {
-    return state as [string, Record<string, string>];
+    return state as [string, RuleVars];
   }
   throw new Error(
     `"${slug}" is set to ${JSON.stringify(state)} — expected "on", "off", or ["on", { var: "value" }]`,
@@ -367,6 +386,17 @@ const STARTER_CONFIG = {
   rulesDir: ["rules"],
 };
 
+/**
+ * Scaffolded off, but filled in — JSON has no comments, so a worked example is
+ * the only way to show the shape. Replace the commands, then switch it on.
+ */
+const STARTER_RULES: Record<string, RuleState> = {
+  "workflow/before-finish": [
+    "off",
+    { checks: ["pnpm tsc", "pnpm lint", "pnpm test"] },
+  ],
+};
+
 /** Adds a line to .gitignore unless it is already there. */
 function ignore(path: string, entry: string): InitResult {
   if (!existsSync(path)) {
@@ -407,7 +437,7 @@ export function init(projectDir = ".", { expand = false } = {}): InitResult[] {
       rules: Record<string, RuleState>;
     } = {
       ...STARTER_CONFIG,
-      rules: {},
+      rules: { ...STARTER_RULES },
     };
     if (expand) {
       const base = resolveExtends(starter.extends[0] ?? "", projectDir);
