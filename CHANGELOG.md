@@ -4,7 +4,10 @@ Rule wording changes are listed as carefully as code changes: a reworded rule
 changes what your agent does. After updating, `npx hal-rules --diff` shows
 exactly which instructions moved.
 
-## Unreleased
+## 0.5.0 — 2026-08-23
+
+Versions 0.3.0 and 0.4.0 were prepared but never published; their changes are
+included here.
 
 ### Rules
 
