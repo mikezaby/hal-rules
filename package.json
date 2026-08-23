@@ -25,14 +25,17 @@
   "license": "ISC",
   "type": "module",
   "bin": {
-    "hal": "./dist/cli.mjs"
+    "hal": "./dist/cli.mjs",
+    "hal-rules": "./dist/cli.mjs"
   },
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./recommended.json": "./recommended.json",
+    "./rules/*": "./rules/*"
   },
   "files": [
     "LICENSE",

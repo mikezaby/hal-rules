@@ -36,9 +36,7 @@ test("scaffolds a config that extends the installed pack", () => {
     string,
     unknown
   >;
-  assert.deepEqual(written.extends, [
-    "node_modules/hal-rules/recommended.json",
-  ]);
+  assert.deepEqual(written.extends, ["hal-rules/recommended.json"]);
   assert.deepEqual(written.rulesDir, ["rules"]);
   assert.deepEqual(written.rules, {});
   assert.equal(read(dir, ".gitignore"), ".claude/rules/generated/\n");
@@ -69,21 +67,22 @@ test("--expand writes the inherited rules out so they can be toggled", () => {
   });
 });
 
-test("--expand on a project with no pack installed still writes a usable config", () => {
-  const dir = project("nopack");
+test("--expand falls back to the bundled pack when there is no node_modules", () => {
+  // The npx case: a Rails or Python repo with nowhere to install a pack.
+  const dir = project("nonode");
   init(dir, { expand: true });
   const written = JSON.parse(read(dir, "hal-rules.json")) as Record<
     string,
     unknown
   >;
-  assert.deepEqual(
-    written.rules,
-    {},
-    "no pack to read: empty rules, not a crash",
+
+  assert.deepEqual(written.extends, ["hal-rules/recommended.json"]);
+  const rules = written.rules as Record<string, unknown>;
+  assert.ok(
+    Object.keys(rules).length > 0,
+    "should expand from the packaged recommended.json",
   );
-  assert.deepEqual(written.extends, [
-    "node_modules/hal-rules/recommended.json",
-  ]);
+  assert.equal(rules["git/never-push"], "on");
 });
 
 test("never overwrites an existing config", () => {

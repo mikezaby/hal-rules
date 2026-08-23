@@ -34,7 +34,7 @@ if (args[0] === "init") {
       status === "exists" ? `${path} exists — left alone` : `${status} ${path}`,
     );
   }
-  console.log("\nnext:\n  pnpm add -D hal-rules\n  pnpm hal");
+  console.log("\nnext:\n  edit hal-rules.json, then run: npx hal-rules");
   process.exit(0);
 }
 

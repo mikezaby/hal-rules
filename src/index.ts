@@ -5,7 +5,9 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 /** `"on"`, `"off"`, or `["on", { varName: value }]`. */
 export type RuleState = "on" | "off" | ["on", Record<string, string>];
@@ -46,6 +48,27 @@ const CONFIG_KEYS = new Set([
   "settings",
 ]);
 
+/** This package's own root, so the bundled pack is reachable with no install. */
+const PACKAGE_ROOT = fileURLToPath(new URL("..", import.meta.url));
+
+/**
+ * A path (`./base.json`, `/abs/base.json`) resolves against the config file.
+ *
+ * Anything else is a bare specifier: an installed package if there is one, and
+ * otherwise the pack shipped inside this package. That fallback is what lets
+ * `npx hal-rules` work in a repo with no node_modules — a Rails or Python
+ * project has nowhere to install a pack.
+ */
+function resolveExtends(spec: string, base: string): string {
+  if (spec.startsWith(".") || isAbsolute(spec)) return resolve(base, spec);
+  try {
+    return createRequire(join(base, "_.js")).resolve(spec);
+  } catch {
+    const [, ...rest] = spec.split("/");
+    return resolve(PACKAGE_ROOT, ...rest);
+  }
+}
+
 export const DEFAULT_CONFIG = "hal-rules.json";
 export const DEFAULT_OUT = ".claude/rules/generated";
 
@@ -85,7 +108,7 @@ export function loadConfig(
   }
   const base = dirname(path);
   for (const from of config.extends ?? []) {
-    const inherited = loadConfig(resolve(base, from), loaded);
+    const inherited = loadConfig(resolveExtends(from, base), loaded);
     out.rulesDirs.push(...inherited.rulesDirs);
     merge(out, inherited);
   }
@@ -340,7 +363,7 @@ export interface InitResult {
 }
 
 const STARTER_CONFIG = {
-  extends: ["node_modules/hal-rules/recommended.json"],
+  extends: ["hal-rules/recommended.json"],
   rulesDir: ["rules"],
 };
 
@@ -387,7 +410,7 @@ export function init(projectDir = ".", { expand = false } = {}): InitResult[] {
       rules: {},
     };
     if (expand) {
-      const base = resolve(projectDir, starter.extends[0] ?? "");
+      const base = resolveExtends(starter.extends[0] ?? "", projectDir);
       // Nothing to expand before the pack is installed; a bare config still works.
       if (existsSync(base))
         Object.assign(starter.rules, loadConfig(base).rules);
