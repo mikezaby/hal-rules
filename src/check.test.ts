@@ -138,7 +138,7 @@ test("skills: declared but not installed, and installed but undeclared", () => {
   const declared = check(p.path, p.dir);
   assert.ok(
     declared.some((x) =>
-      /skill declared but not installed: engineering\/tdd/.test(x.what),
+      x.what.includes("skill declared but not installed: engineering/tdd"),
     ),
   );
 
@@ -158,7 +158,7 @@ test("skills: declared but not installed, and installed but undeclared", () => {
   const onDisk = check(p.path, p.dir);
   assert.ok(
     onDisk.some((x) =>
-      /skill in the lock but missing on disk: tdd/.test(x.what),
+      x.what.includes("skill in the lock but missing on disk: tdd"),
     ),
     "locked but no SKILL.md: skills are committed, so this is a real problem",
   );
@@ -169,7 +169,7 @@ test("skills: declared but not installed, and installed but undeclared", () => {
   );
   assert.ok(
     check(p.path, p.dir).some((x) =>
-      /skill installed but no longer declared: tdd/.test(x.what),
+      x.what.includes("skill installed but no longer declared: tdd"),
     ),
   );
 });
