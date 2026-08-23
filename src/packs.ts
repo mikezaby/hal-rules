@@ -11,6 +11,9 @@ export const PACK_DIR = ".hal/packs";
 /** This package's own root, so the bundled pack is reachable with no install. */
 const PACKAGE_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
+/** Where the pack lives in this repo, kept apart from the generator's code. */
+const REGISTRY_DIR = "registry";
+
 export interface Pack {
   source: Source;
   /** Path to the config file inside the repo. */
@@ -58,9 +61,9 @@ export function packDir(pack: Pack, projectDir: string): string {
  * before any config is read.
  *
  * Anything else is a bare specifier: an installed package if there is one, and
- * otherwise the pack shipped inside this package. That fallback is what lets
- * `npx hal-rules` work in a repo with no node_modules. A Rails or Python
- * project has nowhere to install a pack.
+ * otherwise the pack shipped inside this package, under `registry/`. That
+ * fallback is what lets `npx hal-rules` work in a repo with no node_modules.
+ * A Rails or Python project has nowhere to install a pack.
  */
 export function resolveExtends(
   spec: string,
@@ -82,8 +85,11 @@ export function resolveExtends(
   try {
     return createRequire(join(base, "_.js")).resolve(spec);
   } catch {
+    // The package name is dropped and the rest read against the registry, so
+    // `hal-rules/recommended.json` keeps working now that the pack sits under
+    // `registry/`. The published `exports` map does the same for a real install.
     const [, ...rest] = spec.split("/");
-    return resolve(PACKAGE_ROOT, ...rest);
+    return resolve(PACKAGE_ROOT, REGISTRY_DIR, ...rest);
   }
 }
 

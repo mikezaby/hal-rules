@@ -148,6 +148,7 @@ test("every rule that needs a variable is scaffolded", () => {
   const packRules = join(
     dirname(fileURLToPath(import.meta.url)),
     "..",
+    "registry",
     "rules",
   );
   const needsVars = readdirSync(packRules, {

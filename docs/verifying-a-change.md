@@ -1,7 +1,7 @@
 # Verifying a change
 
-**Internal. Not shipped** — `package.json` publishes only `dist`, `rules`,
-`recommended.json` and `README.md`, so nothing here reaches users.
+**Internal. Not shipped** — `package.json` publishes only `dist`, `registry`
+and `README.md`, so nothing here reaches users.
 
 Follow this whenever you add or change a rule, or change what the generator emits.
 
@@ -49,7 +49,7 @@ mkdir -p src && printf 'export const x = 1;\n' > src/app.ts
 
 cat > hal-rules.json <<'EOF'
 {
-  "extends": ["/ABS/PATH/TO/modular-skills/recommended.json"],
+  "extends": ["/ABS/PATH/TO/modular-skills/registry/recommended.json"],
   "rules": { "<the rule under test>": "on" }
 }
 EOF

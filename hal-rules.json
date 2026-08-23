@@ -1,11 +1,19 @@
 {
-  "extends": ["./recommended.json"],
-  "rulesDir": ["rules"],
+  "extends": [
+    "./registry/recommended.json"
+  ],
+  "rulesDir": [
+    "registry/rules"
+  ],
   "rules": {
     "workflow/before-finish": [
       "on",
       {
-        "checks": ["pnpm tsc", "pnpm lint", "pnpm test"]
+        "checks": [
+          "pnpm tsc",
+          "pnpm lint",
+          "pnpm test"
+        ]
       }
     ],
     "workflow/out-of-scope-findings": [
