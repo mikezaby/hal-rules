@@ -135,6 +135,10 @@ Not built: `ai-rules init`, `--check` for CI, drift _resolution_ (only reporting
 
 Requirements and the open questions: `docs/plans/2026-08-23-modular-rules-design.md`.
 
+**Adding or changing a rule? Follow `docs/verifying-a-change.md`.** A green test
+suite proves the file was written, never that Claude follows it — a rule is only
+verified when the same prompt behaves differently with it on and off.
+
 ## Mechanism facts (verified 2026-08-23, code.claude.com/docs)
 
 - `.claude/rules/*.md` load every session at `.claude/CLAUDE.md` priority;
