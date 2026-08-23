@@ -1,8 +1,8 @@
 # hal-rules
 
 > **"I'm sorry Dave, I'm afraid I can't do that."**
->
-> **Don't let the agent decide what your team's standards are.**
+
+**Don't let the agent decide what your team's standards are.**
 
 > [!WARNING]
 > **Work in progress. Expect things to move.**
@@ -38,7 +38,19 @@ npx hal-rules@latest init      # scaffold hal-rules.json and gitignore the outpu
 npx hal-rules@latest           # generate
 npx hal-rules@latest validate  # is the config itself valid?
 npx hal-rules@latest check     # does what is on disk match the config?
+npx hal-rules@latest outdated  # what does the pack offer that you never decided on?
 ```
+
+Two flags worth knowing:
+
+```bash
+npx hal-rules@latest --update           # move a pinned github: registry to its ref
+npx hal-rules@latest --out docs/rules   # write somewhere other than the default
+```
+
+`--out` overrides `.claude/rules/generated`, and `check --out <dir>` compares
+against the same place. Whatever you choose, that directory is wiped and
+rewritten on every run, so point it at generated output and nothing else.
 
 **Use `@latest`, not a bare `npx hal-rules`.** npx caches by semver range, and a
 bare name is stored as `^<version you first ran>`. A newer `0.x` still satisfies
@@ -86,7 +98,7 @@ artifact under review, not what it compiles to.
 
 ```json
 {
-  "extends": ["hal-rules/recommended.json"],
+  "extends": [{ "registry": "hal-rules" }],
   "rulesDir": ["rules"],
 
   "rules": {
@@ -115,6 +127,11 @@ artifact under review, not what it compiles to.
 | `plugins`      | `"name@marketplace"` → on/off, into `enabledPlugins`.       |
 | `mcp`          | Server name → config, into `mcpServers`.                    |
 | `settings`     | Spliced into `settings.json` as-is.                         |
+
+`rulesDir` appears here only because of `ours/deploy-checklist`, a rule this
+project wrote itself. Extending a registry needs no `rulesDir` — the registry
+brings its own `rules/` — so a config that enables nothing of its own can drop
+the line, which is what `hal init` scaffolds.
 
 Every key composes through `extends` the same way.
 
