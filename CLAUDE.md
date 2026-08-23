@@ -40,7 +40,7 @@ into `~/.claude/`) was the wrong problem.
 
 ```json
 {
-  "extends": ["node_modules/@you/hal-rules/recommended.json"],
+  "extends": [{ "registry": "@you/hal-rules" }],
   "rulesDir": ["rules"],
   "rules": {
     "code-style/no-hardcoded-values": "off",

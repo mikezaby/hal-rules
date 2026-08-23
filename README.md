@@ -1,8 +1,8 @@
 # hal-rules
 
 > **"I'm sorry Dave, I'm afraid I can't do that."**
->
-> **Don't let the agent decide what your team's standards are.**
+
+**Don't let the agent decide what your team's standards are.**
 
 > [!WARNING]
 > **Work in progress. Expect things to move.**
@@ -98,7 +98,7 @@ artifact under review, not what it compiles to.
 
 ```json
 {
-  "extends": ["hal-rules/recommended.json"],
+  "extends": [{ "registry": "hal-rules" }],
   "rulesDir": ["rules"],
 
   "rules": {
@@ -127,6 +127,11 @@ artifact under review, not what it compiles to.
 | `plugins`      | `"name@marketplace"` → on/off, into `enabledPlugins`.       |
 | `mcp`          | Server name → config, into `mcpServers`.                    |
 | `settings`     | Spliced into `settings.json` as-is.                         |
+
+`rulesDir` appears here only because of `ours/deploy-checklist`, a rule this
+project wrote itself. Extending a registry needs no `rulesDir` — the registry
+brings its own `rules/` — so a config that enables nothing of its own can drop
+the line, which is what `hal init` scaffolds.
 
 Every key composes through `extends` the same way.
 
