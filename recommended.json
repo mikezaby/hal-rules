@@ -6,6 +6,7 @@
     "git/never-push": "on",
     "safety/never-publish": "on",
     "safety/never-deploy": "on",
+    "safety/bump-only-when-asked": "on",
     "documentation/docs-in-the-same-commit": "on",
     "documentation/no-scratch-files": "on",
     "testing/test-organization": "on",

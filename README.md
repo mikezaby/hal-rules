@@ -230,6 +230,7 @@ that claims to be generic.
 | `documentation/no-scratch-files`               | Plans and checklists belong in the conversation, not the repo                                       |        ✓         |                |             |
 | `git/never-push`                               | Commit locally when asked; pushing is the human's call                                              |        ✓         |                |             |
 | `safety/never-publish`                         | Preparing a release is fine; pushing it to a registry is a human's call                             |        ✓         |                |             |
+| `safety/bump-only-when-asked`                  | A version number is a release decision; wait to be told                                             |        ✓         |                |             |
 | `safety/never-deploy`                          | Build it, plan it, diff it — then hand the command to a human                                       |        ✓         |                |             |
 | `git/worktrees-for-risky-work`                 | Work in the current checkout for small changes                                                      |                  |                |             |
 | `testing/test-organization`                    | One test file per unit, grouped with describe blocks                                                |        ✓         |                |      ✓      |
