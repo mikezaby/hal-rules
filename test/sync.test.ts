@@ -9,7 +9,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
-import { applyVars, outdated, sync } from "./index.ts";
+import { applyVars, outdated, sync } from "../src/index.ts";
 
 const root = mkdtempSync(join(tmpdir(), "hal-sync-test-"));
 after(() => {

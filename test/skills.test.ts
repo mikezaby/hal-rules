@@ -3,8 +3,8 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
-import { readLock, writeLock } from "./index.ts";
-import { groupForDisplay, indexSkills, parseSource } from "./skills.ts";
+import { readLock, writeLock } from "../src/index.ts";
+import { groupForDisplay, indexSkills, parseSource } from "../src/skills.ts";
 
 const root = mkdtempSync(join(tmpdir(), "hal-skills-test-"));
 after(() => {

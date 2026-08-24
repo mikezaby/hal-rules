@@ -465,9 +465,9 @@ too once `create-hal-rules` is published. That name is free, unlike the
 
 ```bash
 pnpm build    # tsdown -> dist/*.mjs + .d.mts
-pnpm test     # node --test on src/*.test.ts
+pnpm test     # node --test on test/*.test.ts
 pnpm tsc      # typecheck
-pnpm lint     # eslint src
+pnpm lint     # eslint src test
 pnpm format   # prettier . --write
 ```
 

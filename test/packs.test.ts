@@ -17,7 +17,7 @@ import {
   loadConfig,
   readLock,
   writeLock,
-} from "./index.ts";
+} from "../src/index.ts";
 import {
   PACK_DIR,
   RULES_DIR,
@@ -27,7 +27,7 @@ import {
   packFromRef,
   parsePack,
   resolveExtends,
-} from "./packs.ts";
+} from "../src/packs.ts";
 
 const root = mkdtempSync(join(tmpdir(), "hal-packs-test-"));
 after(() => {

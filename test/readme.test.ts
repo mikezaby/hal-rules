@@ -10,7 +10,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { bootstrap, build, loadConfig } from "./index.ts";
+import { bootstrap, build, loadConfig } from "../src/index.ts";
 
 const root = mkdtempSync(join(tmpdir(), "hal-readme-test-"));
 after(() => {

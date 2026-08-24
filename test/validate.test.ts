@@ -10,7 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, test } from "node:test";
-import { build, validate } from "./index.ts";
+import { build, validate } from "../src/index.ts";
 
 const root = mkdtempSync(join(tmpdir(), "hal-validate-"));
 after(() => {

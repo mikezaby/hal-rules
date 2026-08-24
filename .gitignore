@@ -1,4 +1,4 @@
 node_modules/
 dist/
 .claude/rules/generated/
-src/fixtures/.out/
+test/fixtures/.out/

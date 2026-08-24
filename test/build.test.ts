@@ -17,7 +17,7 @@ import {
   buildWithChanges,
   formatDiff,
   summarise,
-} from "./index.ts";
+} from "../src/index.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const config = join(here, "fixtures/project/hal-rules.json");
@@ -80,7 +80,7 @@ test("the header drops a source path that climbs out of the project", () => {
   build(pack, out); // cwd is the repo: the pack is inside it, so the path is useful
   assert.match(
     read("code-style/no-magic"),
-    /generated from code-style\/no-magic \(src\//,
+    /generated from code-style\/no-magic \(test\//,
   );
   rmSync(out, { recursive: true, force: true });
 

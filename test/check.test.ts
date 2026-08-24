@@ -10,7 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
-import { build, check, writeLock } from "./index.ts";
+import { build, check, writeLock } from "../src/index.ts";
 
 const root = mkdtempSync(join(tmpdir(), "hal-check-test-"));
 after(() => {

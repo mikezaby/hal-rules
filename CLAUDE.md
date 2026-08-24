@@ -126,9 +126,9 @@ cannot leave the previous output half-wiped.
 
 ```
 pnpm build   tsdown -> dist/*.mjs + .d.mts
-pnpm test    node --test on src/*.test.ts (Node strips types natively, no test dep)
+pnpm test    node --test on test/*.test.ts (Node strips types natively, no test dep)
 pnpm tsc     typecheck
-pnpm lint    eslint src
+pnpm lint    eslint src test
 pnpm format  prettier . --write
 ```
 
