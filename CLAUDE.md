@@ -157,7 +157,7 @@ evidence, not invention.
 (`checks`, `findingsFile`, `adrDir`) or are a team preference. Left opt-in because
 they need a project-specific value or only fit some stacks:
 `workflow/before-finish` (`checks`), `workflow/out-of-scope-findings` (`findingsFile`),
-`git/worktrees-for-risky-work`.
+`git/worktrees-for-risky-work`, `git/commit-granularity`.
 
 Only four rules appeared in more than one project: `scope-discipline`,
 `before-finish`, `never-push`, `mark-deliberate-simplifications`. The rest are
