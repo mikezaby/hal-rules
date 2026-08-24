@@ -411,7 +411,6 @@ claims to be generic.
 | `documentation/docs-in-the-same-commit`        | A change that invalidates a doc fixes that doc too                                                  |        ✓         |                |             |
 | `documentation/no-scratch-files`               | Plans and checklists belong in the conversation, not the repo                                       |        ✓         |                |             |
 | `documentation/plain-prose`                    | Write like the person who did the work, not like a tool announcing it                               |        ✓         |                |             |
-| `git/commit-granularity`                       | One commit per coherent change, not one per work session                                            |                  |                |             |
 | `git/never-push`                               | Commit locally when asked; pushing is the human's call                                              |        ✓         |                |             |
 | `safety/never-publish`                         | Preparing a release is fine; pushing it to a registry is a human's call                             |        ✓         |                |             |
 | `safety/bump-only-when-asked`                  | A version number is a release decision; wait to be told                                             |        ✓         |                |             |
@@ -423,8 +422,8 @@ claims to be generic.
 | `workflow/out-of-scope-findings`               | Record problems you are not fixing instead of fixing or dropping them                               |                  | `findingsFile` |             |
 | `workflow/scope-discipline`                    | Change only what the request asks for                                                               |        ✓         |                |             |
 
-The five outside `recommended` are opt-in. Three need a project-specific value
-(`checks`, `findingsFile`, `adrDir`), and two are a team preference.
+The four outside `recommended` are opt-in. Three need a project-specific value
+(`checks`, `findingsFile`, `adrDir`), and one is a team preference.
 
 Worth knowing before you treat the pack as settled: only four of these appeared in
 more than one of the three source projects: `scope-discipline`, `before-finish`,
