@@ -398,9 +398,10 @@ belongs in a [skill](https://code.claude.com/docs/en/skills).
 ## The bundled pack
 
 Every rule was carved from a `CLAUDE.md` that was actually in use, across a
-TypeScript monorepo, a Rails service and a Nuxt app. None were invented. Three
-have since been removed for carrying one stack's assumptions into a pack that
-claims to be generic.
+TypeScript monorepo, a Rails service and a Nuxt app, with one exception:
+`git/commit-granularity`, added on direct instruction rather than lifted from
+any of those three. Three others have since been removed for carrying one
+stack's assumptions into a pack that claims to be generic.
 
 | Rule                                           |                                                                                                     | in `recommended` | vars           | path-scoped |
 | ---------------------------------------------- | --------------------------------------------------------------------------------------------------- | :--------------: | -------------- | :---------: |

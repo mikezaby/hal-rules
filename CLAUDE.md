@@ -151,7 +151,8 @@ Code's own docs warn about when rules conflict.
 
 Every rule was carved from a CLAUDE.md that was actually in use, blibliki among
 them. No rule exists here without a source line in one of them — the pack is
-evidence, not invention.
+evidence, not invention. One exception: `git/commit-granularity`, added on
+direct instruction rather than lifted from any real CLAUDE.md.
 
 `registry/recommended.json` enables fourteen of them; the rest need a project-specific value
 (`checks`, `findingsFile`, `adrDir`) or are a team preference. Left opt-in because
