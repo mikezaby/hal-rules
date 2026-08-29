@@ -293,9 +293,8 @@ neither on nor off:
 
 ```
 $ npx hal-rules@latest outdated
-4 rule(s) available, not in your config:
+3 rule(s) available, not in your config:
   documentation/architecture-decisions   (needs adrDir)
-  git/worktrees-by-default
   workflow/before-finish   (needs checks)
   workflow/out-of-scope-findings   (needs findingsFile)
 
@@ -439,15 +438,15 @@ stack's assumptions into a pack that claims to be generic.
 | `safety/never-publish`                         | Preparing a release is fine; pushing it to a registry is a human's call                             |        ✓         |                |             |
 | `safety/bump-only-when-asked`                  | A version number is a release decision; wait to be told                                             |        ✓         |                |             |
 | `safety/never-deploy`                          | Build it, plan it, diff it, then hand the command to a human                                        |        ✓         |                |             |
-| `git/worktrees-by-default`                     | Real work gets its own worktree; a fast one-off does not                                            |                  |                |             |
+| `git/worktrees-by-default`                     | Real work gets its own worktree; a fast one-off does not                                            |        ✓         |                |             |
 | `testing/test-organization`                    | One test file per unit, grouped with describe blocks                                                |        ✓         |                |      ✓      |
 | `workflow/before-finish`                       | The checks that must pass before work is called done                                                |                  | `checks`       |             |
 | `workflow/incremental-delivery`                | Ship one agreed item at a time so each can be tested                                                |        ✓         |                |             |
 | `workflow/out-of-scope-findings`               | Record problems you are not fixing instead of fixing or dropping them                               |                  | `findingsFile` |             |
 | `workflow/scope-discipline`                    | Change only what the request asks for                                                               |        ✓         |                |             |
 
-The four outside `recommended` are opt-in. Three need a project-specific value
-(`checks`, `findingsFile`, `adrDir`), and one is a team preference.
+The three outside `recommended` are opt-in, each because it needs a
+project-specific value: `checks`, `findingsFile`, `adrDir`.
 
 Worth knowing before you treat the pack as settled: only four of these appeared in
 more than one of the three source projects: `scope-discipline`, `before-finish`,

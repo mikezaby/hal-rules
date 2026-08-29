@@ -159,11 +159,10 @@ The pack's skills carry no such provenance rule. `research/manual-analyzer`, the
 first one, was specified directly. Skills are procedures rather than standing
 constraints, so none is in `recommended`.
 
-`registry/recommended.json` enables fourteen of them; the rest need a project-specific value
-(`checks`, `findingsFile`, `adrDir`) or are a team preference. Left opt-in because
-they need a project-specific value or only fit some stacks:
-`workflow/before-finish` (`checks`), `workflow/out-of-scope-findings` (`findingsFile`),
-`git/worktrees-by-default`.
+`registry/recommended.json` enables fifteen of them. The three left opt-in each need
+a project-specific value: `workflow/before-finish` (`checks`),
+`workflow/out-of-scope-findings` (`findingsFile`),
+`documentation/architecture-decisions` (`adrDir`).
 
 Only four rules appeared in more than one project: `scope-discipline`,
 `before-finish`, `never-push`, `mark-deliberate-simplifications`. The rest are

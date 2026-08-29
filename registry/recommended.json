@@ -4,6 +4,7 @@
     "workflow/incremental-delivery": "on",
     "git/never-push": "on",
     "git/commit-granularity": "on",
+    "git/worktrees-by-default": "on",
     "safety/never-publish": "on",
     "safety/never-deploy": "on",
     "safety/bump-only-when-asked": "on",

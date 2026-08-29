@@ -19,6 +19,9 @@ exactly which instructions moved.
   return to, stays in the current checkout. The slug changed because the old one
   now describes the wrong policy, so a config naming the old slug fails the build
   until it is updated. That break is why this is a minor, not a patch.
+- **Enabled** `git/worktrees-by-default` in `recommended`, so extending the pack
+  now turns it on. The three rules still outside `recommended` are the ones
+  needing a project-specific value.
 - Adherence is unverified. The rule generates and loads, but the probe in
   `docs/verifying-a-change.md` behaved the same with it on and off.
 
