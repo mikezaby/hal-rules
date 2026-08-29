@@ -17,6 +17,13 @@ exactly which instructions moved.
   `CLAUDE.md` in use somewhere; it was specified directly, and the README says so
   rather than letting the pack's provenance claim quietly cover it.
 
+- **Renamed and reversed** `git/worktrees-for-risky-work`, now
+  `git/worktrees-by-default`. The old rule said to stay in the current checkout
+  unless the work was risky. The new one says the opposite: real work gets a
+  worktree, and only a fast one-off, one or two light prompts with nothing to
+  return to, stays in the current checkout. The slug changed because the old one
+  now describes the wrong policy; update it in your config if you had it.
+
 ### Skills
 
 - **Added** skills to the pack. A registry can hold a `skills/` directory beside

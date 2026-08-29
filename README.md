@@ -295,7 +295,7 @@ neither on nor off:
 $ npx hal-rules@latest outdated
 4 rule(s) available, not in your config:
   documentation/architecture-decisions   (needs adrDir)
-  git/worktrees-for-risky-work
+  git/worktrees-by-default
   workflow/before-finish   (needs checks)
   workflow/out-of-scope-findings   (needs findingsFile)
 
@@ -439,7 +439,7 @@ stack's assumptions into a pack that claims to be generic.
 | `safety/never-publish`                         | Preparing a release is fine; pushing it to a registry is a human's call                             |        ✓         |                |             |
 | `safety/bump-only-when-asked`                  | A version number is a release decision; wait to be told                                             |        ✓         |                |             |
 | `safety/never-deploy`                          | Build it, plan it, diff it, then hand the command to a human                                        |        ✓         |                |             |
-| `git/worktrees-for-risky-work`                 | Work in the current checkout for small changes                                                      |                  |                |             |
+| `git/worktrees-by-default`                     | Real work gets its own worktree; a fast one-off does not                                            |                  |                |             |
 | `testing/test-organization`                    | One test file per unit, grouped with describe blocks                                                |        ✓         |                |      ✓      |
 | `workflow/before-finish`                       | The checks that must pass before work is called done                                                |                  | `checks`       |             |
 | `workflow/incremental-delivery`                | Ship one agreed item at a time so each can be tested                                                |        ✓         |                |             |

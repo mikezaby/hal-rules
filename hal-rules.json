@@ -30,7 +30,8 @@
       {
         "adrDir": "docs/adr/"
       }
-    ]
+    ],
+    "git/worktrees-by-default": "on"
   },
   "skills": {
     "research/manual-analyzer": "on"
