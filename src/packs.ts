@@ -3,7 +3,12 @@ import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AiRulesConfig } from "./index.ts";
-import { type LockEntry, type Source, download, resolveSha } from "./skills.ts";
+import {
+  type FetchedEntry,
+  type Source,
+  download,
+  resolveSha,
+} from "./skills.ts";
 
 /** Committed, not gitignored: a pack is not reproducible from anything local. */
 export const PACK_DIR = ".hal/packs";
@@ -16,6 +21,9 @@ const REGISTRY_DIR = "registry";
 
 /** A registry holds its rule bodies here. Convention, not configuration. */
 export const RULES_DIR = "rules";
+
+/** And its skill directories here, one `<topic>/<name>/SKILL.md` each. */
+export const SKILLS_DIR = "skills";
 
 /** The preset a registry offers when none is named. */
 export const DEFAULT_PRESET = "recommended";
@@ -255,7 +263,7 @@ export function collectPacks(
 export interface PackReport {
   installed: string[];
   removed: string[];
-  lock: Record<string, LockEntry>;
+  lock: Record<string, FetchedEntry>;
 }
 
 /**
@@ -265,9 +273,9 @@ export interface PackReport {
  */
 async function ensure(
   pack: PackRef,
-  previous: Record<string, LockEntry>,
+  previous: Record<string, FetchedEntry>,
   update: boolean,
-): Promise<{ entry: LockEntry; fetched: boolean }> {
+): Promise<{ entry: FetchedEntry; fetched: boolean }> {
   const locked = previous[pack.spec];
   const wanted = pack.source.ref ?? "HEAD";
   if (!update && locked?.ref === wanted && existsSync(pack.dir)) {
@@ -275,7 +283,7 @@ async function ensure(
   }
 
   const { ref, sha } = await resolveSha(pack.source);
-  const entry: LockEntry = { source: pack.spec, ref, sha, path: PACK_DIR };
+  const entry: FetchedEntry = { source: pack.spec, ref, sha, path: PACK_DIR };
   if (locked?.sha === sha && existsSync(pack.dir)) {
     return { entry, fetched: false };
   }
@@ -299,10 +307,10 @@ async function ensure(
 export async function installPacks(
   configPath: string,
   projectDir = ".",
-  previous: Record<string, LockEntry> = {},
+  previous: Record<string, FetchedEntry> = {},
   { update = false } = {},
 ): Promise<PackReport> {
-  const lock: Record<string, LockEntry> = {};
+  const lock: Record<string, FetchedEntry> = {};
   const installed: string[] = [];
 
   for (;;) {

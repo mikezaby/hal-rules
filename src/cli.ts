@@ -169,7 +169,12 @@ try {
     Object.keys(resolved.skills).length > 0 ||
     Object.keys(previous.skills).length > 0
   ) {
-    const report = await installSkills(resolved.skills, ".", previous.skills);
+    const report = await installSkills(
+      resolved.skills,
+      ".",
+      previous.skills,
+      resolved.skillsDirs,
+    );
     for (const line of report.installed) console.log(`  skill ${line}`);
     for (const name of report.removed)
       console.log(`  removed skill ${name} (no longer in config)`);

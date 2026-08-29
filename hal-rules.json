@@ -31,5 +31,8 @@
         "adrDir": "docs/adr/"
       }
     ]
+  },
+  "skills": {
+    "research/manual-analyzer": "on"
   }
 }

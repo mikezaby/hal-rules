@@ -57,6 +57,11 @@ test("the Configure example is a config that actually builds", () => {
 
   // The bootstrap keys in the same example must land where the table says.
   const config = loadConfig(path);
+  assert.equal(
+    config.skills["research/manual-analyzer"],
+    "on",
+    "a pack skill in the example resolves; build would have thrown otherwise",
+  );
   const [settings, mcp] = bootstrap(config, dir);
   assert.equal(settings?.status, "created");
   assert.equal(mcp?.status, "created");

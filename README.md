@@ -113,6 +113,7 @@ artifact under review, not what it compiles to.
     }
   },
   "plugins": { "figma@claude-plugins-official": "on" },
+  "skills": { "research/manual-analyzer": "on" },
   "mcp": { "internal-api": { "command": "./bin/mcp-server" } },
   "settings": { "permissions": { "allow": ["Bash(pnpm test:*)"] } }
 }
@@ -125,6 +126,7 @@ artifact under review, not what it compiles to.
 | `rules`        | `"on"`, `"off"`, or `["on", { var: value }]` per rule slug. |
 | `marketplaces` | Verbatim into `extraKnownMarketplaces`.                     |
 | `plugins`      | `"name@marketplace"` → on/off, into `enabledPlugins`.       |
+| `skills`       | Pack slug → on/off, or `github:owner/repo` → skill paths.   |
 | `mcp`          | Server name → config, into `mcpServers`.                    |
 | `settings`     | Spliced into `settings.json` as-is.                         |
 
@@ -134,6 +136,22 @@ brings its own `rules/` — so a config that enables nothing of its own can drop
 the line, which is what `hal init` scaffolds.
 
 Every key composes through `extends` the same way.
+
+### Turn on a skill the pack ships
+
+A registry keeps skill directories under `skills/`, next to its `rules/`. They
+are addressed by slug and switched on or off exactly like a rule:
+
+```json
+"skills": {
+  "research/manual-analyzer": "on"
+}
+```
+
+`registry/skills/research/manual-analyzer/SKILL.md` lands as
+`.claude/skills/manual-analyzer/`. A `skills/` directory beside your own
+`hal-rules.json` is searched last, so dropping the same slug in it replaces the
+pack's copy whole.
 
 ### Cherry-pick skills from a repo
 
@@ -161,6 +179,9 @@ engineering/  ask-matt · code-review · diagnosing-bugs · tdd · to-spec · to
 productivity/ grill-me · handoff · teach · writing-for-agents …
 ```
 
+Both shapes share the `skills` key: a `github:` key maps to a list of paths in
+that repo, any other key is a pack slug set to `"on"` or `"off"`.
+
 The folder is the **config's** vocabulary, not a layout on disk. Claude Code
 discovers skills exactly one level deep and treats the directory name as the
 command, so `engineering/tdd` installs to `.claude/skills/tdd/` and runs as
@@ -173,8 +194,9 @@ path for each skill, so provenance survives the flattening. A ref is always
 pinned to a SHA, because otherwise someone else's edit silently changes
 instructions your agent follows.
 
-**Commit the fetched skills.** Unlike generated rules, they are not reproducible
-from anything local. Having them in the repo means the team reviews the diff when
+**Commit the installed skills.** Unlike generated rules, a fetched one is not
+reproducible from anything local, and a pack one sits in the same directory, so
+the whole of `.claude/skills/` is committed rather than half of it. Having them in the repo means the team reviews the diff when
 a version moves, and nobody needs the network to work. Drop a skill from
 the config and the next run deletes it.
 
@@ -430,6 +452,17 @@ The four outside `recommended` are opt-in. Three need a project-specific value
 Worth knowing before you treat the pack as settled: only four of these appeared in
 more than one of the three source projects: `scope-discipline`, `before-finish`,
 `never-push` and `mark-deliberate-simplifications`. The rest are single-source.
+
+### Skills in the pack
+
+| Skill                      |                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------- |
+| `research/manual-analyzer` | Read another product's manual and write down what our project should do about it |
+
+None are in `recommended`. A rule is a standing constraint and belongs on by
+default; a skill is a procedure you invoke, so turning one on is a choice about
+how a team works. Unlike the rules, this one was not carved from a `CLAUDE.md`
+in use anywhere. It was specified directly.
 
 ## settings.json and .mcp.json are bootstrapped, not owned
 

@@ -11,6 +11,14 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, relative, sep } from "node:path";
 
+/** A pack skill is on or off. A `github:` key carries a path list instead. */
+export type SkillState = "on" | "off";
+
+/** Which of the two shapes a `skills` key is: a repo to fetch, or a pack slug. */
+export function isSource(key: string): boolean {
+  return key.startsWith("github:");
+}
+
 /** `github:owner/repo` or `github:owner/repo#ref`. */
 export interface Source {
   owner: string;
@@ -29,10 +37,20 @@ export interface SkillEntry {
 
 export interface LockEntry {
   source: string;
-  ref: string;
-  sha: string;
+  /** Absent for a pack skill: it came off disk, so there is nothing to pin. */
+  ref?: string;
+  sha?: string;
   path: string;
 }
+
+/** Anything fetched from a repo, so the pin is always there. */
+export interface FetchedEntry extends LockEntry {
+  ref: string;
+  sha: string;
+}
+
+/** What a pack skill records as its source, where a fetched one records a repo. */
+export const PACK_SOURCE = "pack";
 
 export function parseSource(spec: string): Source {
   const match = /^github:([^/#]+)\/([^/#]+)(?:#(.+))?$/.exec(spec);
@@ -137,22 +155,68 @@ export interface InstallReport {
   lock: Record<string, LockEntry>;
 }
 
+/** Last dir wins, so a project shadows a pack skill by dropping the slug in place. */
+export function findSkill(slug: string, dirs: string[]): string {
+  for (const dir of [...dirs].reverse()) {
+    const path = join(dir, slug);
+    if (existsSync(join(path, "SKILL.md"))) return path;
+  }
+  throw new Error(
+    `No skill "${slug}" found.\n` +
+      (dirs.length > 0
+        ? `  looked for ${slug}/SKILL.md in:\n${dirs.map((dir) => `    ${dir}`).join("\n")}`
+        : "  no registry in the extends chain has a skills/ directory"),
+  );
+}
+
 /**
  * Skills land flat in `.claude/skills/<name>/` because that is the only layout
  * Claude Code discovers, since the directory name IS the command. The category from
  * the config is kept in the lock file so provenance is not lost.
+ *
+ * A `github:` key names a repo to fetch; any other key is a slug resolved from
+ * the registries in the extends chain, on or off the way a rule is.
  */
 export async function installSkills(
-  wanted: Record<string, string[]>,
+  wanted: Record<string, string[] | SkillState>,
   projectDir: string,
   previous: Record<string, LockEntry> = {},
+  skillsDirs: string[] = [],
 ): Promise<InstallReport> {
   const skillsDir = join(projectDir, ".claude/skills");
   const lock: Record<string, LockEntry> = {};
   const installed: string[] = [];
   const claimedBy = new Map<string, string>();
 
+  const claim = (name: string, by: string): void => {
+    const owner = claimedBy.get(name);
+    if (owner) {
+      throw new Error(
+        `Two sources both provide the skill name "${name}":\n` +
+          `  ${owner}\n  ${by}\n` +
+          `  Claude Code keys skills by directory name, so one would silently win.`,
+      );
+    }
+    claimedBy.set(name, by);
+  };
+
+  // A malformed state is reported by validate; here anything but "on" is a skip.
+  for (const [slug, state] of Object.entries(wanted)) {
+    if (isSource(slug) || state !== "on") continue;
+    const from = findSkill(slug, skillsDirs);
+    const name = slug.split("/").pop() ?? slug;
+    claim(name, `${PACK_SOURCE} (${slug})`);
+
+    const dest = join(skillsDir, name);
+    rmSync(dest, { recursive: true, force: true });
+    mkdirSync(dirname(dest), { recursive: true });
+    cpSync(from, dest, { recursive: true });
+    lock[name] = { source: PACK_SOURCE, path: slug };
+    installed.push(`${name}  <-  ${PACK_SOURCE} (${slug})`);
+  }
+
   for (const [spec, paths] of Object.entries(wanted)) {
+    if (!Array.isArray(paths)) continue;
     if (paths.length === 0) continue;
     const { root, index, ref, sha } = await fetchSource(spec);
     try {
@@ -170,15 +234,7 @@ export async function installSkills(
               `\n  run: hal skills list ${spec}`,
           );
         }
-        const owner = claimedBy.get(entry.name);
-        if (owner) {
-          throw new Error(
-            `Two sources both provide the skill name "${entry.name}":\n` +
-              `  ${owner}\n  ${spec} (${entry.path})\n` +
-              `  Claude Code keys skills by directory name, so one would silently win.`,
-          );
-        }
-        claimedBy.set(entry.name, `${spec} (${entry.path})`);
+        claim(entry.name, `${spec} (${entry.path})`);
 
         const dest = join(skillsDir, entry.name);
         rmSync(dest, { recursive: true, force: true });

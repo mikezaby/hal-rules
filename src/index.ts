@@ -10,8 +10,9 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import type { ExtendsEntry } from "./packs.ts";
-import { PACK_DIR, collectPacks, resolveExtends } from "./packs.ts";
-import type { LockEntry } from "./skills.ts";
+import { PACK_DIR, SKILLS_DIR, collectPacks, resolveExtends } from "./packs.ts";
+import type { FetchedEntry, LockEntry, SkillState } from "./skills.ts";
+import { findSkill, isSource } from "./skills.ts";
 
 /** A variable value: a string, or a list rendered as markdown bullets. */
 export type RuleVars = Record<string, string | string[]>;
@@ -37,18 +38,23 @@ export interface AiRulesConfig {
   mcp?: Record<string, unknown>;
   /** Copied into settings.json as-is, so no Claude Code setting needs modelling here. */
   settings?: Record<string, unknown>;
-  /** `"github:owner/repo#ref"` -> skill paths as the source groups them. */
-  skills?: Record<string, string[]>;
+  /**
+   * Two shapes on one key. A `github:owner/repo#ref` key maps to skill paths as
+   * the source groups them. Any other key is a slug under a registry's `skills/`
+   * directory, on or off the way a rule is.
+   */
+  skills?: Record<string, string[] | SkillState>;
 }
 
 export interface ResolvedConfig {
   rulesDirs: string[];
+  skillsDirs: string[];
   rules: Record<string, RuleState>;
   marketplaces: Record<string, unknown>;
   plugins: Record<string, PluginState>;
   mcp: Record<string, unknown>;
   settings: Record<string, unknown>;
-  skills: Record<string, string[]>;
+  skills: Record<string, string[] | SkillState>;
 }
 
 const CONFIG_KEYS = new Set([
@@ -74,6 +80,7 @@ export function loadConfig(
   const path = resolve(file);
   const out: ResolvedConfig = {
     rulesDirs: [],
+    skillsDirs: [],
     rules: {},
     marketplaces: {},
     plugins: {},
@@ -109,6 +116,7 @@ export function loadConfig(
       projectDir,
     );
     out.rulesDirs.push(...inherited.rulesDirs);
+    out.skillsDirs.push(...inherited.skillsDirs);
     merge(out, inherited);
   }
   // A declared rulesDir that is missing stays an error worth seeing; the
@@ -118,6 +126,10 @@ export function loadConfig(
   out.rulesDirs.push(
     ...(declared ? dirs : dirs.filter((dir) => existsSync(dir))),
   );
+  // Skill bodies have no declared form: a `skills/` beside the config counts
+  // when it is there, which is how a registry contributes its own.
+  const skillsDir = resolve(base, SKILLS_DIR);
+  if (existsSync(skillsDir)) out.skillsDirs.push(skillsDir);
   merge(out, config);
   return out;
 }
@@ -245,6 +257,29 @@ function plan(
         content: withHeader(body, slug, source),
         slug,
       });
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  for (const [key, state] of Object.entries(config.skills)) {
+    if (isSource(key)) {
+      if (!Array.isArray(state)) {
+        errors.push(
+          `skill source "${key}" is set to ${JSON.stringify(state)}. Expected a list of skill paths`,
+        );
+      }
+      continue;
+    }
+    if (state !== "on" && state !== "off") {
+      errors.push(
+        `skill "${key}" is set to ${JSON.stringify(state)}. Expected "on" or "off"`,
+      );
+      continue;
+    }
+    if (state === "off") continue;
+    try {
+      findSkill(key, config.skillsDirs);
     } catch (error) {
       errors.push(error instanceof Error ? error.message : String(error));
     }
@@ -534,7 +569,7 @@ export const LOCK_FILE = "hal-rules.lock.json";
 
 interface Lock {
   skills: Record<string, LockEntry>;
-  packs: Record<string, LockEntry>;
+  packs: Record<string, FetchedEntry>;
 }
 
 export function readLock(projectDir = "."): Lock {
@@ -671,7 +706,11 @@ function checkSkills(
 ): CheckProblem[] {
   const problems: CheckProblem[] = [];
   const locked = readLock(projectDir).skills;
-  const wanted = new Set(Object.values(config.skills).flat());
+  const wanted = new Set<string>();
+  for (const [key, state] of Object.entries(config.skills)) {
+    if (Array.isArray(state)) for (const path of state) wanted.add(path);
+    else if (!isSource(key) && state === "on") wanted.add(key);
+  }
 
   const lockedPaths = new Map(
     Object.entries(locked).map(([name, entry]) => [

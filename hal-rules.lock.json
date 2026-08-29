@@ -1,0 +1,8 @@
+{
+  "skills": {
+    "manual-analyzer": {
+      "source": "pack",
+      "path": "research/manual-analyzer"
+    }
+  }
+}

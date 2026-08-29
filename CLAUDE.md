@@ -146,13 +146,18 @@ Code's own docs warn about when rules conflict.
 ## The pack
 
 `registry/` holds the pack, kept apart from the generator's code in `src/`.
-`registry/rules/` is one file per rule, foldered by topic:
+`registry/skills/` sits beside it, one `<topic>/<name>/SKILL.md` directory per
+skill. `registry/rules/` is one file per rule, foldered by topic:
 `workflow` · `git` · `documentation` · `testing` · `code-style` · `architecture` · `safety`
 
 Every rule was carved from a CLAUDE.md that was actually in use, blibliki among
 them. No rule exists here without a source line in one of them — the pack is
 evidence, not invention. One exception: `git/commit-granularity`, added on
 direct instruction rather than lifted from any real CLAUDE.md.
+
+The pack's skills carry no such provenance rule. `research/manual-analyzer`, the
+first one, was specified directly. Skills are procedures rather than standing
+constraints, so none is in `recommended`.
 
 `registry/recommended.json` enables fourteen of them; the rest need a project-specific value
 (`checks`, `findingsFile`, `adrDir`) or are a team preference. Left opt-in because
@@ -196,12 +201,19 @@ verified when the same prompt behaves differently with it on and off.
 
 ## Skills
 
-`skills` fetches selected skills from a GitHub repo into `.claude/skills/<name>/`,
-pinned by SHA in `hal-rules.lock.json`. Config names them by the source's own
-folders (`engineering/tdd`); disk is flat because **Claude Code discovers skills
+The `skills` key carries two shapes. A `github:owner/repo` key fetches selected
+skills from that repo into `.claude/skills/<name>/`, pinned by SHA in
+`hal-rules.lock.json`. Any other key is a slug under a registry's `skills/`
+directory, `"on"` or `"off"` the way a rule is, resolved last-dir-wins so a
+project shadows a pack skill by dropping the slug in its own `skills/`. There is
+no `skillsDir` key: a `skills/` beside a config counts when it is there, which is
+also how a registry contributes its own. Config names fetched skills by the
+source's own folders (`engineering/tdd`); disk is flat because **Claude Code discovers skills
 exactly one level deep and the directory name is the command** — measured, and a
-nested directory silently never loads. Fetched skills are committed, not
-gitignored: they are not reproducible from anything local.
+nested directory silently never loads. Installed skills are committed, not
+gitignored: a fetched one is not reproducible from anything local, and a pack one
+lands in the same directory, so the whole of `.claude/skills/` is committed
+rather than half of it.
 
 ## Mechanism facts (verified 2026-08-23, code.claude.com/docs)
 
