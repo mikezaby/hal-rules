@@ -8,6 +8,46 @@ Rule wording changes are listed as carefully as code changes: a reworded rule
 changes what your agent does. After updating, `npx hal-rules --diff` shows
 exactly which instructions moved.
 
+## 0.7.0 (2026-08-29)
+
+### Rules
+
+- **Added** `git/commit-granularity` (in `recommended`). One commit per coherent
+  change, not one per work session. The first rule in the pack not carved from a
+  `CLAUDE.md` in use somewhere; it was specified directly, and the README says so
+  rather than letting the pack's provenance claim quietly cover it.
+
+### Skills
+
+- **Added** skills to the pack. A registry can hold a `skills/` directory beside
+  its `rules/`, one `<topic>/<name>/SKILL.md` each, and the `skills` key now
+  carries two shapes: a `github:owner/repo` key still maps to a list of paths to
+  fetch, and any other key is a pack slug set to `"on"` or `"off"` the way a rule
+  is. Existing configs are unaffected.
+- There is no `skillsDir` key. A `skills/` beside a config counts when it is
+  there, which is how a registry contributes its own and how a project shadows a
+  pack skill by dropping the same slug in its own `skills/`. Last dir wins,
+  matching how rule files resolve.
+- **Added** `research/manual-analyzer`, the first skill in the pack. Give it a
+  URL to another product's manual and it downloads the document, reads all of it,
+  and writes `docs/research/<product>-<document>.md` covering overlapping
+  features, gaps worth closing, the constraint numbers, and what is deliberately
+  not worth copying. Every claim cites a page.
+- No skill is in `recommended`. A rule is a standing constraint and belongs on by
+  default; a skill is a procedure you invoke, so turning one on is a choice about
+  how a team works.
+- A config error in the `skills` key is now reported by `validate` alongside
+  everything else: a slug no registry provides, a state that is not `"on"` or
+  `"off"`, or a `github:` key that does not map to a list.
+
+### Tool
+
+- `hal-rules.lock.json` records a pack skill with its slug and no pin, since it
+  came off disk. Fetched skills keep their ref and sha as before.
+- Installed skills are committed either way. A fetched one is not reproducible
+  from anything local, and a pack one lands in the same directory, so the whole
+  of `.claude/skills/` is committed rather than half of it.
+
 ## 0.6.0 (2026-08-24)
 
 ### Rules
