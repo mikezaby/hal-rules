@@ -22,7 +22,16 @@ exactly which instructions moved.
 - **Enabled** `git/worktrees-by-default` in `recommended`, so extending the pack
   now turns it on. The three rules still outside `recommended` are the ones
   needing a project-specific value.
-- Adherence is unverified. The rule generates and loads, but the probe in
+- Adherence is unverified.
+
+### Skills
+
+- `research/manual-analyzer` now takes a local file path or a directory as well
+  as a URL. The reading half always worked on a file on disk; the skill's own
+  description said "given a URL", which is what decides when Claude reaches for
+  it. A directory means every PDF under it, read one at a time with the file list
+  printed first, so a twenty-manual scan is twenty passes and its size is visible
+  before it starts. The rule generates and loads, but the probe in
   `docs/verifying-a-change.md` behaved the same with it on and off.
 
 ## 0.7.0 (2026-08-29)

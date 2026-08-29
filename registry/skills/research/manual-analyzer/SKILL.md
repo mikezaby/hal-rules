@@ -1,6 +1,6 @@
 ---
 name: manual-analyzer
-description: Use when given a URL to another product's manual, datasheet, spec or docs site and asked what our project should learn from it. Downloads the document, reads all of it, and writes a record into docs/research/ covering overlapping features, gaps worth closing, and things deliberately not worth copying.
+description: Use when given another product's manual, datasheet, spec or docs site, as a URL, a local file, or a folder of manuals to scan in bulk, and asked what our project should learn from it. Reads all of each document and writes a record into docs/research/ covering overlapping features, gaps worth closing, and things deliberately not worth copying.
 ---
 
 # Manual Analyzer
@@ -10,29 +10,48 @@ do about it. The output is a document, never a code change.
 
 ## Input
 
-A URL to a manual, datasheet, reference guide or docs site.
+A manual, datasheet, reference guide or docs site, as any of:
 
-If a product is named with no URL, ask for one. Do not analyze from memory. A
+- a URL
+- a path to a file already on disk
+- a path to a **directory**, meaning every PDF under it, recursively
+
+If a product is named with none of those, ask for one. Do not analyze from memory. A
 manual is versioned and specific, and a recalled feature list is wrong in
 exactly the details that decide whether a feature is worth copying.
 
-## 1. Fetch the whole thing
+## 1. Get the whole thing
 
-A PDF:
+A PDF behind a URL:
 
 ```
 curl -fL -o /tmp/<slug>.pdf '<url>'
 ```
 
-Then read it with the Read tool's `pages` parameter, twenty pages per call,
+A PDF already on disk needs no download. Read it where it is, and do not copy it
+into the repo.
+
+A directory: list what you found before reading anything, so the size of the job
+is visible.
+
+```
+find <dir> -iname '*.pdf' | sort
+```
+
+Then work through them **one at a time**, finishing each document's write-up
+before opening the next, and say which one you are on. A folder of twenty
+manuals is twenty passes, not one blurred pass over everything. If one file
+fails to open, say so, skip it, and keep going.
+
+Either way, read each document with the Read tool's `pages` parameter, twenty pages per call,
 from page 1 until Read runs off the end. **Read all of it.** The first twenty
 pages are the marketing and the safety notices; the flows worth stealing are in
 the middle, and the limits worth knowing are in the appendix tables.
 
 A docs site: fetch the index, then every page it links inside the same section.
 
-If the fetch fails, say so and stop. Do not substitute a web search summary for
-the document.
+If the fetch fails, or the path is not there, say so and stop. Do not substitute
+a web search summary for the document.
 
 ## 2. Read for four things
 
@@ -57,7 +76,7 @@ One file per document: `docs/research/<product>-<document>.md`.
 ```markdown
 # <Product> <Document>
 
-Source: <url>
+Source: <url, or the file path and where it came from>
 Version/date on the document: <as printed, not today's date>
 Read: pages 1-<n>
 
@@ -99,4 +118,8 @@ What the manual does not answer.
 - Do not open a PR, file issues, or start implementing. Adopting any of this is
   a separate decision by a person.
 - Analyzing a second document about the same product edits the existing file
-  rather than adding another.
+  rather than adding another. This is what keeps a folder scan from producing
+  five near-identical files for one product's five manuals.
+- Finish with one short list of which documents produced which file, and which
+  were skipped. After a folder scan that list is the only way to tell what was
+  actually read.
