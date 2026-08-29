@@ -8,6 +8,20 @@ Rule wording changes are listed as carefully as code changes: a reworded rule
 changes what your agent does. After updating, `npx hal-rules --diff` shows
 exactly which instructions moved.
 
+## Unreleased
+
+### Rules
+
+- **Renamed and reversed** `git/worktrees-for-risky-work`, now
+  `git/worktrees-by-default`. The old rule said to stay in the current checkout
+  unless the work was risky. The new one says the opposite: real work gets a
+  worktree, and only a fast one-off, one or two light prompts with nothing to
+  return to, stays in the current checkout. The slug changed because the old one
+  now describes the wrong policy, so a config naming the old slug fails the build
+  until it is updated. That break is why this is a minor, not a patch.
+- Adherence is unverified. The rule generates and loads, but the probe in
+  `docs/verifying-a-change.md` behaved the same with it on and off.
+
 ## 0.7.0 (2026-08-29)
 
 ### Rules
@@ -16,13 +30,6 @@ exactly which instructions moved.
   change, not one per work session. The first rule in the pack not carved from a
   `CLAUDE.md` in use somewhere; it was specified directly, and the README says so
   rather than letting the pack's provenance claim quietly cover it.
-
-- **Renamed and reversed** `git/worktrees-for-risky-work`, now
-  `git/worktrees-by-default`. The old rule said to stay in the current checkout
-  unless the work was risky. The new one says the opposite: real work gets a
-  worktree, and only a fast one-off, one or two light prompts with nothing to
-  return to, stays in the current checkout. The slug changed because the old one
-  now describes the wrong policy; update it in your config if you had it.
 
 ### Skills
 
