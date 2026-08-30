@@ -115,8 +115,9 @@ TypeScript in `src/`, ESM, built with tsdown. Config extracted from blibliki:
 eslint flat config (`strictTypeChecked` + `stylisticTypeChecked`, `projectService`),
 prettier with the trivago import sorter, strict tsconfig with `noUncheckedIndexedAccess`.
 
-`hal outdated` lists pack rules absent from the config; `hal sync` adds them as
-`"off"`. `hal check` compares generated output against the config, read-only, exiting
+`hal list` prints every rule and skill on offer with its config state (`on`,
+`off`, `unset`) and the vars it needs; `hal sync` adds the unset rules as
+`"off"`. `outdated` was folded into `list`. `hal check` compares generated output against the config, read-only, exiting
 non-zero on drift. Rules are gitignored so it is a local pre-flight for them;
 for committed skills it is a real CI gate.
 

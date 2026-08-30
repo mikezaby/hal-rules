@@ -9,7 +9,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
-import { applyVars, outdated, sync } from "../src/index.ts";
+import { applyVars, available, outdated, sync } from "../src/index.ts";
 
 const root = mkdtempSync(join(tmpdir(), "hal-sync-test-"));
 after(() => {
@@ -33,6 +33,42 @@ function project(name: string, rules: Record<string, unknown>) {
 
 const config = (path: string) =>
   JSON.parse(readFileSync(path, "utf8")) as { rules: Record<string, unknown> };
+
+test("available lists every rule and skill with what the config says", () => {
+  const { dir, path } = project("all", {
+    "ours/one": "on",
+    "ours/two": "off",
+  });
+  mkdirSync(join(dir, "skills/topic/go"), { recursive: true });
+  writeFileSync(join(dir, "skills/topic/go/SKILL.md"), "Track {{tracker}}\n");
+  mkdirSync(join(dir, "skills/topic/stay"), { recursive: true });
+  writeFileSync(join(dir, "skills/topic/stay/SKILL.md"), "# Stay\n");
+  writeFileSync(
+    path,
+    JSON.stringify({
+      rulesDir: ["rules"],
+      rules: { "ours/one": "on", "ours/two": ["off", {}] },
+      skills: { "topic/go": ["on", { tracker: "github" }] },
+    }),
+  );
+
+  const { rules, skills } = available(path);
+  assert.deepEqual(
+    rules.map((r) => [r.slug, r.state]),
+    [
+      ["ours/needy", "unset"],
+      ["ours/one", "on"],
+      ["ours/two", "off"],
+    ],
+  );
+  assert.deepEqual(
+    skills.map((s) => [s.slug, s.state, s.vars]),
+    [
+      ["topic/go", "on", ["tracker"]],
+      ["topic/stay", "unset", []],
+    ],
+  );
+});
 
 test("lists rules in the pack that the config never mentions", () => {
   const { path } = project("gaps", { "ours/one": "on" });

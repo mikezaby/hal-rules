@@ -12,7 +12,7 @@ import { dirname, join, relative, resolve, sep } from "node:path";
 import type { ExtendsEntry } from "./packs.ts";
 import { PACK_DIR, SKILLS_DIR, collectPacks, resolveExtends } from "./packs.ts";
 import type { FetchedEntry, LockEntry, SkillState } from "./skills.ts";
-import { findSkill, isSource } from "./skills.ts";
+import { findSkill, indexSkills, isSource } from "./skills.ts";
 import type { RuleVars } from "./vars.ts";
 import { applyVars, stateOf } from "./vars.ts";
 
@@ -737,8 +737,59 @@ export function summarise(changes: Change[]): string[] {
 
 export interface Available {
   slug: string;
+  /** What the config says, or "unset" when it never mentions the slug. */
+  state: "on" | "off" | "unset";
   /** Variables the rule needs, so `sync` can scaffold placeholders. */
   vars: string[];
+}
+
+const varsIn = (body: string): string[] => [
+  ...new Set([...body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1] ?? "")),
+];
+
+const stateIn = (
+  config: Record<string, unknown>,
+  slug: string,
+): Available["state"] =>
+  slug in config ? (stateOf(slug, config[slug])[0] as "on" | "off") : "unset";
+
+/**
+ * Every rule and skill the packs and the project's own dirs offer, with what
+ * the config says about each. A later dir shadows an earlier one, as in a build.
+ */
+export function available(configPath = DEFAULT_CONFIG): {
+  rules: Available[];
+  skills: Available[];
+} {
+  const config = loadConfig(configPath);
+  const rules = new Map<string, Available>();
+  const skills = new Map<string, Available>();
+
+  for (const dir of config.rulesDirs) {
+    if (!existsSync(dir)) continue;
+    for (const rel of listMarkdown(dir)) {
+      const slug = rel.replace(/\.md$/, "");
+      rules.set(slug, {
+        slug,
+        state: stateIn(config.rules, slug),
+        vars: varsIn(readFileSync(join(dir, rel), "utf8")),
+      });
+    }
+  }
+  for (const dir of config.skillsDirs) {
+    if (!existsSync(dir)) continue;
+    for (const entry of new Set(indexSkills(dir).values())) {
+      const body = readFileSync(join(dir, entry.repoPath, "SKILL.md"), "utf8");
+      skills.set(entry.path, {
+        slug: entry.path,
+        state: stateIn(config.skills, entry.path),
+        vars: varsIn(body),
+      });
+    }
+  }
+  const sorted = (found: Map<string, Available>) =>
+    [...found.values()].sort((a, b) => a.slug.localeCompare(b.slug));
+  return { rules: sorted(rules), skills: sorted(skills) };
 }
 
 /**
@@ -747,27 +798,7 @@ export interface Available {
  * one pins today's list, and nothing otherwise tells you a rule shipped.
  */
 export function outdated(configPath = DEFAULT_CONFIG): Available[] {
-  const config = loadConfig(configPath);
-  const known = new Set(Object.keys(config.rules));
-  const found = new Map<string, Available>();
-
-  for (const dir of config.rulesDirs) {
-    if (!existsSync(dir)) continue;
-    for (const rel of listMarkdown(dir)) {
-      const slug = rel.replace(/\.md$/, "");
-      if (known.has(slug) || found.has(slug)) continue;
-      const body = readFileSync(join(dir, rel), "utf8");
-      found.set(slug, {
-        slug,
-        vars: [
-          ...new Set(
-            [...body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1] ?? ""),
-          ),
-        ],
-      });
-    }
-  }
-  return [...found.values()].sort((a, b) => a.slug.localeCompare(b.slug));
+  return available(configPath).rules.filter((r) => r.state === "unset");
 }
 
 /**

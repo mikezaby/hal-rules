@@ -38,7 +38,7 @@ npx hal-rules@latest init      # scaffold hal-rules.json and gitignore the outpu
 npx hal-rules@latest           # generate
 npx hal-rules@latest validate  # is the config itself valid?
 npx hal-rules@latest check     # does what is on disk match the config?
-npx hal-rules@latest outdated  # what does the pack offer that you never decided on?
+npx hal-rules@latest list      # every rule and skill on offer, and what the config says
 ```
 
 Two flags worth knowing:
@@ -286,24 +286,32 @@ otherwise the pack bundled inside `hal-rules`. That fallback is what makes
 `hal-rules/recommended.json` work in a repo with no `node_modules`, and it needs
 no network at all.
 
-### Adopting rules a pack added later
+### Seeing what is on offer
+
+`list` prints every rule and skill your packs and your own dirs provide, with
+what your config says about each: `on`, `off`, or `unset` when the config never
+mentions it. Variables a rule or skill needs are shown beside it.
+
+```
+$ npx hal-rules@latest list
+rules (18)
+  on    architecture/mark-deliberate-simplifications   (needs marker)
+  off   code-style/comments
+  unset documentation/architecture-decisions   (needs adrDir)
+  ...
+
+skills (2)
+  on    research/manual-analyzer
+  unset workflow/project-new-task   (needs tracker)
+
+2 unset: your config never mentions them. Add the rules as "off" with: npx hal-rules@latest sync
+```
 
 A sparse config inherits new pack rules automatically. An expanded one pins
 today's list, so a rule that ships later never appears and nothing tells you it
-exists. `outdated` lists what a pack offers that your config never mentions,
-neither on nor off:
+exists; `list` is how you find out.
 
-```
-$ npx hal-rules@latest outdated
-3 rule(s) available, not in your config:
-  documentation/architecture-decisions   (needs adrDir)
-  workflow/before-finish   (needs checks)
-  workflow/out-of-scope-findings   (needs findingsFile)
-
-add them with: npx hal-rules@latest sync
-```
-
-`sync` writes them into your config as `"off"`, with a worked example for any
+`sync` writes the unset rules into your config as `"off"`, with a worked example for any
 variable they need. **Adoption stays a deliberate edit.** Nothing switches itself
 on, and rules you already set to `"off"` are left alone, because that was a
 decision rather than an omission.
