@@ -34,6 +34,6 @@
   },
   "skills": {
     "research/manual-analyzer": "on",
-    "workflow/project-new-task": "on"
+    "workflow/project-new-task": ["on", { "tracker": "github" }]
   }
 }

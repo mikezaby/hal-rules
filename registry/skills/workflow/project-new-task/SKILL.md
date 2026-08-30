@@ -12,11 +12,11 @@ you. Nothing else. Do not begin implementing.
 
 The arguments come in any order. Pick out three things:
 
-| Piece  | Looks like                                                                          |
-| ------ | ----------------------------------------------------------------------------------- |
-| type   | `feat`, `feature`, `bugfix`, `bug`, `fix`                                           |
-| ticket | Linear key `WEB-39` (`letters-digits`), GitHub issue `#42` or `42`, or an issue URL |
-| name   | whatever is left, free text                                                         |
+| Piece  | Looks like                                                                     |
+| ------ | ------------------------------------------------------------------------------ |
+| type   | `feat`, `feature`, `bugfix`, `bug`, `fix`                                      |
+| ticket | `{{tracker}}` issue: Linear key `WEB-39`, GitHub `#42` / `42`, or an issue URL |
+| name   | whatever is left, free text                                                    |
 
 `feat` and `feature` mean `feat`. `bug`, `fix` and `bugfix` mean `bugfix`.
 
@@ -30,6 +30,10 @@ ticket to infer it from, stop and ask for the fixed form:
 Both ticket and name are optional. No ticket means plain-text work with no
 tracker lookup. No name means the name comes from the ticket title.
 
+The tracker is `{{tracker}}`, set in `hal-rules.json`: `github`, `linear` or
+`none`. With `none`, treat every argument as type or name and never look a
+ticket up.
+
 ## 2. Fetch the ticket
 
 Skip this step when there is no ticket.
@@ -37,14 +41,14 @@ Skip this step when there is no ticket.
 Tokens live in `.env.hal` at the repository root, gitignored:
 
 ```
-GITHUB_TOKEN=...          # fine-grained token, Issues: read; not needed when gh is logged in
+GITHUB_TOKEN=...          # private repos only, fine-grained token with Issues: read; or log in with gh
 GITHUB_REPO=owner/repo    # only when issues live in another repo than the code
 LINEAR_API_KEY=...        # Settings > Security & access > Personal API keys
 ```
 
 Load it before any request: `set -a; . ./.env.hal; set +a`. If `.env.hal`
-is missing and the ticket needs a token, print the three lines above and ask
-for the file. Nothing else needs configuring: the GitHub repo comes from the
+is missing and the ticket needs a token, print the lines above and ask for
+the file. Nothing else needs configuring: the GitHub repo comes from the
 remote and a Linear key is unique across the workspace, so no board or team
 is named.
 
@@ -65,8 +69,10 @@ curl -sf -H "Authorization: Bearer $GITHUB_TOKEN" \
   "https://api.github.com/repos/<owner>/<repo>/issues/42"
 ```
 
-`<owner>/<repo>` is `GITHUB_REPO` when set, else `git remote get-url origin`. A bare number is a
-GitHub issue unless the repo has no GitHub remote and `LINEAR_API_KEY` is set.
+A public repo needs no token: drop the header. Do the same for the comments,
+at `.../issues/42/comments`.
+
+`<owner>/<repo>` is `GITHUB_REPO` when set, else `git remote get-url origin`.
 
 If the request fails, or the token is missing, say exactly which one and stop.
 Do not guess the ticket's content and do not create the branch under a name
