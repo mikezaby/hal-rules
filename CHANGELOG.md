@@ -8,6 +8,31 @@ Rule wording changes are listed as carefully as code changes: a reworded rule
 changes what your agent does. After updating, `npx hal-rules --diff` shows
 exactly which instructions moved.
 
+## 0.9.0 (2026-08-30)
+
+### Config
+
+- A pack skill now takes options the way a rule does:
+  `"workflow/project-new-task": ["on", { "tracker": "linear" }]`. The values
+  are substituted for `{{var}}` in the skill's `SKILL.md` on install, and a var
+  the skill uses but the config leaves unset fails `validate` and `build`
+  rather than shipping the placeholder to Claude. Plain `"on"` and `"off"`
+  behave as before, so no existing config changes. Minor, not patch: a skill
+  that uses a var is not installable on an older version.
+
+### Skills
+
+- **Added** `workflow/project-new-task`. `/project-new-task WEB-39 feat cookies`,
+  arguments in any order, reads the ticket from GitHub Issues or Linear,
+  creates the `feat/<ticket>-<name>` or `bugfix/<ticket>-<name>` branch and
+  its worktree from the default branch, and hands over a summary of the ticket
+  without starting the work. Plain text with no ticket gives `feat/<name>`.
+  When the arguments cannot be told apart it asks for the fixed form instead
+  of guessing. The tracker (`github`, `linear` or `none`) is the skill's
+  `tracker` option, committed in `hal-rules.json`; secrets live in a gitignored
+  `.env.hal` (`LINEAR_API_KEY`, and `GITHUB_TOKEN` only for a private repo).
+  Exercised once against a public GitHub issue with no token.
+
 ## 0.8.0 (2026-08-30)
 
 ### Rules
