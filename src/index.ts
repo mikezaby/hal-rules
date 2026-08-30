@@ -13,9 +13,12 @@ import type { ExtendsEntry } from "./packs.ts";
 import { PACK_DIR, SKILLS_DIR, collectPacks, resolveExtends } from "./packs.ts";
 import type { FetchedEntry, LockEntry, SkillState } from "./skills.ts";
 import { findSkill, isSource } from "./skills.ts";
+import type { RuleVars } from "./vars.ts";
+import { applyVars, stateOf } from "./vars.ts";
 
 /** A variable value: a string, or a list rendered as markdown bullets. */
-export type RuleVars = Record<string, string | string[]>;
+export type { RuleVars } from "./vars.ts";
+export { applyVars } from "./vars.ts";
 
 /**
  * `"on"`, `"off"`, or a pair carrying variables. `["off", vars]` is allowed so a
@@ -147,58 +150,6 @@ function merge(
   Object.assign(out.skills, from.skills ?? {});
 }
 
-/** Last dir wins, so a project shadows a pack's rule by slug. */
-function findRule(slug: string, dirs: string[]): string {
-  const search = [...dirs].reverse();
-  for (const dir of search) {
-    const path = join(dir, `${slug}.md`);
-    if (existsSync(path)) return path;
-  }
-  throw new Error(
-    `Rule not found: ${slug}\n  looked in:\n    ${search.join("\n    ")}`,
-  );
-}
-
-export function applyVars(body: string, vars: RuleVars, slug: string): string {
-  let out = body;
-  for (const [name, value] of Object.entries(vars)) {
-    if (value === "") {
-      // A blank is what `sync` scaffolds; enabling the rule without filling it
-      // in would silently render the sentence with a hole in it.
-      throw new Error(
-        `Rule "${slug}": {{${name}}} has no value.\n` +
-          `  Fill it in, or set the rule to "off" until you have it.`,
-      );
-    }
-    if (Array.isArray(value)) {
-      // An empty list renders to nothing, leaving "all of these must pass"
-      // followed by silence. That is a broken rule, not an empty one.
-      if (value.length === 0) {
-        throw new Error(
-          `Rule "${slug}": {{${name}}} is an empty list.\n` +
-            `  Fill it in, or set the rule to "off" until you have the values.`,
-        );
-      }
-      out = out.replaceAll(
-        `{{${name}}}`,
-        value.map((item) => `- \`${item}\``).join("\n"),
-      );
-      continue;
-    }
-    out = out.replaceAll(`{{${name}}}`, value);
-  }
-
-  const [, unset] = /\{\{(\w+)\}\}/.exec(out) ?? [];
-  // Shipping a literal "{{framework}}" to Claude as an instruction is worse than failing.
-  if (unset) {
-    throw new Error(
-      `Rule "${slug}" uses {{${unset}}} but no value was given.\n` +
-        `  Set it: "${slug}": ["on", { "${unset}": "..." }]`,
-    );
-  }
-  return out;
-}
-
 /** The header goes after any frontmatter, because YAML has to start at line 1. */
 function withHeader(body: string, slug: string, source: string): string {
   // Relative, so output is identical on every machine. A path that climbs out of
@@ -212,22 +163,15 @@ function withHeader(body: string, slug: string, source: string): string {
   return `${frontmatter[0]}${note}\n${body.slice(frontmatter[0].length)}`;
 }
 
-// `state` arrives from JSON, so it is unknown however the interface types it.
-function stateOf(
-  slug: string,
-  state: unknown,
-): [enabled: string, vars: RuleVars] {
-  if (state === "on" || state === "off") return [state, {}];
-  if (
-    Array.isArray(state) &&
-    (state[0] === "on" || state[0] === "off") &&
-    typeof state[1] === "object" &&
-    state[1] !== null
-  ) {
-    return state as [string, RuleVars];
+/** Last dir wins, so a project shadows a pack's rule by slug. */
+function findRule(slug: string, dirs: string[]): string {
+  const search = [...dirs].reverse();
+  for (const dir of search) {
+    const path = join(dir, `${slug}.md`);
+    if (existsSync(path)) return path;
   }
   throw new Error(
-    `"${slug}" is set to ${JSON.stringify(state)}. Expected "on", "off", or ["on", { var: "value" }]`,
+    `Rule not found: ${slug}\n  looked in:\n    ${search.join("\n    ")}`,
   );
 }
 
@@ -271,15 +215,11 @@ function plan(
       }
       continue;
     }
-    if (state !== "on" && state !== "off") {
-      errors.push(
-        `skill "${key}" is set to ${JSON.stringify(state)}. Expected "on" or "off"`,
-      );
-      continue;
-    }
-    if (state === "off") continue;
     try {
-      findSkill(key, config.skillsDirs);
+      const [enabled, vars] = stateOf(key, state);
+      if (enabled === "off") continue;
+      const dir = findSkill(key, config.skillsDirs);
+      applyVars(readFileSync(join(dir, "SKILL.md"), "utf8"), vars, key);
     } catch (error) {
       errors.push(error instanceof Error ? error.message : String(error));
     }
@@ -708,8 +648,8 @@ function checkSkills(
   const locked = readLock(projectDir).skills;
   const wanted = new Set<string>();
   for (const [key, state] of Object.entries(config.skills)) {
-    if (Array.isArray(state)) for (const path of state) wanted.add(path);
-    else if (!isSource(key) && state === "on") wanted.add(key);
+    if (isSource(key)) for (const path of state as string[]) wanted.add(path);
+    else if (stateOf(key, state)[0] === "on") wanted.add(key);
   }
 
   const lockedPaths = new Map(

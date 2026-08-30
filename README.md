@@ -180,7 +180,9 @@ productivity/ grill-me · handoff · teach · writing-for-agents …
 ```
 
 Both shapes share the `skills` key: a `github:` key maps to a list of paths in
-that repo, any other key is a pack slug set to `"on"` or `"off"`.
+that repo, any other key is a pack slug set to `"on"` or `"off"`. A pack slug
+also takes options the way a rule does, `["on", { "tracker": "linear" }]`,
+substituted for `{{tracker}}` in its `SKILL.md`; an unset one fails the build.
 
 The folder is the **config's** vocabulary, not a layout on disk. Claude Code
 discovers skills exactly one level deep and treats the directory name as the
@@ -454,10 +456,10 @@ more than one of the three source projects: `scope-discipline`, `before-finish`,
 
 ### Skills in the pack
 
-| Skill                       |                                                                                                                                                                                                               |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `research/manual-analyzer`  | Read another product's manual, from a URL, a local file, or a folder of them, and write down what our project should do about it                                                                              |
-| `workflow/project-new-task` | `/project-new-task WEB-39 feat cookies`, arguments in any order: read the ticket from GitHub Issues or Linear (tokens in `.env.hal`), create the `feat/` or `bugfix/` branch and worktree, summarise the work |
+| Skill                       |                                                                                                                                                                                                                                   |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `research/manual-analyzer`  | Read another product's manual, from a URL, a local file, or a folder of them, and write down what our project should do about it                                                                                                  |
+| `workflow/project-new-task` | `/project-new-task WEB-39 feat cookies`, arguments in any order: read the ticket from the `tracker` (`github`, `linear` or `none`; tokens in `.env.hal`), create the `feat/` or `bugfix/` branch and worktree, summarise the work |
 
 None are in `recommended`. A rule is a standing constraint and belongs on by
 default; a skill is a procedure you invoke, so turning one on is a choice about

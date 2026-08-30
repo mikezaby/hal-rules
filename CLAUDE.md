@@ -203,7 +203,8 @@ verified when the same prompt behaves differently with it on and off.
 The `skills` key carries two shapes. A `github:owner/repo` key fetches selected
 skills from that repo into `.claude/skills/<name>/`, pinned by SHA in
 `hal-rules.lock.json`. Any other key is a slug under a registry's `skills/`
-directory, `"on"` or `"off"` the way a rule is, resolved last-dir-wins so a
+directory, `"on"`, `"off"` or `["on", { vars }]` the way a rule is, with the
+same `{{var}}` substitution over `SKILL.md`, resolved last-dir-wins so a
 project shadows a pack skill by dropping the slug in its own `skills/`. There is
 no `skillsDir` key: a `skills/` beside a config counts when it is there, which is
 also how a registry contributes its own. Config names fetched skills by the

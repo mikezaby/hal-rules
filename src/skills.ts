@@ -4,15 +4,18 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, sep } from "node:path";
+import type { RuleVars } from "./vars.ts";
+import { applyVars, stateOf } from "./vars.ts";
 
-/** A pack skill is on or off. A `github:` key carries a path list instead. */
-export type SkillState = "on" | "off";
+/** A pack skill is on or off, with vars like a rule. A `github:` key carries a path list instead. */
+export type SkillState = "on" | "off" | ["on" | "off", RuleVars];
 
 /** Which of the two shapes a `skills` key is: a repo to fetch, or a pack slug. */
 export function isSource(key: string): boolean {
@@ -202,7 +205,9 @@ export async function installSkills(
 
   // A malformed state is reported by validate; here anything but "on" is a skip.
   for (const [slug, state] of Object.entries(wanted)) {
-    if (isSource(slug) || state !== "on") continue;
+    if (isSource(slug)) continue;
+    const [enabled, vars] = stateOf(slug, state);
+    if (enabled !== "on") continue;
     const from = findSkill(slug, skillsDirs);
     const name = slug.split("/").pop() ?? slug;
     claim(name, `${PACK_SOURCE} (${slug})`);
@@ -211,12 +216,18 @@ export async function installSkills(
     rmSync(dest, { recursive: true, force: true });
     mkdirSync(dirname(dest), { recursive: true });
     cpSync(from, dest, { recursive: true });
+    const skillFile = join(dest, "SKILL.md");
+    writeFileSync(
+      skillFile,
+      applyVars(readFileSync(skillFile, "utf8"), vars, slug),
+    );
     lock[name] = { source: PACK_SOURCE, path: slug };
     installed.push(`${name}  <-  ${PACK_SOURCE} (${slug})`);
   }
 
-  for (const [spec, paths] of Object.entries(wanted)) {
-    if (!Array.isArray(paths)) continue;
+  for (const [spec, state] of Object.entries(wanted)) {
+    if (!isSource(spec)) continue;
+    const paths = state as string[];
     if (paths.length === 0) continue;
     const { root, index, ref, sha } = await fetchSource(spec);
     try {

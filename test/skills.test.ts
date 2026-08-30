@@ -209,10 +209,43 @@ test("the two shapes on the skills key are told apart", () => {
   const errors = validate(join(dir, "hal-rules.json"));
   assert.match(
     errors.join("\n"),
-    /skill "research\/manual-analyzer" is set to/,
+    /"research\/manual-analyzer" is set to "maybe". Expected "on", "off", or \["on"/,
   );
   assert.match(
     errors.join("\n"),
     /skill source "github:matt\/skills" is set to .* Expected a list/,
   );
+});
+
+test("a pack skill takes vars like a rule, substituted into SKILL.md", async () => {
+  const pack = registry("pack-vars", ["workflow/start"]);
+  writeFileSync(
+    join(pack, "skills/workflow/start/SKILL.md"),
+    "---\nname: start\n---\ntracker is {{tracker}}\n",
+  );
+  const dir = consumer("skill-vars", {
+    extends: [{ registry: pack }],
+    skills: { "workflow/start": ["on", { tracker: "linear" }] },
+  });
+
+  const config = loadConfig(join(dir, "hal-rules.json"));
+  await installSkills(config.skills, dir, {}, config.skillsDirs);
+
+  const body = readFileSync(join(dir, ".claude/skills/start/SKILL.md"), "utf8");
+  assert.match(body, /tracker is linear/);
+});
+
+test("a skill var left unset is a validate error, never shipped literally", () => {
+  const pack = registry("pack-unset", ["workflow/start"]);
+  writeFileSync(
+    join(pack, "skills/workflow/start/SKILL.md"),
+    "---\nname: start\n---\ntracker is {{tracker}}\n",
+  );
+  const dir = consumer("skill-unset", {
+    extends: [{ registry: pack }],
+    skills: { "workflow/start": "on" },
+  });
+  const errors = validate(join(dir, "hal-rules.json"));
+  assert.equal(errors.length, 1);
+  assert.match(errors[0] ?? "", /uses \{\{tracker\}\} but no value/);
 });
