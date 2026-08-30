@@ -38,6 +38,10 @@ ticket up.
 
 Skip this step when there is no ticket.
 
+If this session has the tracker's MCP tools (with `linear`, hal adds Linear's
+MCP server to `.mcp.json`), read the issue with them and skip the token setup
+below. Otherwise:
+
 Tokens live in `.env.hal` at the repository root, gitignored:
 
 ```

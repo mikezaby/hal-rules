@@ -211,7 +211,10 @@ directory, `"on"`, `"off"` or `["on", { vars }]` the way a rule is, with the
 same `{{var}}` substitution over `SKILL.md`, resolved last-dir-wins so a
 project shadows a pack skill by dropping the slug in its own `skills/`. There is
 no `skillsDir` key: a `skills/` beside a config counts when it is there, which is
-also how a registry contributes its own. Config names fetched skills by the
+also how a registry contributes its own. An `mcp.json` beside a pack skill's
+`SKILL.md`, keyed var → value → servers, adds those servers to `.mcp.json` when
+the skill is on with that value; the project's own `mcp` wins on a name clash.
+Config names fetched skills by the
 source's own folders (`engineering/tdd`); disk is flat because **Claude Code discovers skills
 exactly one level deep and the directory name is the command** — measured, and a
 nested directory silently never loads. Installed skills are committed, not

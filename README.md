@@ -155,6 +155,23 @@ are addressed by slug and switched on or off exactly like a rule:
 `hal-rules.json` is searched last, so dropping the same slug in it replaces the
 pack's copy whole.
 
+A skill can bring the MCP server it needs. An `mcp.json` beside its `SKILL.md`
+is keyed by var, then value, then the servers to add:
+
+```json
+{
+  "tracker": {
+    "linear": {
+      "linear": { "type": "http", "url": "https://mcp.linear.app/mcp" }
+    }
+  }
+}
+```
+
+Turning `workflow/project-new-task` on with `tracker: "linear"` then puts the
+Linear server into `.mcp.json`; with `github` it adds nothing. Your own `mcp`
+entries win over a skill's when the names collide.
+
 ### Cherry-pick skills from a repo
 
 Plugins are all-or-nothing. `mattpocock/skills` ships 36 skills and you probably

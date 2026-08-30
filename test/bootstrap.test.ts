@@ -151,3 +151,35 @@ test("plugins and mcp compose through extends, later wins", () => {
     "noisy@claude-community": false,
   });
 });
+
+test("a skill's mcp.json adds the servers for its var value, project entries win", () => {
+  const sidecar = {
+    tracker: { linear: { linear: { url: "https://mcp.linear.app/mcp" } } },
+  };
+  const linear = project(
+    "skillMcpLinear",
+    {
+      skills: { "workflow/task": ["on", { tracker: "linear" }] },
+      mcp: { linear: { url: "https://own.example/mcp" } },
+    },
+    {
+      "skills/workflow/task/SKILL.md": "# Task",
+      "skills/workflow/task/mcp.json": sidecar,
+    },
+  );
+  bootstrap(loadConfig(linear.path), linear.dir);
+  assert.deepEqual(read(join(linear.dir, ".mcp.json")), {
+    mcpServers: { linear: { url: "https://own.example/mcp" } },
+  });
+
+  const github = project(
+    "skillMcpGithub",
+    { skills: { "workflow/task": ["on", { tracker: "github" }] } },
+    {
+      "skills/workflow/task/SKILL.md": "# Task",
+      "skills/workflow/task/mcp.json": sidecar,
+    },
+  );
+  const [, none] = bootstrap(loadConfig(github.path), github.dir);
+  assert.equal(none?.status, "empty");
+});

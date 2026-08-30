@@ -32,6 +32,10 @@ The tracker is `github`, set in `hal-rules.json`: `github`, `linear` or
 
 ## 2. Fetch the current ticket
 
+If this session has the tracker's MCP tools (with `linear`, hal adds Linear's
+MCP server to `.mcp.json`), use them to read and later update the issue and
+skip the token setup below. Otherwise:
+
 Tokens live in `.env.hal` at the repository root, gitignored. Load it first:
 `set -a; . ./.env.hal; set +a`. Updating always needs a token, even on a
 public repo. If `.env.hal` is missing, print the lines and ask for the file:

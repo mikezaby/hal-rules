@@ -396,12 +396,37 @@ function desiredSettings(config: ResolvedConfig): Record<string, unknown> {
   return out;
 }
 
+/**
+ * An `mcp.json` beside a skill's SKILL.md names the servers it needs, keyed
+ * by var then value: `{ "tracker": { "linear": { "linear": {...} } } }`.
+ * The project's own `mcp` entries win over anything a skill brings.
+ */
+function skillMcp(config: ResolvedConfig): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [slug, state] of Object.entries(config.skills)) {
+    if (isSource(slug)) continue;
+    const [enabled, vars] = stateOf(slug, state);
+    if (enabled !== "on") continue;
+    const file = join(findSkill(slug, config.skillsDirs), "mcp.json");
+    if (!existsSync(file)) continue;
+    const byVar = JSON.parse(readFileSync(file, "utf8")) as Record<
+      string,
+      Record<string, Record<string, unknown>>
+    >;
+    for (const [name, byValue] of Object.entries(byVar)) {
+      const value = vars[name];
+      if (typeof value === "string") Object.assign(out, byValue[value] ?? {});
+    }
+  }
+  return out;
+}
+
 export function bootstrap(
   config: ResolvedConfig,
   projectDir = ".",
 ): BootstrapResult[] {
-  const mcp =
-    Object.keys(config.mcp).length > 0 ? { mcpServers: config.mcp } : {};
+  const servers = { ...skillMcp(config), ...config.mcp };
+  const mcp = Object.keys(servers).length > 0 ? { mcpServers: servers } : {};
   return [
     bootstrapFile(
       join(projectDir, ".claude/settings.json"),
