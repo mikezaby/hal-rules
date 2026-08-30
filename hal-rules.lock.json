@@ -11,6 +11,10 @@
     "project-update-task": {
       "source": "pack",
       "path": "workflow/project-update-task"
+    },
+    "project-pull-request": {
+      "source": "pack",
+      "path": "workflow/project-pull-request"
     }
   }
 }

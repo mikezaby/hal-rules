@@ -12,6 +12,12 @@ exactly which instructions moved.
 
 ### Skills
 
+- **Added** `workflow/project-pull-request`. `/project-pull-request` opens the
+  GitHub PR for the current branch with `gh`, or updates the one already open,
+  keeping what a person edited into it. The title carries the ticket key; the
+  description starts with the ticket link (`Closes #42`, or the Linear URL),
+  then the approach and how to test, and does not repeat the ticket. Same
+  `tracker` var as `project-new-task`. `gh` only, no token fallback.
 - `workflow/project-new-task` no longer hardcodes `.claude/worktrees`. It
   follows the project's `git/worktrees-by-default` rule for the directory and
   the copy-ignored-files step, so a project with another `worktreesDir` no

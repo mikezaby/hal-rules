@@ -35,6 +35,7 @@
   "skills": {
     "research/manual-analyzer": "on",
     "workflow/project-new-task": ["on", { "tracker": "github" }],
-    "workflow/project-update-task": ["on", { "tracker": "github" }]
+    "workflow/project-update-task": ["on", { "tracker": "github" }],
+    "workflow/project-pull-request": ["on", { "tracker": "github" }]
   }
 }
