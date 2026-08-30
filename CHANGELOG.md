@@ -8,6 +8,24 @@ Rule wording changes are listed as carefully as code changes: a reworded rule
 changes what your agent does. After updating, `npx hal-rules --diff` shows
 exactly which instructions moved.
 
+## 0.10.0 (2026-08-30)
+
+### CLI
+
+- **Added** `hal list`: every rule and skill the packs and your own dirs offer,
+  each marked `on`, `off`, or `unset` when the config never mentions it, with
+  the `{{vars}}` it needs. Skills were previously invisible.
+- **Added** `hal enable <slug> [var=value ...]` and `hal disable <slug>`,
+  for rules and skills alike. `enable` asks on the terminal for each var that
+  has no value yet (comma separated for a list-valued one such as `checks`);
+  from a script, pass `var=value` or get an error naming the exact command.
+  `disable` keeps the values, so enabling again asks nothing.
+- **Removed** `hal outdated`. It only previewed `sync` under a name borrowed
+  from npm that means something else; `list` shows the same rows as `unset`.
+  Minor, not patch: a script calling `outdated` breaks. `sync` is unchanged.
+- **Fixed** `hal check <config>` and `hal validate <config>` ignoring the
+  config path and reading the default instead, whenever `--out` was absent.
+
 ## 0.9.0 (2026-08-30)
 
 ### Config
