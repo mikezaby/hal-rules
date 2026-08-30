@@ -3,4 +3,5 @@ dist/
 .claude/rules/generated/
 test/fixtures/.out/
 .claude/worktrees/
+.claude/skills/
 .env.hal
