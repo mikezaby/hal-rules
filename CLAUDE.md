@@ -156,7 +156,7 @@ evidence, not invention. One exception: `git/commit-granularity`, added on
 direct instruction rather than lifted from any real CLAUDE.md.
 
 The pack's skills carry no such provenance rule. `research/manual-analyzer`, the
-first one, was specified directly. Skills are procedures rather than standing
+first one, and `workflow/project-new-task` were specified directly. Skills are procedures rather than standing
 constraints, so none is in `recommended`.
 
 `registry/recommended.json` enables fifteen of them. The three left opt-in each need

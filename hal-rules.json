@@ -33,6 +33,7 @@
     ]
   },
   "skills": {
-    "research/manual-analyzer": "on"
+    "research/manual-analyzer": "on",
+    "workflow/project-new-task": "on"
   }
 }
