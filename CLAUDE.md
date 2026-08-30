@@ -159,7 +159,8 @@ evidence, not invention. One exception: `git/commit-granularity`, added on
 direct instruction rather than lifted from any real CLAUDE.md.
 
 The pack's skills carry no such provenance rule. `research/manual-analyzer`, the
-first one, and `workflow/project-new-task` were specified directly. Skills are procedures rather than standing
+first one, `workflow/project-new-task` and its counterpart
+`workflow/project-update-task` were specified directly. Skills are procedures rather than standing
 constraints, so none is in `recommended`.
 
 `registry/recommended.json` enables fifteen of them. The three left opt-in each need
@@ -210,7 +211,10 @@ directory, `"on"`, `"off"` or `["on", { vars }]` the way a rule is, with the
 same `{{var}}` substitution over `SKILL.md`, resolved last-dir-wins so a
 project shadows a pack skill by dropping the slug in its own `skills/`. There is
 no `skillsDir` key: a `skills/` beside a config counts when it is there, which is
-also how a registry contributes its own. Config names fetched skills by the
+also how a registry contributes its own. An `mcp.json` beside a pack skill's
+`SKILL.md`, keyed var → value → servers, adds those servers to `.mcp.json` when
+the skill is on with that value; the project's own `mcp` wins on a name clash.
+Config names fetched skills by the
 source's own folders (`engineering/tdd`); disk is flat because **Claude Code discovers skills
 exactly one level deep and the directory name is the command** — measured, and a
 nested directory silently never loads. Installed skills are committed, not
