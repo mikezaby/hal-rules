@@ -7,6 +7,10 @@
     "project-new-task": {
       "source": "pack",
       "path": "workflow/project-new-task"
+    },
+    "project-update-task": {
+      "source": "pack",
+      "path": "workflow/project-update-task"
     }
   }
 }
