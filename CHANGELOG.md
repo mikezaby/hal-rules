@@ -8,6 +8,16 @@ Rule wording changes are listed as carefully as code changes: a reworded rule
 changes what your agent does. After updating, `npx hal-rules --diff` shows
 exactly which instructions moved.
 
+## Unreleased
+
+### Skills
+
+- `workflow/project-new-task` no longer hardcodes `.claude/worktrees`. It
+  follows the project's `git/worktrees-by-default` rule for the directory and
+  the copy-ignored-files step, so a project with another `worktreesDir` no
+  longer gets two paths and a tie-break sentence. Without that rule loaded it
+  falls back to `.claude/worktrees`.
+
 ## 0.10.0 (2026-08-30)
 
 ### CLI

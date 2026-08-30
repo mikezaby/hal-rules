@@ -99,20 +99,20 @@ is the name when none was given.
 
 ## 4. Create the worktree
 
-From the default branch, up to date:
+The project's worktrees rule (`Worktrees by Default`) owns where worktrees
+live and how to set one up. Follow it: its directory, then its step that
+copies the ignored files across (`.env*` and the like; `.env.hal` is one of
+them). This skill only fixes the branch and the base:
 
 ```
 git fetch origin
-git worktree add .claude/worktrees/<branch> -b <branch> origin/<default>
+git worktree add <worktrees dir>/<branch> -b <branch> origin/<default>
 ```
 
 `<default>` is what `git symbolic-ref refs/remotes/origin/HEAD` names, else
-`main`. If the project's worktree rule names another directory, use that.
-If the branch already exists, say so and stop rather than creating a second
-one.
-
-Copy the ignored files the project needs to run, recursively, as the worktree
-rule describes (`.env*` and the like). `.env.hal` is one of them.
+`main`. If no worktrees rule is loaded, use `.claude/worktrees` as the
+directory. If the branch already exists, say so and stop rather than creating
+a second one.
 
 ## 5. Hand over
 
