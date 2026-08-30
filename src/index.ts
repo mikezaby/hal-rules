@@ -792,6 +792,80 @@ export function available(configPath = DEFAULT_CONFIG): {
   return { rules: sorted(rules), skills: sorted(skills) };
 }
 
+export interface Toggle extends Available {
+  kind: "rules" | "skills";
+  /** Variables the file uses that the config has no non-blank value for. */
+  missing: string[];
+}
+
+/** The rule or skill a slug names, or an error listing what it could be. */
+export function findAvailable(configPath: string, slug: string): Toggle {
+  const { rules, skills } = available(configPath);
+  const kind = rules.some((r) => r.slug === slug)
+    ? "rules"
+    : skills.some((s) => s.slug === slug)
+      ? "skills"
+      : undefined;
+  if (kind === undefined) {
+    const near = [...rules, ...skills]
+      .map((i) => i.slug)
+      .filter((s) => s.endsWith(`/${slug}`) || s.includes(slug));
+    throw new Error(
+      `"${slug}" is not a rule or skill in your packs.` +
+        (near.length > 0
+          ? `\n  Did you mean: ${near.join(", ")}`
+          : "\n  See what is on offer: npx hal-rules@latest list"),
+    );
+  }
+  const item = (kind === "rules" ? rules : skills).find((i) => i.slug === slug);
+  if (item === undefined) throw new Error(`"${slug}" vanished mid-lookup`);
+  const raw = readRaw(configPath);
+  const [, given] = stateOf(slug, raw[kind]?.[slug] ?? "off");
+  const missing = item.vars.filter((name) => {
+    const value = given[name];
+    return value === undefined || value === "" || value.length === 0;
+  });
+  return { ...item, kind, missing };
+}
+
+/** A variable `init` scaffolds as a list is entered comma separated. */
+export function isListVar(slug: string, name: string): boolean {
+  const example = STARTER_RULES[slug];
+  return Array.isArray(example) && Array.isArray(example[1][name]);
+}
+
+const readRaw = (configPath: string): AiRulesConfig =>
+  JSON.parse(readFileSync(resolve(configPath), "utf8")) as AiRulesConfig;
+
+/**
+ * Switches one rule or skill in the project's own config, keeping any vars
+ * already there so a disabled entry re-enables without being asked again.
+ * A value for a variable that `init` scaffolds as a list is split on commas.
+ */
+export function setState(
+  configPath: string,
+  item: Toggle,
+  state: "on" | "off",
+  values: Record<string, string> = {},
+): void {
+  const path = resolve(configPath);
+  const raw = readRaw(path);
+  const [, existing] = stateOf(item.slug, raw[item.kind]?.[item.slug] ?? "off");
+  const vars: RuleVars = { ...existing };
+  for (const [name, value] of Object.entries(values)) {
+    vars[name] = isListVar(item.slug, name)
+      ? value
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean)
+      : value;
+  }
+  const entry: RuleState = Object.keys(vars).length > 0 ? [state, vars] : state;
+  if (item.kind === "rules") raw.rules = { ...raw.rules, [item.slug]: entry };
+  else raw.skills = { ...raw.skills, [item.slug]: entry };
+  writeFileSync(path, `${JSON.stringify(raw, null, 2)}\n`);
+}
+
 /**
  * Rules that exist in a pack but appear nowhere in the config, neither on nor
  * off. A sparse config inherits new pack rules automatically, but an expanded

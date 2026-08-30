@@ -117,7 +117,9 @@ prettier with the trivago import sorter, strict tsconfig with `noUncheckedIndexe
 
 `hal list` prints every rule and skill on offer with its config state (`on`,
 `off`, `unset`) and the vars it needs; `hal sync` adds the unset rules as
-`"off"`. `outdated` was folded into `list`. `hal check` compares generated output against the config, read-only, exiting
+`"off"`. `outdated` was folded into `list`. `hal enable <slug> [var=value]` and
+`hal disable <slug>` flip one rule or skill in the project's own config,
+prompting for any var still blank when there is a terminal. `hal check` compares generated output against the config, read-only, exiting
 non-zero on drift. Rules are gitignored so it is a local pre-flight for them;
 for committed skills it is a real CI gate.
 

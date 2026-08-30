@@ -9,7 +9,14 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
-import { applyVars, available, outdated, sync } from "../src/index.ts";
+import {
+  applyVars,
+  available,
+  findAvailable,
+  outdated,
+  setState,
+  sync,
+} from "../src/index.ts";
 
 const root = mkdtempSync(join(tmpdir(), "hal-sync-test-"));
 after(() => {
@@ -68,6 +75,40 @@ test("available lists every rule and skill with what the config says", () => {
       ["topic/stay", "unset", []],
     ],
   );
+});
+
+test("enable and disable edit one entry, keeping vars across the toggle", () => {
+  const { path } = project("toggle", { "ours/one": "on" });
+
+  const needy = findAvailable(path, "ours/needy");
+  assert.equal(needy.kind, "rules");
+  assert.deepEqual(needy.missing, ["place", "other"]);
+
+  setState(path, needy, "on", { place: "here", other: "there" });
+  assert.deepEqual(config(path).rules["ours/needy"], [
+    "on",
+    { place: "here", other: "there" },
+  ]);
+  assert.deepEqual(findAvailable(path, "ours/needy").missing, []);
+
+  setState(path, findAvailable(path, "ours/needy"), "off");
+  assert.deepEqual(config(path).rules["ours/needy"], [
+    "off",
+    { place: "here", other: "there" },
+  ]);
+  assert.equal(config(path).rules["ours/one"], "on", "others untouched");
+
+  setState(path, findAvailable(path, "ours/two"), "off");
+  assert.equal(config(path).rules["ours/two"], "off", "no vars, no tuple");
+});
+
+test("an unknown slug names near misses", () => {
+  const { path } = project("unknown", {});
+  assert.throws(
+    () => findAvailable(path, "needy"),
+    /Did you mean: ours\/needy/,
+  );
+  assert.throws(() => findAvailable(path, "nope"), /hal-rules@latest list/);
 });
 
 test("lists rules in the pack that the config never mentions", () => {

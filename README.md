@@ -39,6 +39,8 @@ npx hal-rules@latest           # generate
 npx hal-rules@latest validate  # is the config itself valid?
 npx hal-rules@latest check     # does what is on disk match the config?
 npx hal-rules@latest list      # every rule and skill on offer, and what the config says
+npx hal-rules@latest enable workflow/before-finish   # switch one on, asking for its vars
+npx hal-rules@latest disable git/never-push          # switch one off
 ```
 
 Two flags worth knowing:
@@ -306,6 +308,20 @@ skills (2)
 
 2 unset: your config never mentions them. Add the rules as "off" with: npx hal-rules@latest sync
 ```
+
+`enable <slug>` and `disable <slug>` flip one entry in your own config, rule or
+skill. Enabling something that uses `{{vars}}` asks for each value it does not
+have yet; a list-valued one (`checks`) is entered comma separated. Pass them on
+the command line to skip the prompt, which is also the only way from a script
+where there is no terminal to ask on:
+
+```
+$ npx hal-rules@latest enable workflow/before-finish "checks=pnpm test, pnpm lint"
+workflow/before-finish -> "on". Apply it: npx hal-rules@latest
+```
+
+Disabling keeps the values, so enabling again later asks nothing. A slug the
+packs do not have is an error that names the nearest matches.
 
 A sparse config inherits new pack rules automatically. An expanded one pins
 today's list, so a rule that ships later never appears and nothing tells you it

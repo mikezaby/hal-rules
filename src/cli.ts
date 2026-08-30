@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { rmSync } from "node:fs";
+import { createInterface } from "node:readline/promises";
 import {
   DEFAULT_CONFIG,
   DEFAULT_OUT,
@@ -7,10 +8,13 @@ import {
   bootstrap,
   buildWithChanges,
   check,
+  findAvailable,
   formatDiff,
   init,
+  isListVar,
   loadConfig,
   readLock,
+  setState,
   sync,
   summarise,
   validate,
@@ -73,6 +77,58 @@ if (args[0] === "list") {
       console.log(
         `${unset.length} unset: your config never mentions them. Add the rules as "off" with: npx hal-rules@latest sync`,
       );
+    process.exit(0);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
+
+if (args[0] === "enable" || args[0] === "disable") {
+  const slug = positional[1];
+  if (!slug) {
+    console.error(`usage: hal ${args[0]} <slug> [var=value ...] [config]`);
+    process.exit(1);
+  }
+  const state = args[0] === "enable" ? "on" : "off";
+  const assignments = positional.slice(2).filter((a) => a.includes("="));
+  const configPath =
+    positional.slice(2).find((a) => !a.includes("=")) ?? DEFAULT_CONFIG;
+  try {
+    const item = findAvailable(configPath, slug);
+    const values = Object.fromEntries(
+      assignments.map((a) => {
+        const at = a.indexOf("=");
+        return [a.slice(0, at), a.slice(at + 1)];
+      }),
+    );
+    const missing = item.missing.filter((name) => !(name in values));
+    if (state === "on" && missing.length > 0) {
+      if (!process.stdin.isTTY) {
+        throw new Error(
+          `"${slug}" needs ${missing.join(", ")}.\n` +
+            `  Pass them: hal enable ${slug} ${missing.map((n) => `${n}=...`).join(" ")}`,
+        );
+      }
+      const rl = createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+      for (const name of missing) {
+        const hint = isListVar(slug, name) ? " (comma separated)" : "";
+        const answer = (await rl.question(`${name}${hint}: `)).trim();
+        if (answer === "") {
+          rl.close();
+          throw new Error(`${name} is required to enable "${slug}"`);
+        }
+        values[name] = answer;
+      }
+      rl.close();
+    }
+    setState(configPath, item, state, values);
+    console.log(
+      `${slug} -> "${state}"${state === "on" ? ". Apply it: npx hal-rules@latest" : ""}`,
+    );
     process.exit(0);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
