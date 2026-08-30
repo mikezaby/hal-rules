@@ -319,12 +319,13 @@ rules (18)
   unset documentation/architecture-decisions   (needs adrDir)
   ...
 
-skills (3)
+skills (4)
   on    research/manual-analyzer
   unset workflow/project-new-task   (needs tracker)
+  unset workflow/project-update-task   (needs tracker)
   unset workflow/project-pull-request   (needs tracker)
 
-3 unset: your config never mentions them. Add the rules as "off" with: npx hal-rules@latest sync
+4 unset: your config never mentions them. Add the rules as "off" with: npx hal-rules@latest sync
 ```
 
 `enable <slug>` and `disable <slug>` flip one entry in your own config, rule or
@@ -502,6 +503,7 @@ more than one of the three source projects: `scope-discipline`, `before-finish`,
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `research/manual-analyzer`      | Read another product's manual, from a URL, a local file, or a folder of them, and write down what our project should do about it                                                                                                                                   |
 | `workflow/project-new-task`     | `/project-new-task WEB-39 feat cookies`, arguments in any order: read the ticket from the `tracker` (`github`, `linear` or `none`; tokens in `.env.hal`), create the `feat/` or `bugfix/` branch and worktree, summarise the work                                  |
+| `workflow/project-update-task`  | `/project-update-task [ticket]`: write what the conversation settled back to the ticket found in the branch name. Title, description and acceptance criteria, merged with what the ticket already says, shown for a yes before writing to GitHub or Linear         |
 | `workflow/project-pull-request` | `/project-pull-request`: open the GitHub PR for the current branch with `gh`, or update the one already open. Title from the ticket, description written for the reviewer: the ticket link first, then the approach and how to test it, never a copy of the ticket |
 
 None are in `recommended`. A rule is a standing constraint and belongs on by
