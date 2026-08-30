@@ -18,7 +18,7 @@ exactly which instructions moved.
   worktree, and only a fast one-off, one or two light prompts with nothing to
   return to, stays in the current checkout. The slug changed because the old one
   now describes the wrong policy, so a config naming the old slug fails the build
-  until it is updated. That break is why this is a minor, not a patch.
+  until it is updated. Pre-1.0 and experimental: slugs move without ceremony.
 - `git/worktrees-by-default` now takes a `worktreesDir` var, so a project picks
   where its worktrees go. `recommended` sets it to `.claude/worktrees`, keeping
   them inside the repo instead of scattering siblings next to it; the rule also
