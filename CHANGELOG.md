@@ -12,13 +12,11 @@ exactly which instructions moved.
 
 ### Rules
 
-- **Renamed and reversed** `git/worktrees-for-risky-work`, now
-  `git/worktrees-by-default`. The old rule said to stay in the current checkout
-  unless the work was risky. The new one says the opposite: real work gets a
-  worktree, and only a fast one-off, one or two light prompts with nothing to
-  return to, stays in the current checkout. The slug changed because the old one
-  now describes the wrong policy, so a config naming the old slug fails the build
-  until it is updated. Pre-1.0 and experimental: slugs move without ceremony.
+- **Added** `git/worktrees-by-default`. Real work gets a worktree: a feature, a
+  refactor, a bug that takes more than a line, anything you come back to across
+  several prompts. Only a fast one-off, one or two light prompts with nothing to
+  return to, stays in the current checkout. It replaces the earlier rule that
+  said the opposite, which is gone.
 - `git/worktrees-by-default` now takes a `worktreesDir` var, so a project picks
   where its worktrees go. `recommended` sets it to `.claude/worktrees`, keeping
   them inside the repo instead of scattering siblings next to it; the rule also
