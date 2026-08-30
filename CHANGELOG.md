@@ -8,7 +8,7 @@ Rule wording changes are listed as carefully as code changes: a reworded rule
 changes what your agent does. After updating, `npx hal-rules --diff` shows
 exactly which instructions moved.
 
-## Unreleased
+## 0.11.0 (2026-08-30)
 
 ### Skills
 
