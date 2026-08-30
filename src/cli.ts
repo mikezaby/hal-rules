@@ -26,7 +26,7 @@ const out = outFlag === -1 ? DEFAULT_OUT : (args[outFlag + 1] ?? DEFAULT_OUT);
 // Flags, and the value after --out, are not arguments. Reading args[1] directly
 // made `check --out dir` treat the flag itself as the config path.
 const positional = args.filter(
-  (arg, i) => !arg.startsWith("--") && i !== outFlag + 1,
+  (arg, i) => !arg.startsWith("--") && (outFlag === -1 || i !== outFlag + 1),
 );
 /** The config a subcommand was given, or the default. */
 const configArg = (after: number): string =>
