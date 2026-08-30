@@ -37,11 +37,16 @@ Skip this step when there is no ticket.
 Tokens live in `.env.hal` at the repository root, gitignored:
 
 ```
-GITHUB_TOKEN=...
-LINEAR_API_KEY=...
+GITHUB_TOKEN=...          # fine-grained token, Issues: read; not needed when gh is logged in
+GITHUB_REPO=owner/repo    # only when issues live in another repo than the code
+LINEAR_API_KEY=...        # Settings > Security & access > Personal API keys
 ```
 
-Load it before any request: `set -a; . ./.env.hal; set +a`.
+Load it before any request: `set -a; . ./.env.hal; set +a`. If `.env.hal`
+is missing and the ticket needs a token, print the three lines above and ask
+for the file. Nothing else needs configuring: the GitHub repo comes from the
+remote and a Linear key is unique across the workspace, so no board or team
+is named.
 
 **Linear** (key like `WEB-39`, needs `LINEAR_API_KEY`):
 
@@ -60,7 +65,7 @@ curl -sf -H "Authorization: Bearer $GITHUB_TOKEN" \
   "https://api.github.com/repos/<owner>/<repo>/issues/42"
 ```
 
-`<owner>/<repo>` comes from `git remote get-url origin`. A bare number is a
+`<owner>/<repo>` is `GITHUB_REPO` when set, else `git remote get-url origin`. A bare number is a
 GitHub issue unless the repo has no GitHub remote and `LINEAR_API_KEY` is set.
 
 If the request fails, or the token is missing, say exactly which one and stop.
