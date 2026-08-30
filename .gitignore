@@ -2,3 +2,4 @@ node_modules/
 dist/
 .claude/rules/generated/
 test/fixtures/.out/
+.claude/worktrees/

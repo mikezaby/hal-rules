@@ -19,6 +19,14 @@ exactly which instructions moved.
   return to, stays in the current checkout. The slug changed because the old one
   now describes the wrong policy, so a config naming the old slug fails the build
   until it is updated. That break is why this is a minor, not a patch.
+- `git/worktrees-by-default` now takes a `worktreesDir` var, so a project picks
+  where its worktrees go. `recommended` sets it to `.claude/worktrees`, keeping
+  them inside the repo instead of scattering siblings next to it; the rule also
+  says to gitignore that path. A config enabling the rule without extending
+  `recommended` has to supply the var.
+- `git/worktrees-by-default` now says to carry the ignored files a fresh
+  worktree lacks (`.env` and friends) over from the main checkout, searching
+  recursively so a monorepo's per-package ones come too.
 - **Enabled** `git/worktrees-by-default` in `recommended`, so extending the pack
   now turns it on. The three rules still outside `recommended` are the ones
   needing a project-specific value.
