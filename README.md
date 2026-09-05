@@ -319,13 +319,14 @@ rules (18)
   unset documentation/architecture-decisions   (needs adrDir)
   ...
 
-skills (4)
+skills (5)
   on    research/manual-analyzer
   unset workflow/project-new-task   (needs tracker)
   unset workflow/project-update-task   (needs tracker)
   unset workflow/project-pull-request   (needs tracker)
+  unset workflow/project-clean-tasks
 
-4 unset: your config never mentions them. Add the rules as "off" with: npx hal-rules@latest sync
+5 unset: your config never mentions them. Add the rules as "off" with: npx hal-rules@latest sync
 ```
 
 `enable <slug>` and `disable <slug>` flip one entry in your own config, rule or
@@ -505,6 +506,7 @@ more than one of the three source projects: `scope-discipline`, `before-finish`,
 | `workflow/project-new-task`     | `/project-new-task WEB-39 feat cookies`, arguments in any order: read the ticket from the `tracker` (`github`, `linear` or `none`; tokens in `.env.hal`), create the `feat/` or `bugfix/` branch and worktree, summarise the work                                  |
 | `workflow/project-update-task`  | `/project-update-task [ticket]`: write what the conversation settled back to the ticket found in the branch name. Title, description and acceptance criteria, merged with what the ticket already says, shown for a yes before writing to GitHub or Linear         |
 | `workflow/project-pull-request` | `/project-pull-request`: open the GitHub PR for the current branch with `gh`, or update the one already open. Title from the ticket, description written for the reviewer: the ticket link first, then the approach and how to test it, never a copy of the ticket |
+| `workflow/project-clean-tasks`  | `/project-clean-tasks`: list every local branch and worktree with its state against `main` and `develop` (squash merges found through `gh`), then ask one at a time before deleting. Never touches the remote                                                      |
 
 None are in `recommended`. A rule is a standing constraint and belongs on by
 default; a skill is a procedure you invoke, so turning one on is a choice about
